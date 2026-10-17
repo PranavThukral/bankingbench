@@ -1,0 +1,29 @@
+id = "01_idempotent_payments"
+title = "Make payment creation idempotent"
+mandatory = true
+difficulty = "hard"
+tags = ["app", "postgres"]
+requires = ["postgres"]
+timeout_seconds = 90
+public_interface = ["app.main:create_app(database_url, gateway) -> FastAPI", "app.gateway:Gateway, ChargeResult", "HTTP POST /v1/payments"]
+leak_terms = ["ON CONFLICT", "advisory", "FOR UPDATE", "idempotency_keys"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Transaction-wide advisory lock and response on payment rows; reference reserves persistent request rows."
+[variants.wrong_retry_race]
+kind = "wrong"
+bug = "Checks before charging; concurrent requests each charge before insertion."
+must_fail = ["test_concurrent_duplicates_charge_once"]
+predicted_naive = "false_pass"
+[variants.wrong_key_scope]
+kind = "wrong"
+bug = "Shares a key across merchants."
+must_fail = ["test_same_key_different_merchants_independent"]
+predicted_naive = "false_pass"
+[variants.wrong_inmemory_cache]
+kind = "wrong"
+bug = "App-local cache disappears at restart."
+must_fail = ["test_replay_survives_app_restart"]
+predicted_naive = "false_pass"

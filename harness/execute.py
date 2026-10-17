@@ -32,6 +32,7 @@ def run_one(spec):
             database_created = True
         command = [sys.executable, "-m", "pytest", str(run_dir / "grader"), "-q", "-p", "no:cacheprovider",
                    f"--rootdir={run_dir / 'grader'}", f"--confcutdir={run_dir / 'grader'}",
+                   f"--basetemp={run_dir / 'pytest-tmp'}",
                    f"--junitxml={run_dir / 'junit.xml'}", "-o", "junit_family=xunit2"]
         proc = subprocess.run(command, cwd=work, env=env, capture_output=True,
                               text=True, encoding="utf-8", errors="replace", timeout=task.timeout_seconds)
