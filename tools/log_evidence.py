@@ -20,11 +20,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("phase", choices=["naive", "final"])
     parser.add_argument("task")
+    parser.add_argument("--results", type=Path, default=ROOT / "results")
     args = parser.parse_args()
     task = discover(selected=args.task)[0]
     file = ROOT / "analysis/findings.md"
     text = file.read_text(encoding="utf-8")
-    matrix = json.loads(latest().read_text(encoding="utf-8"))
+    matrix = json.loads(latest(args.results).read_text(encoding="utf-8"))
+    commit = matrix["git_sha"]
+    if not any(r["task"] == task.id for r in matrix["runs"]):
+        raise ValueError("selected results do not include this task")
     if args.phase == "naive":
         for run in matrix["runs"]:
             if run["verdict"] not in {"false_pass", "false_fail"}:
@@ -32,13 +36,13 @@ def main():
             variant = next(v for v in task.variants if v.name == run["variant"])
             anchor = f"{task.id}-{variant.name}"
             text += (f'\n<a id="{anchor}"></a>\n### {task.id} · {variant.name} · {run["verdict"]} under naive\n'
-                     f'- **Naive grader commit:** {sha()} · **Hardened commit:** PENDING-{task.id}\n'
+                     f'- **Naive grader commit:** {commit} · **Hardened commit:** PENDING-{task.id}\n'
                      f'- **What slipped through:** {variant.bug or "The unmodified starter satisfies ordinary examples but omits required behavior."}\n'
                      '- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.\n'
                      f'- **Hardening:** add observable tests `{", ".join(variant.must_fail)}` plus the task invariants.\n'
                      '- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.\n')
     else:
-        text = text.replace(f"PENDING-{task.id}", sha())
+        text = text.replace(f"PENDING-{task.id}", commit)
     text += f"\n#### {task.id} — measured {args.phase} summary (run {matrix['git_sha']})\n```text\n{summary(matrix)}\n```\n"
     file.write_text(text, encoding="utf-8", newline="\n")
 

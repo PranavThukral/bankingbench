@@ -1,0 +1,29 @@
+id = "03_fx_quotes"
+title = "Quote transfers with currency-specific minor units"
+mandatory = false
+difficulty = "medium"
+tags = ["fx"]
+requires = []
+timeout_seconds = 90
+public_interface = ["fx.quote:quote_transfer, Quote, RateUnavailable"]
+leak_terms = ["Fraction", "localcontext"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Exact Fraction scaling and integer half-even rounding instead of Decimal amount arithmetic."
+[variants.wrong_two_decimals]
+kind = "wrong"
+bug = "Assumes every currency has two decimal places."
+must_fail = ["test_jpy_and_kwd_units"]
+predicted_naive = "false_pass"
+[variants.wrong_round_cross_leg]
+kind = "wrong"
+bug = "Rounds the intermediate USD amount in a cross quote."
+must_fail = ["test_cross_has_no_intermediate_rounding"]
+predicted_naive = "false_pass"
+[variants.wrong_fee_after_conversion]
+kind = "wrong"
+bug = "Rounds destination fees after conversion instead of source fees before it."
+must_fail = ["test_source_fee_before_conversion"]
+predicted_naive = "false_pass"
