@@ -1,0 +1,56 @@
+{
+  "interest": [
+    {
+      "principal": "50",
+      "rate": "0.0365",
+      "days": 1,
+      "expected": "0"
+    },
+    {
+      "principal": "73",
+      "rate": "0.025",
+      "days": 1,
+      "expected": "0"
+    },
+    {
+      "principal": "25",
+      "rate": "0.0365",
+      "days": 2,
+      "expected": "0"
+    }
+  ],
+  "fees": [
+    {
+      "amount": 5000,
+      "bps": 3,
+      "exact": 2,
+      "float_result": 1
+    },
+    {
+      "amount": 25000,
+      "bps": 3,
+      "exact": 8,
+      "float_result": 7
+    },
+    {
+      "amount": 35000,
+      "bps": 3,
+      "exact": 11,
+      "float_result": 10
+    }
+  ],
+  "fx": [
+    {
+      "amount_minor": 1,
+      "rate": "0.5"
+    },
+    {
+      "amount_minor": 2,
+      "rate": "0.25"
+    },
+    {
+      "amount_minor": 2,
+      "rate": "0.75"
+    }
+  ]
+}

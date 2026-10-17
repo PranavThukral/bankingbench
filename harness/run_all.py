@@ -10,6 +10,7 @@ import time
 from harness import config, db
 from harness.discover import discover
 from harness.execute import run_one
+from harness.evidence import fingerprints
 from harness.model import RunSpec
 
 
@@ -87,6 +88,7 @@ def main(argv=None):
                       env=dict(python=platform.python_version(), postgres=db.version(),
                                hypothesis_profile="ci", platform=platform.platform()),
                       runs=runs, flips=find_flips(runs), wall_s=round(time.perf_counter() - start, 3),
+                      task_digests=fingerprints(tasks),
                       invocation=dict(tasks=args.tasks, variants=args.variants, grader=args.grader,
                                       repeat=args.repeat, jobs=args.jobs))
         (output / "matrix.json").write_text(json.dumps(matrix, indent=2) + "\n", encoding="utf-8")

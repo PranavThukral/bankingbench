@@ -2,13 +2,13 @@ import argparse
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
 
 from harness import config, db
 from harness.discover import discover
+from harness.evidence import fingerprints
 from harness.workspace import materialize
 
 
@@ -56,9 +56,11 @@ def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--tasks")
     args = p.parse_args(argv)
-    rows = check(discover(selected=args.tasks))
+    tasks = discover(selected=args.tasks)
+    rows = check(tasks)
     config.RESULTS.mkdir(exist_ok=True)
-    (config.RESULTS / "realism.json").write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
+    receipt = dict(task_digests=fingerprints(tasks), rows=rows)
+    (config.RESULTS / "realism.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     return int(not rows or any(not r["ok"] for r in rows))
 
 
