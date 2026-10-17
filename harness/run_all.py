@@ -78,6 +78,7 @@ def main(argv=None):
         if not specs:
             raise ValueError("empty run plan")
         sha, dirty = git_info()
+        source_digests = fingerprints(tasks)
         with ProcessPoolExecutor(max_workers=args.jobs) as pool:
             runs = list(pool.map(run_one, specs))
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
@@ -88,7 +89,8 @@ def main(argv=None):
                       env=dict(python=platform.python_version(), postgres=db.version(),
                                hypothesis_profile="ci", platform=platform.platform()),
                       runs=runs, flips=find_flips(runs), wall_s=round(time.perf_counter() - start, 3),
-                      task_digests=fingerprints(tasks),
+                      task_digests=source_digests,
+                      source_changed_during_run=(source_digests != fingerprints(tasks)),
                       invocation=dict(tasks=args.tasks, variants=args.variants, grader=args.grader,
                                       repeat=args.repeat, jobs=args.jobs))
         (output / "matrix.json").write_text(json.dumps(matrix, indent=2) + "\n", encoding="utf-8")
@@ -98,6 +100,9 @@ def main(argv=None):
         for r in runs:
             if r["grader"] == "final" and r["verdict"] != "ok":
                 print(f"{r['task']} {r['variant']}: {r['verdict']}\n{r['stderr_tail']}")
+        if matrix["source_changed_during_run"]:
+            print("Source changed during execution; rerun against a stable checkout.")
+            return 2
         return int(bool(matrix["flips"]) or any(r["verdict"] != "ok" for r in runs if r["grader"] == "final"))
     except Exception as exc:
         print(f"Harness error: {type(exc).__name__}: {exc}")

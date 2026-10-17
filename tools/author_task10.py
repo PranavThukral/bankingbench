@@ -289,7 +289,10 @@ def test_count_mismatch():
     assert result.payments == []
     assert any(error.code == "count_mismatch" for error in result.errors)
 ''')
-write(b / "grader/naive/test_hidden.py", (b / "starter/tests/test_visible.py").read_text(encoding="utf-8"))
+naive = (b / "starter/tests/test_visible.py").read_text(encoding="utf-8").replace("from batch.render import render", "")
+render_helper = '\n' + (b / "starter/batch/render.py").read_text(encoding="utf-8").replace("from batch.models import Payment", "from batch.parser import Payment")
+write(b / "grader/naive/test_hidden.py", render_helper + "\n" + naive)
+
 write(b / "NOTES.md", '''
 # Private draft — batch parser reviewer notes
 

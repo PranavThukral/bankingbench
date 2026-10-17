@@ -1,6 +1,6 @@
 # Private draft — refund reviewer notes
 
-The correct counter-based service and aggregate-query alternative share only the public errors
+The correct counter-based service and append-only event alternative share only the public errors
 and validation. Wrong candidates isolate a per-request check, the wrong amount basis, or counting
 rejected attempts. The last bug is over-strict, so the grader checks successful recovery too.
 

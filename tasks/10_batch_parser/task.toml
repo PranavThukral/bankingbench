@@ -1,0 +1,29 @@
+id = "10_batch_parser"
+title = "Validate an entire SBF-80 payment batch"
+mandatory = false
+difficulty = "medium"
+tags = ["batch"]
+requires = []
+timeout_seconds = 90
+public_interface = ["batch.parser:parse, BatchResult, Payment, BatchError"]
+leak_terms = ["reward.txt"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Streaming record accumulation and incremental totals versus a two-pass validation and control phase."
+[variants.wrong_partial_accept]
+kind = "wrong"
+bug = "Accepts valid details from a batch containing invalid detail records."
+must_fail = ["test_atomic_batch_rejection"]
+predicted_naive = "false_pass"
+[variants.wrong_ignores_hash_total]
+kind = "wrong"
+bug = "Does not check the trailer account hash total."
+must_fail = ["test_hash_total"]
+predicted_naive = "false_pass"
+[variants.wrong_crlf_slicing]
+kind = "wrong"
+bug = "Validates physical line width before normalizing CRLF."
+must_fail = ["test_crlf"]
+predicted_naive = "false_pass"

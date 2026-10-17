@@ -250,7 +250,7 @@ runs=72 final_ok=36/36 naive_false_pass=21 infra_errors=0 flips=0 wall_s=71.630
 
 <a id="07_statement_periods-starter"></a>
 ### 07_statement_periods · starter · false_pass under naive
-- **Naive grader commit:** f5c24ac · **Hardened commit:** PENDING-07_statement_periods
+- **Naive grader commit:** f5c24ac · **Hardened commit:** 25de722
 - **What slipped through:** The unmodified starter satisfies ordinary examples but omits required behavior.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `` plus the task invariants.
@@ -258,7 +258,7 @@ runs=72 final_ok=36/36 naive_false_pass=21 infra_errors=0 flips=0 wall_s=71.630
 
 <a id="07_statement_periods-wrong_utc_month"></a>
 ### 07_statement_periods · wrong_utc_month · false_pass under naive
-- **Naive grader commit:** f5c24ac · **Hardened commit:** PENDING-07_statement_periods
+- **Naive grader commit:** f5c24ac · **Hardened commit:** 25de722
 - **What slipped through:** Uses UTC calendar months for every account.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_local_midnight_boundaries` plus the task invariants.
@@ -266,7 +266,7 @@ runs=72 final_ok=36/36 naive_false_pass=21 infra_errors=0 flips=0 wall_s=71.630
 
 <a id="07_statement_periods-wrong_inclusive_2359"></a>
 ### 07_statement_periods · wrong_inclusive_2359 · false_pass under naive
-- **Naive grader commit:** f5c24ac · **Hardened commit:** PENDING-07_statement_periods
+- **Naive grader commit:** f5c24ac · **Hardened commit:** 25de722
 - **What slipped through:** Ends at 23:59:59, excluding fractional seconds before midnight.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_microsecond_boundary` plus the task invariants.
@@ -274,7 +274,7 @@ runs=72 final_ok=36/36 naive_false_pass=21 infra_errors=0 flips=0 wall_s=71.630
 
 <a id="07_statement_periods-wrong_fixed_offset"></a>
 ### 07_statement_periods · wrong_fixed_offset · false_pass under naive
-- **Naive grader commit:** f5c24ac · **Hardened commit:** PENDING-07_statement_periods
+- **Naive grader commit:** f5c24ac · **Hardened commit:** 25de722
 - **What slipped through:** Keeps a standard-time offset throughout the year.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_dst_months` plus the task invariants.
@@ -283,4 +283,9 @@ runs=72 final_ok=36/36 naive_false_pass=21 infra_errors=0 flips=0 wall_s=71.630
 #### 07_statement_periods — measured naive summary (run f5c24ac)
 ```text
 runs=6 final_ok=0/0 naive_false_pass=4 infra_errors=0 flips=0 wall_s=1.441
+```
+
+#### 07_statement_periods — measured final summary (run 25de722)
+```text
+runs=84 final_ok=42/42 naive_false_pass=25 infra_errors=0 flips=0 wall_s=80.932
 ```
