@@ -163,3 +163,32 @@ runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=4.274
 ```text
 runs=48 final_ok=24/24 naive_false_pass=14 infra_errors=0 flips=0 wall_s=95.223
 ```
+
+<a id="09_tiered_fees-starter"></a>
+### 09_tiered_fees · starter · false_pass under naive
+- **Naive grader commit:** f047a0b · **Hardened commit:** PENDING-09_tiered_fees
+- **What slipped through:** The unmodified starter satisfies ordinary examples but omits required behavior.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="09_tiered_fees-wrong_exclusive_boundary"></a>
+### 09_tiered_fees · wrong_exclusive_boundary · false_pass under naive
+- **Naive grader commit:** f047a0b · **Hardened commit:** PENDING-09_tiered_fees
+- **What slipped through:** Uses an exclusive upper tier boundary.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_inclusive_boundaries` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="09_tiered_fees-wrong_float_bps"></a>
+### 09_tiered_fees · wrong_float_bps · false_pass under naive
+- **Naive grader commit:** f047a0b · **Hardened commit:** PENDING-09_tiered_fees
+- **What slipped through:** Binary percentage multiplication mis-rounds exact half-unit ties.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_discovered_float_ties` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+#### 09_tiered_fees — measured naive summary (run f047a0b)
+```text
+runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=2.074
+```
