@@ -22,3 +22,10 @@ def test_unbalanced_rejected():
     s, a, b = accounts()
     with pytest.raises(UnbalancedTransaction):
         s.post([Line(a, "debit", 100), Line(b, "credit", 90)], "unbalanced")
+
+
+def test_account_creation_is_idempotent():
+    s, a, b = accounts()
+    s.create_account(a, "CAD")
+    s.create_account(b, "CAD")
+    assert s.balance(a) == s.balance(b) == 0

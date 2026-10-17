@@ -6,6 +6,10 @@ from ledger.models import (Line, LedgerError, UnbalancedTransaction, InvalidAmou
 RECORDS = "jsonb_to_recordset(%s::jsonb) AS x(account_code text, side text, amount_minor bigint)"
 
 
+__all__ = ["LedgerService", "Line", "LedgerError", "UnbalancedTransaction", "InvalidAmount",
+           "UnknownAccount", "AlreadyReversed", "CannotReverseReversal"]
+
+
 class LedgerService:
     def __init__(self, database_url):
         self.dsn = database_url

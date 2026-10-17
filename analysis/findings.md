@@ -150,3 +150,9 @@ runs=36 final_ok=18/18 naive_false_pass=11 infra_errors=0 flips=0 wall_s=25.414
 ```text
 runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=4.274
 ```
+
+### 05_double_entry ? valid candidates ? false_fail risk from verifier timeout
++- **Observed at:** 9e15283; reference, alt_valid and wrong_double_reverse timed out at 90 s (infra_error, not a semantic FAIL).
++- **Cause:** the state-machine invariant opened eight fresh connections after every generated operation, then re-checked the same unchanged accounts.
++- **Correction:** preserve 20 examples ? 12 steps, all generated rules and the per-currency trial-balance invariant. Check both affected accounts on every successful post/reversal and verify the entire account model at teardown. This removes repeated I/O without removing operations or assertions on final state.
++- **Scope:** do not interpret these timeout runs as candidate failures. A new complete matrix is required.

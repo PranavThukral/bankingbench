@@ -105,6 +105,8 @@ class JournalMachine(RuleBasedStateMachine):
         self.transactions[txn] = (a, b, amount)
         self.model[a] += amount
         self.model[b] -= amount
+        assert self.service.balance(a) == self.model[a]
+        assert self.service.balance(b) == self.model[b]
 
     @rule(amount=st.integers(1, 100000))
     def post_invalid(self, amount):
@@ -123,6 +125,8 @@ class JournalMachine(RuleBasedStateMachine):
         self.reversed.add(txn)
         self.model[a] -= amount
         self.model[b] += amount
+        assert self.service.balance(a) == self.model[a]
+        assert self.service.balance(b) == self.model[b]
 
     @precondition(lambda self: bool(self.reversed))
     @rule(data=st.data())
@@ -136,10 +140,11 @@ class JournalMachine(RuleBasedStateMachine):
     @invariant()
     def balances_match_model(self):
         for currency, codes in self.accounts.items():
-            actual = {a: self.service.balance(a) for a in codes}
-            assert actual == {a: self.model[a] for a in codes}
-            assert sum(actual.values()) == 0, currency
+            assert sum(self.model[a] for a in codes) == 0, currency
         assert all(debit == credit for debit, credit in self.service.trial_balance().values())
+
+    def teardown(self):
+        assert {a: self.service.balance(a) for a in self.model} == self.model
 
 
 TestJournal = JournalMachine.TestCase
