@@ -1,0 +1,13 @@
+import math
+
+from fees.models import Tier, Schedule  # noqa: F401
+
+
+def compute_fee(amount_minor, schedule):
+    if type(amount_minor) is not int or amount_minor < 0:
+        raise ValueError("nonnegative integer amount required")
+    for tier in schedule.tiers:
+        if tier.up_to_minor is None or amount_minor <= tier.up_to_minor:
+            rounded = math.floor(amount_minor * (tier.bps / 10000) + tier.fixed_minor + .5)
+            return min(schedule.max_fee_minor, max(schedule.min_fee_minor, rounded))
+    raise ValueError("unbounded tier required")

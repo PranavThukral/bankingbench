@@ -1,0 +1,29 @@
+id = "09_tiered_fees"
+title = "Apply a non-marginal tiered fee schedule"
+mandatory = false
+difficulty = "medium"
+tags = ["fees"]
+requires = []
+timeout_seconds = 90
+public_interface = ["fees.schedule:compute_fee, Tier, Schedule"]
+leak_terms = ["Decimal", "ROUND_HALF_UP"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Decimal quantization with tier selection by first matching record, versus integer numerator rounding."
+[variants.wrong_exclusive_boundary]
+kind = "wrong"
+bug = "Uses an exclusive upper tier boundary."
+must_fail = ["test_inclusive_boundaries"]
+predicted_naive = "false_pass"
+[variants.wrong_float_bps]
+kind = "wrong"
+bug = "Binary percentage multiplication mis-rounds exact half-unit ties."
+must_fail = ["test_discovered_float_ties"]
+predicted_naive = "false_pass"
+[variants.wrong_marginal]
+kind = "wrong"
+bug = "Charges each band separately instead of selecting one rate."
+must_fail = ["test_non_marginal"]
+predicted_naive = "ok_wrong_reason"
