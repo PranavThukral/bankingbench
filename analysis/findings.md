@@ -3,6 +3,14 @@
 Only measured outcomes belong here. Naive graders are committed before final graders.
 All candidate data, accounts, merchants, and formats are synthetic.
 
+### 08_refund_limits · reference · false_fail under final (fb4e73e)
+- **Observed:** property assertions passed, but TemporaryDirectory cleanup raised WinError32 on
+  an SQLite connection cycle awaiting garbage collection. No public API requires a close method.
+- **Correction:** collect unreachable connection cycles before deleting the grader-owned fixture.
+  Candidate code and all 200 generated refund sequences are unchanged. File deletion is fixture
+  housekeeping, not observable refund behavior. The valid alternative already closes explicitly.
+- **Lesson:** native resource cleanup must not accidentally become part of a financial contract.
+
 
 <a id="01_idempotent_payments-wrong_retry_race"></a>
 ### 01_idempotent_payments · wrong_retry_race · false_pass under naive

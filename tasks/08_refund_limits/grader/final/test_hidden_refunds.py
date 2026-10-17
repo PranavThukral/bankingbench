@@ -1,8 +1,20 @@
 from pathlib import Path
+from contextlib import contextmanager
+import gc
 from tempfile import TemporaryDirectory
 import pytest
 from hypothesis import given, strategies as st
 from refunds.service import RefundService, RefundExceedsCaptured, PaymentNotCaptured, InvalidAmount
+
+
+@contextmanager
+def workspace():
+    with TemporaryDirectory() as temp:
+        try:
+            yield Path(temp) / "db"
+        finally:
+            # SQLite connection cycles may await collection before Windows file removal.
+            gc.collect()
 
 
 def payment(path, authorized=100, captured=100):
@@ -55,8 +67,7 @@ def test_invalid_and_uncaptured(tmp_path):
 @given(capture=st.integers(1, 100000), extra=st.integers(0, 100000),
        attempts=st.lists(st.integers(1, 100000), max_size=30))
 def test_refund_sequence_matches_greedy_oracle(capture, extra, attempts):
-    with TemporaryDirectory() as temp:
-        path = Path(temp) / "db"
+    with workspace() as path:
         s, p = payment(path, capture + extra, capture)
         total, identifiers = 0, set()
         for amount in attempts:
