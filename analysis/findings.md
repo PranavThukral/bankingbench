@@ -289,3 +289,32 @@ runs=6 final_ok=0/0 naive_false_pass=4 infra_errors=0 flips=0 wall_s=1.441
 ```text
 runs=84 final_ok=42/42 naive_false_pass=25 infra_errors=0 flips=0 wall_s=80.932
 ```
+
+<a id="10_batch_parser-wrong_partial_accept"></a>
+### 10_batch_parser · wrong_partial_accept · false_pass under naive
+- **Naive grader commit:** 4b90fce · **Hardened commit:** PENDING-10_batch_parser
+- **What slipped through:** Accepts valid details from a batch containing invalid detail records.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_atomic_batch_rejection` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="10_batch_parser-wrong_ignores_hash_total"></a>
+### 10_batch_parser · wrong_ignores_hash_total · false_pass under naive
+- **Naive grader commit:** 4b90fce · **Hardened commit:** PENDING-10_batch_parser
+- **What slipped through:** Does not check the trailer account hash total.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_hash_total` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="10_batch_parser-wrong_crlf_slicing"></a>
+### 10_batch_parser · wrong_crlf_slicing · false_pass under naive
+- **Naive grader commit:** 4b90fce · **Hardened commit:** PENDING-10_batch_parser
+- **What slipped through:** Validates physical line width before normalizing CRLF.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_crlf` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+#### 10_batch_parser — measured naive summary (run 4b90fce)
+```text
+runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=1.560
+```
