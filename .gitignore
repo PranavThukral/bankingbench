@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.hypothesis/
+.ruff_cache/
+results/*
+!results/final/
+dist/
+.venv/
+.audit-history/
+.test-tmp/

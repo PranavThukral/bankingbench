@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: bcp
+    # Test-only durability tradeoff: data is disposable and fsync is disabled.
+    command: ["postgres", "-c", "fsync=off"]
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+    networks: [bcp]
+  runner:
+    build:
+      context: .
+      dockerfile: docker/runner.Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./:/pack
+    working_dir: /pack
+    environment:
+      PG_ADMIN_URL: postgresql://postgres:bcp@postgres:5432/postgres
+      BCP_TMP: /tmp/bcp
+    command: ["sleep", "infinity"]
+    networks: [bcp]
+networks:
+  bcp:
+    internal: true

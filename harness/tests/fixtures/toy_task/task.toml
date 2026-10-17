@@ -1,0 +1,18 @@
+id = "toy_task"
+title = "Synthetic increment ticket"
+mandatory = false
+difficulty = "easy"
+tags = []
+requires = []
+public_interface = ["toy:increment"]
+leak_terms = []
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "sum instead of addition"
+[variants.wrong_constant]
+kind = "wrong"
+bug = "only handles one input"
+must_fail = ["test_other"]
+predicted_naive = "false_pass"
