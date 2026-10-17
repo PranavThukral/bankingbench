@@ -1,9 +1,12 @@
+import atexit
 from pathlib import Path
-import uuid
+import shutil
+import tempfile
 
 
 def pytest_configure(config):
-    # Avoid a shared user-wide pytest directory with incompatible ACLs on Windows.
-    parent = Path(__file__).resolve().parents[2] / ".test-tmp"
-    parent.mkdir(exist_ok=True)
-    config.option.basetemp = str(parent / uuid.uuid4().hex)
+    # Keep pytest's per-run directories in the system temp dir, never inside the repository.
+    # (A shared user-wide pytest directory can have incompatible ACLs on Windows.)
+    parent = Path(tempfile.mkdtemp(prefix="bcp-pytest-"))
+    atexit.register(shutil.rmtree, parent, ignore_errors=True)
+    config.option.basetemp = str(parent / "run")

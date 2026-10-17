@@ -11,6 +11,7 @@ class Variant:
     bug: str = ""
     predicted_naive: str = ""
     structural_difference: str = ""
+    regression_rationale: str = ""
 
     @property
     def expected(self):

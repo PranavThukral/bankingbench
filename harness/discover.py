@@ -7,7 +7,8 @@ from harness.model import Task, Variant
 
 KEYS = {"id", "title", "mandatory", "difficulty", "tags", "requires", "timeout_seconds",
         "public_interface", "leak_terms", "variants", "leak_allow"}
-VKEYS = {"kind", "must_fail", "bug", "predicted_naive", "structural_difference"}
+VKEYS = {"kind", "must_fail", "bug", "predicted_naive", "structural_difference",
+         "regression_rationale"}
 
 
 def load_task(path: Path) -> Task:
@@ -42,6 +43,10 @@ def load_task(path: Path) -> Task:
                 raise ValueError("wrong requires bug and nonempty must_fail")
             if item.get("predicted_naive") not in {"ok", "false_pass", "ok_wrong_reason", "infra_error"}:
                 raise ValueError("wrong requires predicted_naive")
+        if "regression_rationale" in item:
+            rationale = item["regression_rationale"]
+            if item["kind"] != "wrong" or not isinstance(rationale, str) or not rationale.strip():
+                raise ValueError("regression_rationale must be a nonempty string on a wrong variant")
         if item["kind"] == "alt_valid" and not item.get("structural_difference"):
             raise ValueError("alt requires structural_difference")
         if not isinstance(item.get("must_fail", []), list):

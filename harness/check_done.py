@@ -4,10 +4,29 @@ from pathlib import Path
 import shutil
 
 from harness import config
+from harness.check_realism import ref_diff_lines, diff_floor
 from harness.discover import discover
 from harness.evidence import load, matches
 from harness.lint_leaks import scan
 from harness.run_all import latest
+
+
+LOC_MIN, LOC_MAX = 200, 600
+
+
+def package_loc(task):
+    """Lines of non-test package code in starter/ (tests/ directories and conftest.py excluded)."""
+    root = task.path / "starter"
+    return sum(len(p.read_text(encoding="utf-8").splitlines()) for p in root.rglob("*.py")
+               if "__pycache__" not in p.parts and "tests" not in p.relative_to(root).parts
+               and p.name != "conftest.py")
+
+
+def design_ok(realism, tasks):
+    """S7 design half: diff floor recomputed from source, regression rationales from the receipt."""
+    rows = {r["task"]: r for r in realism.get("design", [])}
+    return bool(tasks) and all(
+        t.id in rows and rows[t.id]["ok"] and ref_diff_lines(t) >= diff_floor(t) for t in tasks)
 
 
 def repeat_ok(matrix, tasks, names, repeats):
@@ -49,8 +68,7 @@ def collect(tasks, matrix, evidence, docker_available):
             sum(v.kind == "wrong" for v in t.variants) >= 2 and
             all((t.path / "grader" / g).is_dir() for g in ("naive", "final")) and
             all((t.path / "solutions" / v.name).is_dir() for v in t.variants if v.name != "starter") and
-            200 <= sum(len(p.read_text(encoding="utf-8").splitlines()) for p in (t.path / "starter").rglob("*.py")
-                       if "__pycache__" not in p.parts) <= 600 for t in tasks),
+            LOC_MIN <= package_loc(t) <= LOC_MAX for t in tasks),
         S2=bool(expected) and expected <= final.keys() and matches(matrix, tasks) and not matrix.get("source_changed_during_run") and
             all(r["verdict"] == "ok" for r in final.values()),
         S3=corrected >= 3,
@@ -59,7 +77,7 @@ def collect(tasks, matrix, evidence, docker_available):
             "No unresolved graded ambiguity" in (t.path / "NOTES.md").read_text(encoding="utf-8") for t in tasks),
         S6=bool(wrong) and all(k in final and final[k]["outcome"] == "FAIL" and final[k]["must_fail_hit"] for k in wrong),
         S7=matches(realism, tasks) and expected <= {(r["task"], r["variant"]) for r in realism_rows} and
-            all(r["ok"] for r in realism_rows),
+            all(r["ok"] for r in realism_rows) and design_ok(realism, tasks),
         S8=repeat_ok(evidence.get("repeat"), tasks, None, 3) and
             repeat_ok(evidence.get("flake"), [t for t in tasks if t.id[:2] == "01"],
                       {"reference", "alt_valid", "wrong_retry_race"}, 20),
