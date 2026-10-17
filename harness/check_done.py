@@ -47,8 +47,11 @@ def collect(tasks, matrix, evidence, docker_available):
         S1=len(tasks) >= 8 and {"01", "02", "04", "05"} <= {t.id[:2] for t in tasks} and all(
             {"reference", "alt_valid"} <= {v.kind for v in t.variants} and
             sum(v.kind == "wrong" for v in t.variants) >= 2 and
-            all((t.path / "grader" / g).is_dir() for g in ("naive", "final")) for t in tasks),
-        S2=bool(expected) and expected <= final.keys() and matches(matrix, tasks) and
+            all((t.path / "grader" / g).is_dir() for g in ("naive", "final")) and
+            all((t.path / "solutions" / v.name).is_dir() for v in t.variants if v.name != "starter") and
+            200 <= sum(len(p.read_text(encoding="utf-8").splitlines()) for p in (t.path / "starter").rglob("*.py")
+                       if "__pycache__" not in p.parts) <= 600 for t in tasks),
+        S2=bool(expected) and expected <= final.keys() and matches(matrix, tasks) and not matrix.get("source_changed_during_run") and
             all(r["verdict"] == "ok" for r in final.values()),
         S3=corrected >= 3,
         S4=evidence.get("docker_wall_s", float("inf")) < 300,

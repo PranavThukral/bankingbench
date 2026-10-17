@@ -6,6 +6,8 @@ Clients retry requests after losing a response. Implement the following observab
 Public interface: `app.main.create_app(database_url: str, gateway: Gateway) -> FastAPI`;
 `app.gateway.Gateway.charge(merchant_id, amount_minor, currency, source_token) -> ChargeResult`.
 `ChargeResult(charge_id: str, status: "succeeded"|"declined")` is a frozen dataclass.
+The starter also exports `app.gateway.FakeGateway` for visible and naive smoke tests;
+its `.calls` property is a tuple of charging calls. Hidden final tests inject their own Gateway.
 `POST /v1/payments` takes `X-Merchant-Id`, `Idempotency-Key`, and JSON
 `{amount_minor, currency, source_token}`. Money is positive integer minor units, never bool.
 Currencies supported: CAD/USD/EUR/GBP (2 dp), JPY (0), KWD/BHD (3). No conversion occurs.

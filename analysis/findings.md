@@ -299,7 +299,7 @@ runs=84 final_ok=42/42 naive_false_pass=25 infra_errors=0 flips=0 wall_s=80.932
 
 <a id="10_batch_parser-wrong_partial_accept"></a>
 ### 10_batch_parser · wrong_partial_accept · false_pass under naive
-- **Naive grader commit:** 4b90fce · **Hardened commit:** PENDING-10_batch_parser
+- **Naive grader commit:** 4b90fce · **Hardened commit:** 94c0302
 - **What slipped through:** Accepts valid details from a batch containing invalid detail records.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_atomic_batch_rejection` plus the task invariants.
@@ -307,7 +307,7 @@ runs=84 final_ok=42/42 naive_false_pass=25 infra_errors=0 flips=0 wall_s=80.932
 
 <a id="10_batch_parser-wrong_ignores_hash_total"></a>
 ### 10_batch_parser · wrong_ignores_hash_total · false_pass under naive
-- **Naive grader commit:** 4b90fce · **Hardened commit:** PENDING-10_batch_parser
+- **Naive grader commit:** 4b90fce · **Hardened commit:** 94c0302
 - **What slipped through:** Does not check the trailer account hash total.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_hash_total` plus the task invariants.
@@ -315,7 +315,7 @@ runs=84 final_ok=42/42 naive_false_pass=25 infra_errors=0 flips=0 wall_s=80.932
 
 <a id="10_batch_parser-wrong_crlf_slicing"></a>
 ### 10_batch_parser · wrong_crlf_slicing · false_pass under naive
-- **Naive grader commit:** 4b90fce · **Hardened commit:** PENDING-10_batch_parser
+- **Naive grader commit:** 4b90fce · **Hardened commit:** 94c0302
 - **What slipped through:** Validates physical line width before normalizing CRLF.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_crlf` plus the task invariants.
@@ -328,7 +328,7 @@ runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=1.560
 
 <a id="03_fx_quotes-wrong_two_decimals"></a>
 ### 03_fx_quotes · wrong_two_decimals · false_pass under naive
-- **Naive grader commit:** 295b342 · **Hardened commit:** PENDING-03_fx_quotes
+- **Naive grader commit:** 295b342 · **Hardened commit:** 94c0302
 - **What slipped through:** Assumes every currency has two decimal places.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_jpy_and_kwd_units` plus the task invariants.
@@ -336,7 +336,7 @@ runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=1.560
 
 <a id="03_fx_quotes-wrong_round_cross_leg"></a>
 ### 03_fx_quotes · wrong_round_cross_leg · false_pass under naive
-- **Naive grader commit:** 295b342 · **Hardened commit:** PENDING-03_fx_quotes
+- **Naive grader commit:** 295b342 · **Hardened commit:** 94c0302
 - **What slipped through:** Rounds the intermediate USD amount in a cross quote.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_cross_has_no_intermediate_rounding` plus the task invariants.
@@ -344,7 +344,7 @@ runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=1.560
 
 <a id="03_fx_quotes-wrong_fee_after_conversion"></a>
 ### 03_fx_quotes · wrong_fee_after_conversion · false_pass under naive
-- **Naive grader commit:** 295b342 · **Hardened commit:** PENDING-03_fx_quotes
+- **Naive grader commit:** 295b342 · **Hardened commit:** 94c0302
 - **What slipped through:** Rounds destination fees after conversion instead of source fees before it.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_source_fee_before_conversion` plus the task invariants.
@@ -382,4 +382,14 @@ runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=1.901
 #### 06_available_balance — measured naive summary (run 6cf4a11)
 ```text
 runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=3.535
+```
+
+#### 10_batch_parser — measured final summary (run 94c0302)
+```text
+runs=108 final_ok=54/54 naive_false_pass=31 infra_errors=0 flips=0 wall_s=116.892
+```
+
+#### 03_fx_quotes — measured final summary (run 94c0302)
+```text
+runs=108 final_ok=54/54 naive_false_pass=31 infra_errors=0 flips=0 wall_s=116.892
 ```

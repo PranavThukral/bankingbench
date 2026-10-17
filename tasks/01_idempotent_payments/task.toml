@@ -5,7 +5,7 @@ difficulty = "hard"
 tags = ["app", "postgres"]
 requires = ["postgres"]
 timeout_seconds = 90
-public_interface = ["app.main:create_app(database_url, gateway) -> FastAPI", "app.gateway:Gateway, ChargeResult", "HTTP POST /v1/payments"]
+public_interface = ["app.main:create_app(database_url, gateway) -> FastAPI", "app.gateway:Gateway, ChargeResult, FakeGateway (visible and naive smoke tests)", "HTTP POST /v1/payments"]
 leak_terms = ["ON CONFLICT", "advisory", "FOR UPDATE", "idempotency_keys"]
 [variants.reference]
 kind = "reference"

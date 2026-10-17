@@ -113,6 +113,28 @@ def test_decline_replayed(database_url):
     assert len(gateway.calls) == 1
 
 
+def test_body_mismatch_while_in_flight(database_url):
+    entered = threading.Event()
+    gateway = Gateway(latency=.3)
+    original_charge = gateway.charge
+
+    def signal(*args):
+        entered.set()
+        return original_charge(*args)
+
+    gateway.charge = signal
+    with live_server(create_app(database_url, gateway)) as url, httpx.Client(base_url=url, timeout=30, trust_env=False) as client:
+        key = str(uuid4())
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            future = pool.submit(client.post, "/v1/payments", **request(key))
+            assert entered.wait(10)
+            mismatch = client.post("/v1/payments", **request(key, amount_minor=1251))
+            assert mismatch.status_code == 422
+            assert mismatch.json()["error"]["code"] == "idempotency_key_reuse"
+            assert future.result().status_code == 201
+        assert len(gateway.calls) == 1
+
+
 def test_replay_survives_app_restart(database_url):
     gateway = Gateway()
     args = request()
