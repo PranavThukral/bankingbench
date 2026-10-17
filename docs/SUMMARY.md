@@ -32,7 +32,7 @@ only at rounding ties, boundaries, concurrent retries or after a rejected operat
 | Valid solutions rejected (false fail) | 0 of 20 | 0 of 20 |
 | Hidden tests per task | 1–3 | 5–12 |
 
-Full matrix: 120 runs in 152 s (native, 4 workers), 0 infra errors. 3 repeats: 0 flips.
+Full matrix: 120 runs in 152–174 s (native, 4 workers), 0 infra errors. 3 repeats: 0 flips.
 Task 01 race test: 60 runs, 0 flips.
 
 Caveat: the naive graders are deliberately minimal (6 of 10 have a single test), so 29 of 30 is

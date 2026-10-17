@@ -44,7 +44,7 @@ write and commit the hardened grader. Run the full matrix, realism, leaks and di
 | final | 0 / 30 | 0 / 10 | 0 / 20 | 0 |
 
 - 10 tasks, 50 solution variants plus 10 starters, 120 runs (`--grader all`).
-- **Measured wall-clock (native, not Docker):** 152 s for `run_all --grader all` with 4 workers on
+- **Measured wall-clock (native, not Docker):** 152–174 s across two runs for `run_all --grader all` with 4 workers on
   Windows 11, Python 3.14.7, PostgreSQL 16.13 (local, fsync off). The Docker timing (S4) is unmeasured.
 - `run_all --grader final --repeat 3`: 180/180 ok, 0 flips. Task 01 race test, 20 repeats × 3 variants: 0 flips.
 - `export_harbor --validate`: reference reward 1 and starter reward 0 for all 10 tasks.

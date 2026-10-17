@@ -401,7 +401,7 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=50.634
 
 #### Full matrix — committed snapshot (results/final/matrix.json)
 ```text
-runs=120 final_ok=60/60 naive_false_pass=34 infra_errors=0 flips=0 wall_s=151.997
+runs=120 final_ok=60/60 naive_false_pass=34 infra_errors=0 flips=0 wall_s=173.865
 ```
 Naive graders let through 29 of 30 wrong variants and 5 of 10 unmodified starters. The one
 wrong variant the naive grader caught was 09 `wrong_marginal` (its mid-tier examples already
