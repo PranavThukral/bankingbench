@@ -82,7 +82,7 @@ runs=24 final_ok=12/12 naive_false_pass=7 infra_errors=0 flips=0 wall_s=24.668
 
 <a id="04_ledger_reconciliation-starter"></a>
 ### 04_ledger_reconciliation · starter · false_pass under naive
-- **Naive grader commit:** a418189 · **Hardened commit:** PENDING-04_ledger_reconciliation
+- **Naive grader commit:** a418189 · **Hardened commit:** a432c4c
 - **What slipped through:** The unmodified starter satisfies ordinary examples but omits required behavior.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `` plus the task invariants.
@@ -90,7 +90,7 @@ runs=24 final_ok=12/12 naive_false_pass=7 infra_errors=0 flips=0 wall_s=24.668
 
 <a id="04_ledger_reconciliation-wrong_no_consumption"></a>
 ### 04_ledger_reconciliation · wrong_no_consumption · false_pass under naive
-- **Naive grader commit:** a418189 · **Hardened commit:** PENDING-04_ledger_reconciliation
+- **Naive grader commit:** a418189 · **Hardened commit:** a432c4c
 - **What slipped through:** Allows one ledger payment to match multiple statement lines.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_duplicate_statement_line_left_unmatched` plus the task invariants.
@@ -98,7 +98,7 @@ runs=24 final_ok=12/12 naive_false_pass=7 infra_errors=0 flips=0 wall_s=24.668
 
 <a id="04_ledger_reconciliation-wrong_split_ignored"></a>
 ### 04_ledger_reconciliation · wrong_split_ignored · false_pass under naive
-- **Naive grader commit:** a418189 · **Hardened commit:** PENDING-04_ledger_reconciliation
+- **Naive grader commit:** a418189 · **Hardened commit:** a432c4c
 - **What slipped through:** Omits aggregate split matches.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_split_all_lines` plus the task invariants.
@@ -106,7 +106,7 @@ runs=24 final_ok=12/12 naive_false_pass=7 infra_errors=0 flips=0 wall_s=24.668
 
 <a id="04_ledger_reconciliation-wrong_refund_abs"></a>
 ### 04_ledger_reconciliation · wrong_refund_abs · false_pass under naive
-- **Naive grader commit:** a418189 · **Hardened commit:** PENDING-04_ledger_reconciliation
+- **Naive grader commit:** a418189 · **Hardened commit:** a432c4c
 - **What slipped through:** Treats negative statement amounts as payments of the absolute amount.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_refund_kind_and_original_reference` plus the task invariants.
@@ -115,4 +115,9 @@ runs=24 final_ok=12/12 naive_false_pass=7 infra_errors=0 flips=0 wall_s=24.668
 #### 04_ledger_reconciliation — measured naive summary (run a418189)
 ```text
 runs=6 final_ok=0/0 naive_false_pass=4 infra_errors=0 flips=0 wall_s=2.153
+```
+
+#### 04_ledger_reconciliation — measured final summary (run a432c4c)
+```text
+runs=36 final_ok=18/18 naive_false_pass=11 infra_errors=0 flips=0 wall_s=25.414
 ```

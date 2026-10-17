@@ -1,0 +1,29 @@
+id = "05_double_entry"
+title = "Enforce an atomic double-entry journal"
+mandatory = true
+difficulty = "hard"
+tags = ["ledger", "postgres"]
+requires = ["postgres"]
+timeout_seconds = 90
+public_interface = ["ledger.service:LedgerService, Line, LedgerError, UnbalancedTransaction, InvalidAmount, UnknownAccount, AlreadyReversed, CannotReverseReversal"]
+leak_terms = ["jsonb_to_recordset"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Set-based JSON recordset validation and INSERT SELECT reversal, with an independent journal schema."
+[variants.wrong_cross_currency_sum]
+kind = "wrong"
+bug = "Balances the total across currencies instead of each currency."
+must_fail = ["test_cross_currency_cannot_net"]
+predicted_naive = "false_pass"
+[variants.wrong_non_atomic]
+kind = "wrong"
+bug = "Commits individual lines before all account validation completes."
+must_fail = ["test_unknown_account_is_atomic"]
+predicted_naive = "false_pass"
+[variants.wrong_double_reverse]
+kind = "wrong"
+bug = "Allows the same original transaction to be reversed twice."
+must_fail = ["test_reverse_once"]
+predicted_naive = "false_pass"
