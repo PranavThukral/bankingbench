@@ -1,0 +1,29 @@
+id = "04_ledger_reconciliation"
+title = "Reconcile synthetic statements deterministically"
+mandatory = true
+difficulty = "hard"
+tags = ["recon"]
+requires = []
+timeout_seconds = 90
+public_interface = ["recon.engine:reconcile, StatementLine, LedgerEntry, Match, ReconResult"]
+leak_terms = ["subset search"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Indexed candidate buckets and explicit remaining-id maps instead of repeated scans with consumed sets."
+[variants.wrong_no_consumption]
+kind = "wrong"
+bug = "Allows one ledger payment to match multiple statement lines."
+must_fail = ["test_duplicate_statement_line_left_unmatched"]
+predicted_naive = "false_pass"
+[variants.wrong_split_ignored]
+kind = "wrong"
+bug = "Omits aggregate split matches."
+must_fail = ["test_split_all_lines"]
+predicted_naive = "false_pass"
+[variants.wrong_refund_abs]
+kind = "wrong"
+bug = "Treats negative statement amounts as payments of the absolute amount."
+must_fail = ["test_refund_kind_and_original_reference"]
+predicted_naive = "false_pass"

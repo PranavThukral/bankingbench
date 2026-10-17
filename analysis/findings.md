@@ -40,7 +40,7 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=22.766
 
 <a id="02_interest_accrual-starter"></a>
 ### 02_interest_accrual · starter · false_pass under naive
-- **Naive grader commit:** 6ab4600 · **Hardened commit:** PENDING-02_interest_accrual
+- **Naive grader commit:** 6ab4600 · **Hardened commit:** d86532e
 - **What slipped through:** The unmodified starter satisfies ordinary examples but omits required behavior.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `` plus the task invariants.
@@ -48,7 +48,7 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=22.766
 
 <a id="02_interest_accrual-wrong_float"></a>
 ### 02_interest_accrual · wrong_float · false_pass under naive
-- **Naive grader commit:** 6ab4600 · **Hardened commit:** PENDING-02_interest_accrual
+- **Naive grader commit:** 6ab4600 · **Hardened commit:** d86532e
 - **What slipped through:** Binary floating point loses precision on ties and large principals.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_large_principal_exact, test_half_cent_ties_bankers` plus the task invariants.
@@ -56,7 +56,7 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=22.766
 
 <a id="02_interest_accrual-wrong_half_up"></a>
 ### 02_interest_accrual · wrong_half_up · false_pass under naive
-- **Naive grader commit:** 6ab4600 · **Hardened commit:** PENDING-02_interest_accrual
+- **Naive grader commit:** 6ab4600 · **Hardened commit:** d86532e
 - **What slipped through:** Rounds ties away from zero instead of to even.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_half_cent_ties_bankers` plus the task invariants.
@@ -64,7 +64,7 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=22.766
 
 <a id="02_interest_accrual-wrong_round_daily"></a>
 ### 02_interest_accrual · wrong_round_daily · false_pass under naive
-- **Naive grader commit:** 6ab4600 · **Hardened commit:** PENDING-02_interest_accrual
+- **Naive grader commit:** 6ab4600 · **Hardened commit:** d86532e
 - **What slipped through:** Rounds daily accrual before the posting boundary.
 - **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
 - **Hardening:** add observable tests `test_small_balance_daily_accrues` plus the task invariants.
@@ -73,4 +73,9 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=22.766
 #### 02_interest_accrual — measured naive summary (run 6ab4600)
 ```text
 runs=6 final_ok=0/0 naive_false_pass=4 infra_errors=0 flips=0 wall_s=2.410
+```
+
+#### 02_interest_accrual — measured final summary (run d86532e)
+```text
+runs=24 final_ok=12/12 naive_false_pass=7 infra_errors=0 flips=0 wall_s=24.668
 ```
