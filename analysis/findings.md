@@ -197,3 +197,40 @@ runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=2.074
 ```text
 runs=60 final_ok=30/30 naive_false_pass=17 infra_errors=0 flips=0 wall_s=95.551
 ```
+
+<a id="08_refund_limits-starter"></a>
+### 08_refund_limits · starter · false_pass under naive
+- **Naive grader commit:** a4adcfb · **Hardened commit:** PENDING-08_refund_limits
+- **What slipped through:** The unmodified starter satisfies ordinary examples but omits required behavior.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="08_refund_limits-wrong_checks_single_refund"></a>
+### 08_refund_limits · wrong_checks_single_refund · false_pass under naive
+- **Naive grader commit:** a4adcfb · **Hardened commit:** PENDING-08_refund_limits
+- **What slipped through:** Checks each refund against capture, ignoring earlier refunds.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_cumulative_partials` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="08_refund_limits-wrong_uses_authorized"></a>
+### 08_refund_limits · wrong_uses_authorized · false_pass under naive
+- **Naive grader commit:** a4adcfb · **Hardened commit:** PENDING-08_refund_limits
+- **What slipped through:** Uses the authorized amount as the refund ceiling.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_capture_less_than_authorization` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="08_refund_limits-wrong_counts_rejected"></a>
+### 08_refund_limits · wrong_counts_rejected · false_pass under naive
+- **Naive grader commit:** a4adcfb · **Hardened commit:** PENDING-08_refund_limits
+- **What slipped through:** Includes rejected attempts in the remaining refund budget.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_valid_after_rejection` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+#### 08_refund_limits — measured naive summary (run a4adcfb)
+```text
+runs=6 final_ok=0/0 naive_false_pass=4 infra_errors=0 flips=0 wall_s=2.344
+```
