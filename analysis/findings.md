@@ -3,6 +3,13 @@
 Only measured outcomes belong here. Naive graders are committed before final graders.
 All candidate data, accounts, merchants, and formats are synthetic.
 
+### 10_batch_parser · starter · false_pass under final (2c3adf5)
+- **What slipped through:** the unmodified starter ignored a nonzero declared-count mismatch.
+- **Why missed:** final tests added mutation and atomicity cases but omitted the existing naive
+  count regression. The full matrix exposed 9/9 starter tests passing.
+- **Hardening:** retain the starter and add test_count_mismatch using the public parser.
+- **Lesson:** hardening must preserve regression coverage from earlier grader versions.
+
 ### 08_refund_limits · reference · false_fail under final (fb4e73e)
 - **Observed:** property assertions passed, but TemporaryDirectory cleanup raised WinError32 on
   an SQLite connection cycle awaiting garbage collection. No public API requires a close method.

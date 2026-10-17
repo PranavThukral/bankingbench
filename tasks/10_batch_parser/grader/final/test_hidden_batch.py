@@ -37,6 +37,14 @@ def test_hash_total():
     assert parse(render(many)).payments == many
 
 
+def test_count_mismatch():
+    rows = render(fixture()).splitlines()
+    rows[-1] = b"T000002" + rows[-1][7:]
+    result = parse(b"\n".join(rows))
+    assert not result.accepted and result.payments == []
+    assert errors(result) == [(3, "count_mismatch")]
+
+
 def test_atomic_batch_rejection():
     payments = fixture() + [Payment("000000000456", 200, "second")]
     rows = render(payments).splitlines()

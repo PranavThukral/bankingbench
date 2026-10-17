@@ -11,7 +11,7 @@ leak_terms = ["BEGIN IMMEDIATE"]
 kind = "reference"
 [variants.alt_valid]
 kind = "alt_valid"
-structural_difference = "Append-only capture/refund events aggregated by category; reference updates per-payment budget counters."
+structural_difference = "Reconstructs state by replaying an append-only JSON event journal; reference updates per-payment budget counters."
 [variants.wrong_checks_single_refund]
 kind = "wrong"
 bug = "Checks each refund against capture, ignoring earlier refunds."
