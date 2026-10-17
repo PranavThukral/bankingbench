@@ -10,3 +10,5 @@ were unspecified in the starter. The ticket now resolves them. Predictions: auth
 refund40 then30 -> first accepted, second RefundExceedsCaptured; reject101 then refund100 ->
 accepted100; uncaptured refund1 -> PaymentNotCaptured. No unresolved graded ambiguity.
 Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.

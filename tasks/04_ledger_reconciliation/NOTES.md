@@ -10,3 +10,5 @@ negative R2 amounts, R3 tie breaks/date window, ordering of result lists. Ticket
 of these. Predictions: exact amount at +3 days -> R1; duplicate exact statement -> one R1 and
 one duplicate; parts 40+60 against 100 -> one R2 with both ids. No unresolved graded ambiguity.
 Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.

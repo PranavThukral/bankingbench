@@ -11,3 +11,5 @@ Ambiguities: negative rates/principal, initial cents, datetime vs date, rounding
 periods. Resolved explicitly in PROBLEM.md.
 Predictions: 50 CAD at 0.0365 for one day -> 0.00 interest; zero days -> []; 1000 CAD at 0.0365
 for ten simple days -> 1.00 interest and 1001.00 balance. No unresolved graded ambiguity.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.

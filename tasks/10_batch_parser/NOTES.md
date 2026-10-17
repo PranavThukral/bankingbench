@@ -10,3 +10,5 @@ Author self-review: positions, terminators, malformed-field error granularity, c
 checks, ordering and line numbers all needed explicit rules. The ticket now contains them.
 Predictions: account000000000123 contributes123 to hash; count mismatch -> rejected/no payments;
 valid CRLF -> accepted/same records as LF. No unresolved graded ambiguity. Independent review owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.

@@ -9,3 +9,5 @@ Author self-review clarified account seeding, exact expiry instant, partial-capt
 closed/overcapture error priority, persistence and amount validation in the ticket.
 Predictions: reserve1000/capture400 ->posted9600/available9600; at7days hold stops counting;
 flex15000 authorized then1 declined. No unresolved graded ambiguity. Independent review owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.

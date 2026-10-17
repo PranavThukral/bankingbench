@@ -10,3 +10,5 @@ invalid side/count errors, re-created accounts, unknown transaction errors, and 
 All are specified in PROBLEM.md. Predictions: CAD debit100/USD credit100 -> UnbalancedTransaction;
 unknown third account -> UnknownAccount with unchanged balances; reverse a reversal ->
 CannotReverseReversal, no change. No unresolved graded ambiguity. Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.

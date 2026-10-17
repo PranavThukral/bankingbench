@@ -1,0 +1,2632 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Private draft — verifier audit</title>
+<style>
+body{font:15px/1.5 system-ui,sans-serif;margin:2rem;color:#182232;background:#f6f8fb}
+table{border-collapse:collapse;width:100%;background:white;margin:1rem 0}
+td,th{border:1px solid #aeb8c7;padding:.6rem;text-align:left;vertical-align:top}
+td table{margin:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+.ok{background:#d9f2e3}.ok_wrong_reason{background:#fff0b3}
+.false_pass,.false_fail,.infra_error,.alert{background:#ffd9d9}
+.alert{padding:1rem;font-weight:bold}details{margin:.5rem 0}summary{cursor:pointer}
+a{color:#174b85}h1{font-size:1.8rem}footer{margin-top:2rem;border-top:2px solid #aeb8c7}
+</style>
+<h1>Private draft · synthetic payment verifier audit</h1>
+<p>Commit b1135d8 · 2026-10-17T22:43:47.893539+00:00 · 120 runs · 0 final deviations</p>
+
+<p>Green means the expected outcome, including rejection of a wrong variant. Red means a verifier deviation.</p>
+<h2>Final matrix</h2><table><thead><tr><th>Task</th><th>starter</th><th>reference</th><th>alt_valid</th><th>wrong variants</th></tr></thead><tbody>
+<tr id="final-01_idempotent_payments"><th>01_idempotent_payments</th>
+<td class="ok"><details><summary>starter: ok 4/12</summary><pre>test_hidden_payments::test_sequential_retry
+test_hidden_payments::test_concurrent_duplicates_charge_once
+test_hidden_payments::test_body_mismatch[change0]
+test_hidden_payments::test_body_mismatch[change1]
+test_hidden_payments::test_body_mismatch[change2]
+test_hidden_payments::test_decline_replayed
+test_hidden_payments::test_body_mismatch_while_in_flight
+test_hidden_payments::test_replay_survives_app_restart</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 12/12</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 12/12</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_inmemory_cache: ok 11/12</summary><pre>test_hidden_payments::test_replay_survives_app_restart</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#01_idempotent_payments-wrong_inmemory_cache">caught by hardening</a></td><td class="ok"><details><summary>wrong_key_scope: ok 11/12</summary><pre>test_hidden_payments::test_same_key_different_merchants_independent</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#01_idempotent_payments-wrong_key_scope">caught by hardening</a></td><td class="ok"><details><summary>wrong_retry_race: ok 10/12</summary><pre>test_hidden_payments::test_concurrent_duplicates_charge_once
+test_hidden_payments::test_body_mismatch_while_in_flight</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#01_idempotent_payments-wrong_retry_race">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-02_interest_accrual"><th>02_interest_accrual</th>
+<td class="ok"><details><summary>starter: ok 1/8</summary><pre>test_hidden_interest::test_half_cent_ties_bankers[50-0.0365-1]
+test_hidden_interest::test_half_cent_ties_bankers[73-0.025-1]
+test_hidden_interest::test_half_cent_ties_bankers[25-0.0365-2]
+test_hidden_interest::test_large_principal_exact[simple_monthly]
+test_hidden_interest::test_large_principal_exact[daily_compound]
+test_hidden_interest::test_leap_and_partial
+test_hidden_interest::test_accrual_properties</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#02_interest_accrual-starter">caught by hardening</a></td>
+<td class="ok"><details><summary>reference: ok 8/8</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 8/8</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_float: ok 5/8</summary><pre>test_hidden_interest::test_half_cent_ties_bankers[50-0.0365-1]
+test_hidden_interest::test_half_cent_ties_bankers[73-0.025-1]
+test_hidden_interest::test_half_cent_ties_bankers[25-0.0365-2]</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#02_interest_accrual-wrong_float">caught by hardening</a></td><td class="ok"><details><summary>wrong_half_up: ok 5/8</summary><pre>test_hidden_interest::test_half_cent_ties_bankers[50-0.0365-1]
+test_hidden_interest::test_half_cent_ties_bankers[73-0.025-1]
+test_hidden_interest::test_half_cent_ties_bankers[25-0.0365-2]</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#02_interest_accrual-wrong_half_up">caught by hardening</a></td><td class="ok"><details><summary>wrong_round_daily: ok 3/8</summary><pre>test_hidden_interest::test_large_principal_exact[simple_monthly]
+test_hidden_interest::test_large_principal_exact[daily_compound]
+test_hidden_interest::test_small_balance_daily_accrues
+test_hidden_interest::test_leap_and_partial
+test_hidden_interest::test_accrual_properties</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#02_interest_accrual-wrong_round_daily">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-03_fx_quotes"><th>03_fx_quotes</th>
+<td class="ok"><details><summary>starter: ok 6/9</summary><pre>test_hidden_fx::test_jpy_and_kwd_units
+test_hidden_fx::test_source_fee_before_conversion
+test_hidden_fx::test_exact_scaling_and_monotonicity</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 9/9</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 9/9</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_fee_after_conversion: ok 6/9</summary><pre>test_hidden_fx::test_jpy_and_kwd_units
+test_hidden_fx::test_source_fee_before_conversion
+test_hidden_fx::test_exact_scaling_and_monotonicity</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#03_fx_quotes-wrong_fee_after_conversion">caught by hardening</a></td><td class="ok"><details><summary>wrong_round_cross_leg: ok 8/9</summary><pre>test_hidden_fx::test_cross_has_no_intermediate_rounding</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#03_fx_quotes-wrong_round_cross_leg">caught by hardening</a></td><td class="ok"><details><summary>wrong_two_decimals: ok 7/9</summary><pre>test_hidden_fx::test_jpy_and_kwd_units
+test_hidden_fx::test_exact_scaling_and_monotonicity</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#03_fx_quotes-wrong_two_decimals">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-04_ledger_reconciliation"><th>04_ledger_reconciliation</th>
+<td class="ok"><details><summary>starter: ok 4/6</summary><pre>test_hidden_recon::test_split_all_lines
+test_hidden_recon::test_tie_breaks_and_window</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#04_ledger_reconciliation-starter">caught by hardening</a></td>
+<td class="ok"><details><summary>reference: ok 6/6</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 6/6</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_no_consumption: ok 4/6</summary><pre>test_hidden_recon::test_duplicate_statement_line_left_unmatched
+test_hidden_recon::test_ground_truth_transforms</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#04_ledger_reconciliation-wrong_no_consumption">caught by hardening</a></td><td class="ok"><details><summary>wrong_refund_abs: ok 5/6</summary><pre>test_hidden_recon::test_refund_kind_and_original_reference</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#04_ledger_reconciliation-wrong_refund_abs">caught by hardening</a></td><td class="ok"><details><summary>wrong_split_ignored: ok 4/6</summary><pre>test_hidden_recon::test_split_all_lines
+test_hidden_recon::test_ground_truth_transforms</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#04_ledger_reconciliation-wrong_split_ignored">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-05_double_entry"><th>05_double_entry</th>
+<td class="ok"><details><summary>starter: ok 7/10</summary><pre>test_hidden_ledger::test_cross_currency_cannot_net
+test_hidden_ledger::test_rejections_leave_no_trace
+test_hidden_ledger.TestJournal::runTest</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 10/10</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 10/10</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_cross_currency_sum: ok 8/10</summary><pre>test_hidden_ledger::test_cross_currency_cannot_net
+test_hidden_ledger.TestJournal::runTest</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#05_double_entry-wrong_cross_currency_sum">caught by hardening</a></td><td class="ok"><details><summary>wrong_double_reverse: ok 8/10</summary><pre>test_hidden_ledger::test_reverse_once
+test_hidden_ledger.TestJournal::runTest</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#05_double_entry-wrong_double_reverse">caught by hardening</a></td><td class="ok"><details><summary>wrong_non_atomic: ok 6/10</summary><pre>test_hidden_ledger::test_cross_currency_cannot_net
+test_hidden_ledger::test_unknown_account_is_atomic
+test_hidden_ledger::test_rejections_leave_no_trace
+test_hidden_ledger.TestJournal::runTest</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#05_double_entry-wrong_non_atomic">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-06_available_balance"><th>06_available_balance</th>
+<td class="ok"><details><summary>starter: ok 4/6</summary><pre>test_hidden_holds::test_partial_capture_releases_remainder
+test_hidden_holds::test_random_operation_model</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 6/6</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 6/6</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_available_ignores_holds: ok 1/6</summary><pre>test_hidden_holds::test_existing_holds_reduce_available
+test_hidden_holds::test_expiry_exactly_seven_days
+test_hidden_holds::test_void_overcapture_and_persistence
+test_hidden_holds::test_overdraft_boundary
+test_hidden_holds::test_random_operation_model</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#06_available_balance-wrong_available_ignores_holds">caught by hardening</a></td><td class="ok"><details><summary>wrong_expired_holds_count: ok 4/6</summary><pre>test_hidden_holds::test_expiry_exactly_seven_days
+test_hidden_holds::test_random_operation_model</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#06_available_balance-wrong_expired_holds_count">caught by hardening</a></td><td class="ok"><details><summary>wrong_partial_capture_keeps_remainder: ok 4/6</summary><pre>test_hidden_holds::test_partial_capture_releases_remainder
+test_hidden_holds::test_random_operation_model</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#06_available_balance-wrong_partial_capture_keeps_remainder">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-07_statement_periods"><th>07_statement_periods</th>
+<td class="ok"><details><summary>starter: ok 2/8</summary><pre>test_hidden_periods::test_local_midnight_boundaries[America/Toronto-2026-1-2026-01-01T05:00:00+00:00-2026-02-01T05:00:00+00:00]
+test_hidden_periods::test_local_midnight_boundaries[Asia/Kolkata-2026-1-2025-12-31T18:30:00+00:00-2026-01-31T18:30:00+00:00]
+test_hidden_periods::test_dst_months[America/Toronto-3-2026-03-01T05:00:00+00:00-2026-04-01T04:00:00+00:00]
+test_hidden_periods::test_dst_months[America/Toronto-11-2026-11-01T04:00:00+00:00-2026-12-01T05:00:00+00:00]
+test_hidden_periods::test_dst_months[Pacific/Auckland-4-2026-03-31T11:00:00+00:00-2026-04-30T12:00:00+00:00]
+test_hidden_periods::test_naive_and_instant_order</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#07_statement_periods-starter">caught by hardening</a></td>
+<td class="ok"><details><summary>reference: ok 8/8</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 8/8</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_fixed_offset: ok 5/8</summary><pre>test_hidden_periods::test_dst_months[America/Toronto-3-2026-03-01T05:00:00+00:00-2026-04-01T04:00:00+00:00]
+test_hidden_periods::test_dst_months[America/Toronto-11-2026-11-01T04:00:00+00:00-2026-12-01T05:00:00+00:00]
+test_hidden_periods::test_dst_months[Pacific/Auckland-4-2026-03-31T11:00:00+00:00-2026-04-30T12:00:00+00:00]</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#07_statement_periods-wrong_fixed_offset">caught by hardening</a></td><td class="ok"><details><summary>wrong_inclusive_2359: ok 1/8</summary><pre>test_hidden_periods::test_local_midnight_boundaries[America/Toronto-2026-1-2026-01-01T05:00:00+00:00-2026-02-01T05:00:00+00:00]
+test_hidden_periods::test_local_midnight_boundaries[Asia/Kolkata-2026-1-2025-12-31T18:30:00+00:00-2026-01-31T18:30:00+00:00]
+test_hidden_periods::test_microsecond_boundary
+test_hidden_periods::test_dst_months[America/Toronto-3-2026-03-01T05:00:00+00:00-2026-04-01T04:00:00+00:00]
+test_hidden_periods::test_dst_months[America/Toronto-11-2026-11-01T04:00:00+00:00-2026-12-01T05:00:00+00:00]
+test_hidden_periods::test_dst_months[Pacific/Auckland-4-2026-03-31T11:00:00+00:00-2026-04-30T12:00:00+00:00]
+test_hidden_periods::test_thirteen_month_partition</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#07_statement_periods-wrong_inclusive_2359">caught by hardening</a></td><td class="ok"><details><summary>wrong_utc_month: ok 3/8</summary><pre>test_hidden_periods::test_local_midnight_boundaries[America/Toronto-2026-1-2026-01-01T05:00:00+00:00-2026-02-01T05:00:00+00:00]
+test_hidden_periods::test_local_midnight_boundaries[Asia/Kolkata-2026-1-2025-12-31T18:30:00+00:00-2026-01-31T18:30:00+00:00]
+test_hidden_periods::test_dst_months[America/Toronto-3-2026-03-01T05:00:00+00:00-2026-04-01T04:00:00+00:00]
+test_hidden_periods::test_dst_months[America/Toronto-11-2026-11-01T04:00:00+00:00-2026-12-01T05:00:00+00:00]
+test_hidden_periods::test_dst_months[Pacific/Auckland-4-2026-03-31T11:00:00+00:00-2026-04-30T12:00:00+00:00]</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#07_statement_periods-wrong_utc_month">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-08_refund_limits"><th>08_refund_limits</th>
+<td class="ok"><details><summary>starter: ok 1/5</summary><pre>test_hidden_refunds::test_cumulative_partials
+test_hidden_refunds::test_capture_less_than_authorization
+test_hidden_refunds::test_valid_after_rejection
+test_hidden_refunds::test_refund_sequence_matches_greedy_oracle</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#08_refund_limits-starter">caught by hardening</a></td>
+<td class="ok"><details><summary>reference: ok 5/5</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 5/5</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_checks_single_refund: ok 3/5</summary><pre>test_hidden_refunds::test_cumulative_partials
+test_hidden_refunds::test_refund_sequence_matches_greedy_oracle</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#08_refund_limits-wrong_checks_single_refund">caught by hardening</a></td><td class="ok"><details><summary>wrong_counts_rejected: ok 1/5</summary><pre>test_hidden_refunds::test_cumulative_partials
+test_hidden_refunds::test_capture_less_than_authorization
+test_hidden_refunds::test_valid_after_rejection
+test_hidden_refunds::test_refund_sequence_matches_greedy_oracle</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#08_refund_limits-wrong_counts_rejected">caught by hardening</a></td><td class="ok"><details><summary>wrong_uses_authorized: ok 3/5</summary><pre>test_hidden_refunds::test_capture_less_than_authorization
+test_hidden_refunds::test_refund_sequence_matches_greedy_oracle</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#08_refund_limits-wrong_uses_authorized">caught by hardening</a></td></tr></table></td></tr>
+<tr id="final-09_tiered_fees"><th>09_tiered_fees</th>
+<td class="ok"><details><summary>starter: ok 5/7</summary><pre>test_hidden_fees::test_clamps_and_zero
+test_hidden_fees::test_fee_properties</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#09_tiered_fees-starter">caught by hardening</a></td>
+<td class="ok"><details><summary>reference: ok 7/7</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 7/7</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_exclusive_boundary: ok 6/7</summary><pre>test_hidden_fees::test_inclusive_boundaries</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#09_tiered_fees-wrong_exclusive_boundary">caught by hardening</a></td><td class="ok"><details><summary>wrong_float_bps: ok 4/7</summary><pre>test_hidden_fees::test_discovered_float_ties[5000-3-2]
+test_hidden_fees::test_discovered_float_ties[25000-3-8]
+test_hidden_fees::test_discovered_float_ties[35000-3-11]</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#09_tiered_fees-wrong_float_bps">caught by hardening</a></td><td class="ok"><details><summary>wrong_marginal: ok 5/7</summary><pre>test_hidden_fees::test_inclusive_boundaries
+test_hidden_fees::test_non_marginal</pre><p>Prediction: </p></details></td></tr></table></td></tr>
+<tr id="final-10_batch_parser"><th>10_batch_parser</th>
+<td class="ok"><details><summary>starter: ok 9/10</summary><pre>test_hidden_batch::test_count_mismatch</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 10/10</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 10/10</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="ok"><details><summary>wrong_crlf_slicing: ok 8/10</summary><pre>test_hidden_batch::test_crlf
+test_hidden_batch::test_roundtrip_and_single_digit_corruption</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#10_batch_parser-wrong_crlf_slicing">caught by hardening</a></td><td class="ok"><details><summary>wrong_ignores_hash_total: ok 7/10</summary><pre>test_hidden_batch::test_hash_total
+test_hidden_batch::test_atomic_batch_rejection
+test_hidden_batch::test_multiple_errors_and_line_numbers</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#10_batch_parser-wrong_ignores_hash_total">caught by hardening</a></td><td class="ok"><details><summary>wrong_partial_accept: ok 9/10</summary><pre>test_hidden_batch::test_atomic_batch_rejection</pre><p>Prediction: </p></details><a href="../../analysis/findings.md#10_batch_parser-wrong_partial_accept">caught by hardening</a></td></tr></table></td></tr>
+</tbody></table>
+<h2>Naive matrix</h2><table><thead><tr><th>Task</th><th>starter</th><th>reference</th><th>alt_valid</th><th>wrong variants</th></tr></thead><tbody>
+<tr id="naive-01_idempotent_payments"><th>01_idempotent_payments</th>
+<td class="ok"><details><summary>starter: ok 2/3</summary><pre>test_hidden::test_retry</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 3/3</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 3/3</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_inmemory_cache: false_pass 3/3</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_key_scope: false_pass 3/3</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_retry_race: false_pass 3/3</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-02_interest_accrual"><th>02_interest_accrual</th>
+<td class="false_pass"><details><summary>starter: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_float: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_half_up: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_round_daily: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-03_fx_quotes"><th>03_fx_quotes</th>
+<td class="ok"><details><summary>starter: ok 0/1</summary><pre>test_hidden::test_direct_cad_usd</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_fee_after_conversion: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_round_cross_leg: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_two_decimals: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-04_ledger_reconciliation"><th>04_ledger_reconciliation</th>
+<td class="false_pass"><details><summary>starter: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_no_consumption: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_refund_abs: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_split_ignored: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-05_double_entry"><th>05_double_entry</th>
+<td class="ok"><details><summary>starter: ok 1/2</summary><pre>test_hidden::test_unbalanced_rejected</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_cross_currency_sum: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_double_reverse: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_non_atomic: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-06_available_balance"><th>06_available_balance</th>
+<td class="ok"><details><summary>starter: ok 1/2</summary><pre>test_hidden::test_full_capture</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_available_ignores_holds: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_expired_holds_count: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_partial_capture_keeps_remainder: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-07_statement_periods"><th>07_statement_periods</th>
+<td class="false_pass"><details><summary>starter: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_fixed_offset: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_inclusive_2359: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_utc_month: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-08_refund_limits"><th>08_refund_limits</th>
+<td class="false_pass"><details><summary>starter: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_checks_single_refund: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_counts_rejected: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_uses_authorized: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+<tr id="naive-09_tiered_fees"><th>09_tiered_fees</th>
+<td class="false_pass"><details><summary>starter: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 1/1</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_exclusive_boundary: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_float_bps: false_pass 1/1</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="ok_wrong_reason"><details><summary>wrong_marginal: ok_wrong_reason 0/1</summary><pre>test_hidden::test_tier_midpoints</pre><p>Prediction: ok_wrong_reason</p></details></td></tr></table></td></tr>
+<tr id="naive-10_batch_parser"><th>10_batch_parser</th>
+<td class="ok"><details><summary>starter: ok 1/2</summary><pre>test_hidden::test_count_mismatch</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>reference: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td class="ok"><details><summary>alt_valid: ok 2/2</summary><pre>No failed test ids</pre><p>Prediction: </p></details></td>
+<td><table><tr><td class="false_pass"><details><summary>wrong_crlf_slicing: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_ignores_hash_total: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td><td class="false_pass"><details><summary>wrong_partial_accept: false_pass 2/2</summary><pre>No failed test ids</pre><p>Prediction: false_pass</p></details></td></tr></table></td></tr>
+</tbody></table>
+<details><summary>01_idempotent_payments — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: payment retries must be idempotent
+
+Our synthetic payment service already charges a declared gateway and returns a receipt.
+Clients retry requests after losing a response. Implement the following observable contract.
+
+Public interface: `app.main.create_app(database_url: str, gateway: Gateway) -&gt; FastAPI`;
+`app.gateway.Gateway.charge(merchant_id, amount_minor, currency, source_token) -&gt; ChargeResult`.
+`ChargeResult(charge_id: str, status: &quot;succeeded&quot;|&quot;declined&quot;)` is a frozen dataclass.
+The starter also exports `app.gateway.FakeGateway` for visible and naive smoke tests;
+its `.calls` property is a tuple of charging calls. Hidden final tests inject their own Gateway.
+`POST /v1/payments` takes `X-Merchant-Id`, `Idempotency-Key`, and JSON
+`{amount_minor, currency, source_token}`. Money is positive integer minor units, never bool.
+Currencies supported: CAD/USD/EUR/GBP (2 dp), JPY (0), KWD/BHD (3). No conversion occurs.
+
+- Key required, length 1–255 characters; missing/empty/too long: HTTP 400
+  `idempotency_key_required`. Merchant is a nonempty string; missing: 400 `merchant_required`.
+- Invalid JSON body/fields: 422 `invalid_payment`. Ignore JSON member ordering. Body equality
+  means equality of the three validated fields; no extra fields are accepted.
+- Keys are scoped per merchant. Same merchant, key and body replay the original status and JSON
+  exactly, without another gateway call. Declines (402 `card_declined`) also replay exactly.
+- Same merchant and key with a different body: 422 `idempotency_key_reuse`, no charge,
+  whether the first request is complete or in flight.
+- Concurrent identical duplicates cause exactly one gateway charge. Each duplicate either gets
+  the original response or HTTP 409 `idempotency_request_in_progress`. A later retry must replay.
+- This behavior survives creating another app instance against the same database; no expiry.
+- A successful receipt is HTTP 201 with `payment_id`, `charge_id`, `status` (&quot;succeeded&quot;),
+  `amount_minor`, `currency`, and `merchant_id`. The payment id is nonempty and unique for distinct
+  payments. Do not compare an id to any particular UUID format.
+- Errors are JSON `{&quot;error&quot;:{&quot;code&quot;:&quot;&lt;snake_case&gt;&quot;,&quot;message&quot;:&quot;...&quot;}}`; message text is free.
+  No gateway exceptions or crash recovery are in scope. A charge returns normally with either status.
+
+Preserve the factory and gateway protocol. Store state in the supplied PostgreSQL database;
+the application may create its own schema. Tests inspect only the declared HTTP surface and
+gateway calls. Timestamps in stored receipts use aware UTC; no timestamp field is required in JSON.
+Run visible tests from starter: `python -m pytest tests -q` with `DATABASE_URL` set to a disposable
+database. No customer data or real payment network is involved.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — task 01 reviewer notes
+
+The reservation implementation returns 409 during a charge; the advisory-lock implementation waits.
+Both are valid under the public contract. Wrong variants isolate a realistic persistence,
+namespace, or check-then-write defect; none change visible tests.
+
+## Blind review
+Author self-review, restricted to the ticket and starter (independent review still owed).
+Ambiguities found: JSON equality vs member order, key length errors, merchant validation, receipt
+fields, and failures during gateway calls. Resolved in PROBLEM.md: validated-field equality,
+explicit status codes, free message text, and crash recovery excluded.
+Three withheld-output predictions: missing key -&gt; 400/idempotency_key_required; same key on
+another merchant -&gt; distinct 201 payment; completed decline retry -&gt; identical 402 without charge.
+No unresolved graded ambiguity after the ticket revision. This is not an independent model review.
+
+## Flake measurement
+
+Native Windows / PostgreSQL 16.13, 10 simultaneous callers, 150 ms gateway delay, 25 fresh-key rounds per test.
+60 final runs (20 per variant), 0 flips, all 60 verdicts ok. Wall time 152.592 s.
+Per-run duration_s in repeat order:
+
+- reference: 13.375, 13.363, 13.355, 13.313, 13.524, 14.034, 13.765, 14.007, 11.629, 11.373, 11.759, 11.776, 11.744, 11.724, 11.488, 11.506, 12.831, 12.77, 12.835, 12.823
+- alt_valid: 11.155, 11.127, 11.534, 11.224, 14.209, 14.117, 14.372, 14.435, 12.004, 12.011, 11.959, 11.839, 12.051, 12.04, 11.933, 11.789, 11.98, 11.981, 11.814, 11.943
+- wrong_retry_race: 5.157, 5.154, 4.952, 5.034, 5.528, 5.445, 5.332, 5.258, 6.434, 6.477, 6.408, 6.477, 5.253, 5.25, 5.245, 5.04, 5.335, 5.19, 5.27, 5.21
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/app\main.py
++++ alt_valid/app\main.py
+@@ -1,29 +1,52 @@
++&quot;&quot;&quot;Serialize a request identity for the lifetime of its charging transaction.&quot;&quot;&quot;
++from datetime import datetime, timezone
++import json
++from uuid import uuid4
++import psycopg
+ from fastapi import FastAPI, Request
+ from fastapi.responses import JSONResponse
+-from app.contracts import PaymentRequest, error, headers
+-from app.storage import PaymentStore
++from starlette.concurrency import run_in_threadpool
++from app.contracts import PaymentRequest, error, headers, receipt
+ 
+ 
+ def create_app(database_url, gateway):
+-    store = PaymentStore(database_url)
+-    app = FastAPI()
+-    @app.post(&quot;/v1/payments&quot;)
+-    async def pay(request: Request):
+-        merchant = request.headers.get(&quot;X-Merchant-Id&quot;)
+-        key = request.headers.get(&quot;Idempotency-Key&quot;)
+-        invalid = headers(merchant, key)
+-        if invalid is not None:
+-            return invalid
++    with psycopg.connect(database_url) as setup:
++        setup.execute(&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS payment_receipts (
++            id text PRIMARY KEY, merchant text, request_key text, request_body jsonb,
++            response jsonb, code int, created_at timestamptz,
++            UNIQUE (merchant, request_key))&quot;&quot;&quot;)
++
++    def serialized_charge(merchant, key, parsed):
++        with psycopg.connect(database_url) as transaction:
++            lock_identity = json.dumps([merchant, key])
++            transaction.execute(&quot;SELECT pg_advisory_xact_lock(hashtextextended(%s,0))&quot;, (lock_identity,))
++            previous = transaction.execute(&quot;&quot;&quot;SELECT request_body,response,code FROM payment_receipts
++                WHERE merchant=%s AND request_key=%s&quot;&quot;&quot;, (merchant, key)).fetchone()
++            if previous is not None:
++                if previous[0] != parsed.as_dict():
++                    return error(422, &quot;idempotency_key_reuse&quot;)
++                return JSONResponse(previous[1], status_code=previous[2])
++            result = gateway.charge(merchant, parsed.amount_minor, parsed.currency, parsed.source_token)
++            identifier = str(uuid4())
++            status, response = receipt(identifier, merchant, parsed, result)
++            transaction.execute(&quot;INSERT INTO payment_receipts VALUES (%s,%s,%s,%s,%s,%s,%s)&quot;,
++                                (identifier, merchant, key, json.dumps(parsed.as_dict()),
++                                 json.dumps(response), status, datetime.now(timezone.utc)))
++            return JSONResponse(response, status_code=status)
++
++    api = FastAPI()
++
++    @api.post(&quot;/v1/payments&quot;)
++    async def payment_endpoint(request: Request):
++        merchant_id = request.headers.get(&quot;X-Merchant-Id&quot;)
++        request_key = request.headers.get(&quot;Idempotency-Key&quot;)
++        invalid_headers = headers(merchant_id, request_key)
++        if invalid_headers is not None:
++            return invalid_headers
+         try:
+-            body = PaymentRequest.parse(await request.json())
++            parsed = PaymentRequest.parse(await request.json())
+         except (ValueError, TypeError):
+             return error(422, &quot;invalid_payment&quot;)
+-        return await __import__(&quot;starlette.concurrency&quot;, fromlist=[&quot;run_in_threadpool&quot;]).run_in_threadpool(
+-            process, merchant, key, body)
++        return await run_in_threadpool(serialized_charge, merchant_id, request_key, parsed)
+ 
+-    def process(merchant, key, body):
+-
+-        charge = gateway.charge(merchant, body.amount_minor, body.currency, body.source_token)
+-        status, payload = store.save(merchant, body, charge)
+-        return JSONResponse(payload, status_code=status)
+-    return app
++    return api
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/app\main.py
++++ reference/app\main.py
+@@ -1,16 +1,22 @@
++import json
+ from fastapi import FastAPI, Request
+ from fastapi.responses import JSONResponse
++from starlette.concurrency import run_in_threadpool
+ from app.contracts import PaymentRequest, error, headers
+ from app.storage import PaymentStore
+ 
+ 
+ def create_app(database_url, gateway):
+     store = PaymentStore(database_url)
++    with store.connect() as conn:
++        conn.execute(&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS idempotency_keys (
++            merchant text, key text, fingerprint text NOT NULL, state text NOT NULL,
++            response_code integer, response_json jsonb, PRIMARY KEY(merchant,key))&quot;&quot;&quot;)
+     app = FastAPI()
++
+     @app.post(&quot;/v1/payments&quot;)
+     async def pay(request: Request):
+-        merchant = request.headers.get(&quot;X-Merchant-Id&quot;)
+-        key = request.headers.get(&quot;Idempotency-Key&quot;)
++        merchant, key = request.headers.get(&quot;X-Merchant-Id&quot;), request.headers.get(&quot;Idempotency-Key&quot;)
+         invalid = headers(merchant, key)
+         if invalid is not None:
+             return invalid
+@@ -18,12 +24,25 @@
+             body = PaymentRequest.parse(await request.json())
+         except (ValueError, TypeError):
+             return error(422, &quot;invalid_payment&quot;)
+-        return await __import__(&quot;starlette.concurrency&quot;, fromlist=[&quot;run_in_threadpool&quot;]).run_in_threadpool(
+-            process, merchant, key, body)
++        return await run_in_threadpool(process, merchant, key, body)
+ 
+     def process(merchant, key, body):
+-
++        scope = merchant
++        with store.connect() as conn:
++            inserted = conn.execute(&quot;&quot;&quot;INSERT INTO idempotency_keys VALUES (%s,%s,%s,&#x27;in_progress&#x27;,NULL,NULL)
++                ON CONFLICT DO NOTHING RETURNING key&quot;&quot;&quot;, (scope, key, body.fingerprint())).fetchone()
++            if not inserted:
++                row = conn.execute(&quot;&quot;&quot;SELECT fingerprint,state,response_code,response_json
++                    FROM idempotency_keys WHERE merchant=%s AND key=%s&quot;&quot;&quot;, (scope, key)).fetchone()
++                if row[0] != body.fingerprint():
++                    return error(422, &quot;idempotency_key_reuse&quot;)
++                if row[1] != &quot;complete&quot;:
++                    return error(409, &quot;idempotency_request_in_progress&quot;)
++                return JSONResponse(row[3], status_code=row[2])
+         charge = gateway.charge(merchant, body.amount_minor, body.currency, body.source_token)
+-        status, payload = store.save(merchant, body, charge)
+-        return JSONResponse(payload, status_code=status)
++        with store.connect() as conn:
++            code, payload = store.save(merchant, body, charge, conn)
++            conn.execute(&quot;&quot;&quot;UPDATE idempotency_keys SET state=&#x27;complete&#x27;,response_code=%s,response_json=%s
++                WHERE merchant=%s AND key=%s&quot;&quot;&quot;, (code, json.dumps(payload), scope, key))
++        return JSONResponse(payload, status_code=code)
+     return app
+</pre></details>
+<details><summary>wrong_inmemory_cache diff</summary><pre>--- starter/app\main.py
++++ wrong_inmemory_cache/app\main.py
+@@ -1,3 +1,5 @@
++from threading import Lock
++
+ from fastapi import FastAPI, Request
+ from fastapi.responses import JSONResponse
+ from app.contracts import PaymentRequest, error, headers
+@@ -6,6 +8,7 @@
+ 
+ def create_app(database_url, gateway):
+     store = PaymentStore(database_url)
++    cache, lock = {}, Lock()
+     app = FastAPI()
+     @app.post(&quot;/v1/payments&quot;)
+     async def pay(request: Request):
+@@ -23,7 +26,15 @@
+ 
+     def process(merchant, key, body):
+ 
+-        charge = gateway.charge(merchant, body.amount_minor, body.currency, body.source_token)
+-        status, payload = store.save(merchant, body, charge)
+-        return JSONResponse(payload, status_code=status)
++        with lock:
++            identity = (merchant, key)
++            if identity in cache:
++                fingerprint, status, payload = cache[identity]
++                if fingerprint != body.fingerprint():
++                    return error(422, &quot;idempotency_key_reuse&quot;)
++            else:
++                charge = gateway.charge(merchant, body.amount_minor, body.currency, body.source_token)
++                status, payload = store.save(merchant, body, charge)
++                cache[identity] = (body.fingerprint(), status, payload)
++            return JSONResponse(payload, status_code=status)
+     return app
+</pre></details>
+<details><summary>wrong_key_scope diff</summary><pre>--- starter/app\main.py
++++ wrong_key_scope/app\main.py
+@@ -1,16 +1,22 @@
++import json
+ from fastapi import FastAPI, Request
+ from fastapi.responses import JSONResponse
++from starlette.concurrency import run_in_threadpool
+ from app.contracts import PaymentRequest, error, headers
+ from app.storage import PaymentStore
+ 
+ 
+ def create_app(database_url, gateway):
+     store = PaymentStore(database_url)
++    with store.connect() as conn:
++        conn.execute(&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS idempotency_keys (
++            merchant text, key text, fingerprint text NOT NULL, state text NOT NULL,
++            response_code integer, response_json jsonb, PRIMARY KEY(merchant,key))&quot;&quot;&quot;)
+     app = FastAPI()
++
+     @app.post(&quot;/v1/payments&quot;)
+     async def pay(request: Request):
+-        merchant = request.headers.get(&quot;X-Merchant-Id&quot;)
+-        key = request.headers.get(&quot;Idempotency-Key&quot;)
++        merchant, key = request.headers.get(&quot;X-Merchant-Id&quot;), request.headers.get(&quot;Idempotency-Key&quot;)
+         invalid = headers(merchant, key)
+         if invalid is not None:
+             return invalid
+@@ -18,12 +24,25 @@
+             body = PaymentRequest.parse(await request.json())
+         except (ValueError, TypeError):
+             return error(422, &quot;invalid_payment&quot;)
+-        return await __import__(&quot;starlette.concurrency&quot;, fromlist=[&quot;run_in_threadpool&quot;]).run_in_threadpool(
+-            process, merchant, key, body)
++        return await run_in_threadpool(process, merchant, key, body)
+ 
+     def process(merchant, key, body):
+-
++        scope = &quot;shared&quot;
++        with store.connect() as conn:
++            inserted = conn.execute(&quot;&quot;&quot;INSERT INTO idempotency_keys VALUES (%s,%s,%s,&#x27;in_progress&#x27;,NULL,NULL)
++                ON CONFLICT DO NOTHING RETURNING key&quot;&quot;&quot;, (scope, key, body.fingerprint())).fetchone()
++            if not inserted:
++                row = conn.execute(&quot;&quot;&quot;SELECT fingerprint,state,response_code,response_json
++                    FROM idempotency_keys WHERE merchant=%s AND key=%s&quot;&quot;&quot;, (scope, key)).fetchone()
++                if row[0] != body.fingerprint():
++                    return error(422, &quot;idempotency_key_reuse&quot;)
++                if row[1] != &quot;complete&quot;:
++                    return error(409, &quot;idempotency_request_in_progress&quot;)
++                return JSONResponse(row[3], status_code=row[2])
+         charge = gateway.charge(merchant, body.amount_minor, body.currency, body.source_token)
+-        status, payload = store.save(merchant, body, charge)
+-        return JSONResponse(payload, status_code=status)
++        with store.connect() as conn:
++            code, payload = store.save(merchant, body, charge, conn)
++            conn.execute(&quot;&quot;&quot;UPDATE idempotency_keys SET state=&#x27;complete&#x27;,response_code=%s,response_json=%s
++                WHERE merchant=%s AND key=%s&quot;&quot;&quot;, (code, json.dumps(payload), scope, key))
++        return JSONResponse(payload, status_code=code)
+     return app
+</pre></details>
+<details><summary>wrong_retry_race diff</summary><pre>--- starter/app\main.py
++++ wrong_retry_race/app\main.py
+@@ -1,16 +1,23 @@
++import json
++import psycopg
+ from fastapi import FastAPI, Request
+ from fastapi.responses import JSONResponse
++from starlette.concurrency import run_in_threadpool
+ from app.contracts import PaymentRequest, error, headers
+ from app.storage import PaymentStore
+ 
+ 
+ def create_app(database_url, gateway):
+     store = PaymentStore(database_url)
++    with store.connect() as conn:
++        conn.execute(&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS idempotency_keys (
++            merchant text, key text, fingerprint text NOT NULL, state text NOT NULL,
++            response_code integer, response_json jsonb, PRIMARY KEY(merchant,key))&quot;&quot;&quot;)
+     app = FastAPI()
++
+     @app.post(&quot;/v1/payments&quot;)
+     async def pay(request: Request):
+-        merchant = request.headers.get(&quot;X-Merchant-Id&quot;)
+-        key = request.headers.get(&quot;Idempotency-Key&quot;)
++        merchant, key = request.headers.get(&quot;X-Merchant-Id&quot;), request.headers.get(&quot;Idempotency-Key&quot;)
+         invalid = headers(merchant, key)
+         if invalid is not None:
+             return invalid
+@@ -18,12 +25,25 @@
+             body = PaymentRequest.parse(await request.json())
+         except (ValueError, TypeError):
+             return error(422, &quot;invalid_payment&quot;)
+-        return await __import__(&quot;starlette.concurrency&quot;, fromlist=[&quot;run_in_threadpool&quot;]).run_in_threadpool(
+-            process, merchant, key, body)
++        return await run_in_threadpool(process, merchant, key, body)
+ 
+     def process(merchant, key, body):
+-
++        scope = merchant
++        with store.connect() as conn:
++            row = conn.execute(&quot;&quot;&quot;SELECT fingerprint,state,response_code,response_json
++                FROM idempotency_keys WHERE merchant=%s AND key=%s&quot;&quot;&quot;, (scope, key)).fetchone()
++            if row:
++                if row[0] != body.fingerprint():
++                    return error(422, &quot;idempotency_key_reuse&quot;)
++                return JSONResponse(row[3], status_code=row[2])
+         charge = gateway.charge(merchant, body.amount_minor, body.currency, body.source_token)
+-        status, payload = store.save(merchant, body, charge)
+-        return JSONResponse(payload, status_code=status)
++        with store.connect() as conn:
++            code, payload = store.save(merchant, body, charge, conn)
++            try:
++                conn.execute(&quot;&quot;&quot;INSERT INTO idempotency_keys VALUES (%s,%s,%s,&#x27;complete&#x27;,%s,%s)&quot;&quot;&quot;,
++                             (scope, key, body.fingerprint(), code, json.dumps(payload)))
++            except psycopg.errors.UniqueViolation:
++                conn.rollback()
++                return error(500, &quot;payment_conflict&quot;)
++        return JSONResponse(payload, status_code=code)
+     return app
+</pre></details>
+</details>
+<details><summary>02_interest_accrual — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: accrue interest across partial calendar months
+
+The synthetic CAD account needs correct daily accrual and explicit posting boundaries.
+Keep `interest.accrual.accrue(principal: Decimal, annual_rate: Decimal, start: date, end: date,
+method: Literal[&quot;simple_monthly&quot;,&quot;daily_compound&quot;]) -&gt; list[Posting]` and
+`Posting(posting_date: date, interest: Decimal, balance: Decimal)` (frozen dataclass).
+
+CAD has 2 decimal places. Principal is a nonnegative finite Decimal in whole cents; rate is
+a nonnegative finite Decimal (a fraction, e.g. 0.05 means 5%). Invalid values/method or end before
+start raise ValueError. These are dates, not timestamps; any datetime instead of date is invalid.
+
+- Day count is Actual/365 Fixed, including leap years. Accrue for every date in `[start,end)`.
+- Post on each month end within that period, and also on `end - 1 day` if it is not a month end.
+  Return chronological postings. `start == end` returns `[]`.
+- `simple_monthly`: interest at a posting equals current posted balance × rate × segment days / 365.
+  Add each posting to the balance; thus it compounds at posting boundaries.
+- `daily_compound`: each date, accrued += (posted balance + accrued) × rate / 365 with full
+  intermediate precision. At posting, round accrued, add to balance, reset accrued to zero;
+  discard the unrounded residual.
+- Round only the posting to 0.01 using ROUND_HALF_EVEN. Intermediate arithmetic must use
+  precision at least 28 or exact arithmetic. Both money fields must be Decimal with exponent -2,
+  even when zero. Return the resulting balance after each posting.
+
+Only the declared interface is graded; internal representation and algorithms are unrestricted.
+Run from starter: `python -m pytest tests -q`. All examples and accounts are synthetic.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — interest reviewer notes
+
+Reference accumulates daily in Decimal (34 digits), multiplying the simple segment in one
+expression to preserve exact ties. Alternative uses closed-form Fraction compounding by segment.
+The floating candidate is financially plausible and converts results back to Decimal; type
+checking alone cannot reject it. Daily rounding is another common premature-normalization error.
+
+## Blind review
+Author self-review using only ticket and starter; independent review remains owed.
+Ambiguities: negative rates/principal, initial cents, datetime vs date, rounding residuals, empty
+periods. Resolved explicitly in PROBLEM.md.
+Predictions: 50 CAD at 0.0365 for one day -&gt; 0.00 interest; zero days -&gt; []; 1000 CAD at 0.0365
+for ten simple days -&gt; 1.00 interest and 1001.00 balance. No unresolved graded ambiguity.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/interest\accrual.py
++++ alt_valid/interest\accrual.py
+@@ -1,7 +1,8 @@
+ from dataclasses import dataclass
+-from datetime import date, timedelta
++from datetime import date
+ from decimal import Decimal
+-from interest.calendar import is_month_end, validate
++from fractions import Fraction
++from interest.calendar import segments, validate
+ 
+ 
+ @dataclass(frozen=True)
+@@ -11,21 +12,29 @@
+     balance: Decimal
+ 
+ 
++def cents(value):
++    quotient, remainder = divmod(value.numerator * 100, value.denominator)
++    if 2 * remainder &gt; value.denominator or (2 * remainder == value.denominator and quotient % 2):
++        quotient += 1
++    return quotient
++
++
++def money(n):
++    return Decimal(f&quot;{n // 100}.{n % 100:02d}&quot;)
++
++
+ def accrue(principal, annual_rate, start, end, method):
+     validate(principal, annual_rate, start, end, method)
+-    balance, rate, accumulated, days = float(principal), float(annual_rate), 0.0, 0
+-    day, result = start, []
+-    while day &lt; end:
+-        days += 1
+-        if method == &quot;daily_compound&quot;:
+-            accumulated += (balance + accumulated) * rate / 365
++    posted_cents = int(principal * 100)
++    factor = Fraction(annual_rate) / 365
++    postings = []
++    for segment in segments(start, end):
++        capital = Fraction(posted_cents, 100)
++        if method == &quot;simple_monthly&quot;:
++            earnings = capital * factor * segment.days
+         else:
+-            accumulated = balance * rate * days / 365
+-        if is_month_end(day):
+-            interest = round(accumulated, 2)
+-            balance = round(balance + interest, 2)
+-            result.append(Posting(day, Decimal(str(interest)).quantize(Decimal(&quot;0.01&quot;)),
+-                                  Decimal(str(balance)).quantize(Decimal(&quot;0.01&quot;))))
+-            accumulated, days = 0.0, 0
+-        day += timedelta(days=1)
+-    return result
++            earnings = capital * ((1 + factor) ** segment.days - 1)
++        rounded_cents = cents(earnings)
++        posted_cents += rounded_cents
++        postings.append(Posting(segment.last, money(rounded_cents), money(posted_cents)))
++    return postings
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/interest\accrual.py
++++ reference/interest\accrual.py
+@@ -1,6 +1,6 @@
+ from dataclasses import dataclass
+ from datetime import date, timedelta
+-from decimal import Decimal
++from decimal import Decimal, localcontext, ROUND_HALF_EVEN
+ from interest.calendar import is_month_end, validate
+ 
+ 
+@@ -13,19 +13,23 @@
+ 
+ def accrue(principal, annual_rate, start, end, method):
+     validate(principal, annual_rate, start, end, method)
+-    balance, rate, accumulated, days = float(principal), float(annual_rate), 0.0, 0
+-    day, result = start, []
+-    while day &lt; end:
+-        days += 1
+-        if method == &quot;daily_compound&quot;:
+-            accumulated += (balance + accumulated) * rate / 365
+-        else:
+-            accumulated = balance * rate * days / 365
+-        if is_month_end(day):
+-            interest = round(accumulated, 2)
+-            balance = round(balance + interest, 2)
+-            result.append(Posting(day, Decimal(str(interest)).quantize(Decimal(&quot;0.01&quot;)),
+-                                  Decimal(str(balance)).quantize(Decimal(&quot;0.01&quot;))))
+-            accumulated, days = 0.0, 0
+-        day += timedelta(days=1)
+-    return result
++    with localcontext() as context:
++        context.prec = 34
++        cent = Decimal(&quot;0.01&quot;)
++        balance = principal.quantize(cent)
++        accrued = Decimal(0)
++        result = []
++        days = 0
++        day = start
++        while day &lt; end:
++            base = balance + accrued if method == &quot;daily_compound&quot; else balance
++            days += 1
++            accrued = (accrued + base * annual_rate / 365) if method == &quot;daily_compound&quot; else balance * annual_rate * days / 365
++            if is_month_end(day) or day == end - timedelta(days=1):
++                interest = accrued.quantize(cent, rounding=ROUND_HALF_EVEN)
++                balance = (balance + interest).quantize(cent)
++                result.append(Posting(day, interest, balance))
++                accrued = Decimal(0)
++                days = 0
++            day += timedelta(days=1)
++        return result
+</pre></details>
+<details><summary>wrong_float diff</summary><pre>--- starter/interest\accrual.py
++++ wrong_float/interest\accrual.py
+@@ -21,7 +21,7 @@
+             accumulated += (balance + accumulated) * rate / 365
+         else:
+             accumulated = balance * rate * days / 365
+-        if is_month_end(day):
++        if is_month_end(day) or day == end - timedelta(days=1):
+             interest = round(accumulated, 2)
+             balance = round(balance + interest, 2)
+             result.append(Posting(day, Decimal(str(interest)).quantize(Decimal(&quot;0.01&quot;)),
+</pre></details>
+<details><summary>wrong_half_up diff</summary><pre>--- starter/interest\accrual.py
++++ wrong_half_up/interest\accrual.py
+@@ -1,6 +1,6 @@
+ from dataclasses import dataclass
+ from datetime import date, timedelta
+-from decimal import Decimal
++from decimal import Decimal, localcontext, ROUND_HALF_UP
+ from interest.calendar import is_month_end, validate
+ 
+ 
+@@ -13,19 +13,23 @@
+ 
+ def accrue(principal, annual_rate, start, end, method):
+     validate(principal, annual_rate, start, end, method)
+-    balance, rate, accumulated, days = float(principal), float(annual_rate), 0.0, 0
+-    day, result = start, []
+-    while day &lt; end:
+-        days += 1
+-        if method == &quot;daily_compound&quot;:
+-            accumulated += (balance + accumulated) * rate / 365
+-        else:
+-            accumulated = balance * rate * days / 365
+-        if is_month_end(day):
+-            interest = round(accumulated, 2)
+-            balance = round(balance + interest, 2)
+-            result.append(Posting(day, Decimal(str(interest)).quantize(Decimal(&quot;0.01&quot;)),
+-                                  Decimal(str(balance)).quantize(Decimal(&quot;0.01&quot;))))
+-            accumulated, days = 0.0, 0
+-        day += timedelta(days=1)
+-    return result
++    with localcontext() as context:
++        context.prec = 34
++        cent = Decimal(&quot;0.01&quot;)
++        balance = principal.quantize(cent)
++        accrued = Decimal(0)
++        result = []
++        days = 0
++        day = start
++        while day &lt; end:
++            base = balance + accrued if method == &quot;daily_compound&quot; else balance
++            days += 1
++            accrued = (accrued + base * annual_rate / 365) if method == &quot;daily_compound&quot; else balance * annual_rate * days / 365
++            if is_month_end(day) or day == end - timedelta(days=1):
++                interest = accrued.quantize(cent, rounding=ROUND_HALF_UP)
++                balance = (balance + interest).quantize(cent)
++                result.append(Posting(day, interest, balance))
++                accrued = Decimal(0)
++                days = 0
++            day += timedelta(days=1)
++        return result
+</pre></details>
+<details><summary>wrong_round_daily diff</summary><pre>--- starter/interest\accrual.py
++++ wrong_round_daily/interest\accrual.py
+@@ -1,6 +1,6 @@
+ from dataclasses import dataclass
+ from datetime import date, timedelta
+-from decimal import Decimal
++from decimal import Decimal, localcontext, ROUND_HALF_EVEN
+ from interest.calendar import is_month_end, validate
+ 
+ 
+@@ -13,19 +13,24 @@
+ 
+ def accrue(principal, annual_rate, start, end, method):
+     validate(principal, annual_rate, start, end, method)
+-    balance, rate, accumulated, days = float(principal), float(annual_rate), 0.0, 0
+-    day, result = start, []
+-    while day &lt; end:
+-        days += 1
+-        if method == &quot;daily_compound&quot;:
+-            accumulated += (balance + accumulated) * rate / 365
+-        else:
+-            accumulated = balance * rate * days / 365
+-        if is_month_end(day):
+-            interest = round(accumulated, 2)
+-            balance = round(balance + interest, 2)
+-            result.append(Posting(day, Decimal(str(interest)).quantize(Decimal(&quot;0.01&quot;)),
+-                                  Decimal(str(balance)).quantize(Decimal(&quot;0.01&quot;))))
+-            accumulated, days = 0.0, 0
+-        day += timedelta(days=1)
+-    return result
++    with localcontext() as context:
++        context.prec = 34
++        cent = Decimal(&quot;0.01&quot;)
++        balance = principal.quantize(cent)
++        accrued = Decimal(0)
++        result = []
++        days = 0
++        day = start
++        while day &lt; end:
++            base = balance + accrued if method == &quot;daily_compound&quot; else balance
++            days += 1
++            accrued = (accrued + base * annual_rate / 365) if method == &quot;daily_compound&quot; else accrued + balance * annual_rate / 365
++            accrued = accrued.quantize(cent, rounding=ROUND_HALF_EVEN)
++            if is_month_end(day) or day == end - timedelta(days=1):
++                interest = accrued.quantize(cent, rounding=ROUND_HALF_EVEN)
++                balance = (balance + interest).quantize(cent)
++                result.append(Posting(day, interest, balance))
++                accrued = Decimal(0)
++                days = 0
++            day += timedelta(days=1)
++        return result
+</pre></details>
+</details>
+<details><summary>03_fx_quotes — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: quote a synthetic currency transfer
+
+`fx.quote.quote_transfer(amount_minor:int,src:str,dst:str,rates:dict[tuple[str,str],Decimal],fee_bps:int)`
+returns frozen `Quote(fee_minor:int,converted_minor:int,rate_used:Decimal,path:tuple[str,...])`.
+Expose `RateUnavailable(ValueError)` for unavailable currencies/pairs.
+
+Minor units: CAD/USD/EUR/GBP=2, JPY=0, KWD/BHD=3. Rates are positive finite Decimals in
+destination major units per source major unit. All money values returned are int minor units.
+Amount is nonnegative int, never bool; fee_bps integer in [0,10000]; invalid values -&gt; ValueError.
+Inputs use distinct src/dst; an unsupported currency -&gt; RateUnavailable.
+
+1. Fee in source minor units = amount_minor × fee_bps / 10000, rounded HALF_EVEN to integer.
+   Deduct this fee BEFORE conversion. Returned fee_minor is this source fee.
+2. Use direct `(src,dst)` rate if present, path `(src,dst)`. Otherwise require both `(src,&quot;USD&quot;)`
+   and `(&quot;USD&quot;,dst)`, multiply at full precision, path `(src,&quot;USD&quot;,dst)`. Do not infer inverses or
+   other routes. Missing required rates -&gt; RateUnavailable. Direct rate takes precedence.
+3. Convert net source minor units to source major units, apply the full rate, then scale to
+   destination minor units. Round ONLY the final destination amount HALF_EVEN to integer.
+   Do not round the USD leg of a cross quote. rate_used is the full direct/product Decimal.
+
+Do not mutate rates. Zero amount returns zero amounts while still resolving the declared route.
+No actual currency market or customer is represented. Run `python -m pytest tests -q` from starter.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — FX reviewer notes
+
+The exact rational alternative verifies that the Decimal implementation does not define the
+answer by itself. Wrong candidates use a universal scale, round a cross leg, or charge fees in
+the destination. Ordinary two-decimal direct quotes can mask all three errors.
+
+## Blind review
+Author self-review: fee denomination, direct-rate precedence, unsupported currencies, inverse
+rates, zero amount and acceptable fee range clarified in PROBLEM.md.
+Predictions: JPY100 -&gt; USD at0.01 -&gt;100 cents; CAD3 at0.5 with5000bps -&gt;fee2/converted0;
+cross CAD1 via0.5 USD and1.5 EUR -&gt;1 EUR cent. No unresolved graded ambiguity.
+Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/fx\quote.py
++++ alt_valid/fx\quote.py
+@@ -1,20 +1,32 @@
+-from decimal import Decimal, ROUND_HALF_EVEN
++from decimal import Decimal, localcontext
++from fractions import Fraction
+ from fx.models import Quote, RateUnavailable, UNITS, validate
+ 
+ __all__ = [&quot;quote_transfer&quot;, &quot;Quote&quot;, &quot;RateUnavailable&quot;]
+ 
+ 
++def nearest_even(value):
++    integer, residue = divmod(value.numerator, value.denominator)
++    doubled = residue * 2
++    return integer + int(doubled &gt; value.denominator or (doubled == value.denominator and integer % 2))
++
++
+ def quote_transfer(amount_minor, src, dst, rates, fee_bps):
+     validate(amount_minor, src, dst, fee_bps)
+-    if (src, dst) in rates:
+-        rate, path = rates[src, dst], (src, dst)
+-    else:
+-        try:
+-            rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
+-        except KeyError as exc:
+-            raise RateUnavailable((src, dst)) from exc
+-        path = (src, &quot;USD&quot;, dst)
+-    fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    net = Decimal(amount_minor).scaleb(-UNITS[src])
+-    converted = int((net * rate).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    return Quote(fee, converted, rate, path)
++    route = (src, dst) if (src, dst) in rates else (src, &quot;USD&quot;, dst)
++    factors = []
++    for pair in zip(route, route[1:]):
++        if pair not in rates:
++            raise RateUnavailable(pair)
++        factors.append(rates[pair])
++    with localcontext() as arithmetic:
++        arithmetic.prec = max(34, sum(len(f.as_tuple().digits) for f in factors) + 10)
++        decimal_rate = Decimal(1)
++        for factor in factors:
++            decimal_rate *= factor
++    exact_rate = Fraction(1)
++    for factor in factors:
++        exact_rate *= Fraction(factor)
++    commission = nearest_even(Fraction(amount_minor * fee_bps, 10000))
++    destination = Fraction(amount_minor - commission, 10**UNITS[src]) * exact_rate * 10**UNITS[dst]
++    return Quote(commission, nearest_even(destination), decimal_rate, route)
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/fx\quote.py
++++ reference/fx\quote.py
+@@ -1,4 +1,4 @@
+-from decimal import Decimal, ROUND_HALF_EVEN
++from decimal import Decimal, ROUND_HALF_EVEN, localcontext
+ from fx.models import Quote, RateUnavailable, UNITS, validate
+ 
+ __all__ = [&quot;quote_transfer&quot;, &quot;Quote&quot;, &quot;RateUnavailable&quot;]
+@@ -6,15 +6,17 @@
+ 
+ def quote_transfer(amount_minor, src, dst, rates, fee_bps):
+     validate(amount_minor, src, dst, fee_bps)
+-    if (src, dst) in rates:
+-        rate, path = rates[src, dst], (src, dst)
+-    else:
+-        try:
+-            rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
+-        except KeyError as exc:
+-            raise RateUnavailable((src, dst)) from exc
+-        path = (src, &quot;USD&quot;, dst)
+-    fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    net = Decimal(amount_minor).scaleb(-UNITS[src])
+-    converted = int((net * rate).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    return Quote(fee, converted, rate, path)
++    with localcontext() as ctx:
++        ctx.prec = max(50, len(str(amount_minor)) + sum(len(r.as_tuple().digits) for r in rates.values()) + 20)
++        if (src, dst) in rates:
++            rate, path = rates[src, dst], (src, dst)
++        else:
++            try:
++                rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
++            except KeyError as exc:
++                raise RateUnavailable((src, dst)) from exc
++            path = (src, &quot;USD&quot;, dst)
++        fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        net = Decimal(amount_minor - fee).scaleb(-UNITS[src])
++        converted = int((net * rate).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        return Quote(fee, converted, rate, path)
+</pre></details>
+<details><summary>wrong_fee_after_conversion diff</summary><pre>--- starter/fx\quote.py
++++ wrong_fee_after_conversion/fx\quote.py
+@@ -1,4 +1,4 @@
+-from decimal import Decimal, ROUND_HALF_EVEN
++from decimal import Decimal, ROUND_HALF_EVEN, localcontext
+ from fx.models import Quote, RateUnavailable, UNITS, validate
+ 
+ __all__ = [&quot;quote_transfer&quot;, &quot;Quote&quot;, &quot;RateUnavailable&quot;]
+@@ -6,15 +6,18 @@
+ 
+ def quote_transfer(amount_minor, src, dst, rates, fee_bps):
+     validate(amount_minor, src, dst, fee_bps)
+-    if (src, dst) in rates:
+-        rate, path = rates[src, dst], (src, dst)
+-    else:
+-        try:
+-            rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
+-        except KeyError as exc:
+-            raise RateUnavailable((src, dst)) from exc
+-        path = (src, &quot;USD&quot;, dst)
+-    fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    net = Decimal(amount_minor).scaleb(-UNITS[src])
+-    converted = int((net * rate).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    return Quote(fee, converted, rate, path)
++    with localcontext() as ctx:
++        ctx.prec = max(50, len(str(amount_minor)) + sum(len(r.as_tuple().digits) for r in rates.values()) + 20)
++        if (src, dst) in rates:
++            rate, path = rates[src, dst], (src, dst)
++        else:
++            try:
++                rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
++            except KeyError as exc:
++                raise RateUnavailable((src, dst)) from exc
++            path = (src, &quot;USD&quot;, dst)
++        fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        net = Decimal(amount_minor).scaleb(-UNITS[src])
++        converted = int((net * rate).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        converted -= int((Decimal(converted) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        return Quote(fee, converted, rate, path)
+</pre></details>
+<details><summary>wrong_round_cross_leg diff</summary><pre>--- starter/fx\quote.py
++++ wrong_round_cross_leg/fx\quote.py
+@@ -1,4 +1,4 @@
+-from decimal import Decimal, ROUND_HALF_EVEN
++from decimal import Decimal, ROUND_HALF_EVEN, localcontext
+ from fx.models import Quote, RateUnavailable, UNITS, validate
+ 
+ __all__ = [&quot;quote_transfer&quot;, &quot;Quote&quot;, &quot;RateUnavailable&quot;]
+@@ -6,15 +6,22 @@
+ 
+ def quote_transfer(amount_minor, src, dst, rates, fee_bps):
+     validate(amount_minor, src, dst, fee_bps)
+-    if (src, dst) in rates:
+-        rate, path = rates[src, dst], (src, dst)
+-    else:
+-        try:
+-            rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
+-        except KeyError as exc:
+-            raise RateUnavailable((src, dst)) from exc
+-        path = (src, &quot;USD&quot;, dst)
+-    fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    net = Decimal(amount_minor).scaleb(-UNITS[src])
+-    converted = int((net * rate).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    return Quote(fee, converted, rate, path)
++    with localcontext() as ctx:
++        ctx.prec = max(50, len(str(amount_minor)) + sum(len(r.as_tuple().digits) for r in rates.values()) + 20)
++        if (src, dst) in rates:
++            rate, path = rates[src, dst], (src, dst)
++        else:
++            try:
++                rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
++            except KeyError as exc:
++                raise RateUnavailable((src, dst)) from exc
++            path = (src, &quot;USD&quot;, dst)
++        fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        net = Decimal(amount_minor - fee).scaleb(-UNITS[src])
++        if len(path) == 3:
++            net = (net * rates[src, &quot;USD&quot;]).quantize(Decimal(&quot;.01&quot;), rounding=ROUND_HALF_EVEN)
++            rate_for_amount = rates[&quot;USD&quot;, dst]
++        else:
++            rate_for_amount = rate
++        converted = int((net * rate_for_amount).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        return Quote(fee, converted, rate, path)
+</pre></details>
+<details><summary>wrong_two_decimals diff</summary><pre>--- starter/fx\quote.py
++++ wrong_two_decimals/fx\quote.py
+@@ -1,20 +1,22 @@
+-from decimal import Decimal, ROUND_HALF_EVEN
+-from fx.models import Quote, RateUnavailable, UNITS, validate
++from decimal import Decimal, ROUND_HALF_EVEN, localcontext
++from fx.models import Quote, RateUnavailable, validate
+ 
+ __all__ = [&quot;quote_transfer&quot;, &quot;Quote&quot;, &quot;RateUnavailable&quot;]
+ 
+ 
+ def quote_transfer(amount_minor, src, dst, rates, fee_bps):
+     validate(amount_minor, src, dst, fee_bps)
+-    if (src, dst) in rates:
+-        rate, path = rates[src, dst], (src, dst)
+-    else:
+-        try:
+-            rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
+-        except KeyError as exc:
+-            raise RateUnavailable((src, dst)) from exc
+-        path = (src, &quot;USD&quot;, dst)
+-    fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    net = Decimal(amount_minor).scaleb(-UNITS[src])
+-    converted = int((net * rate).scaleb(UNITS[dst]).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+-    return Quote(fee, converted, rate, path)
++    with localcontext() as ctx:
++        ctx.prec = max(50, len(str(amount_minor)) + sum(len(r.as_tuple().digits) for r in rates.values()) + 20)
++        if (src, dst) in rates:
++            rate, path = rates[src, dst], (src, dst)
++        else:
++            try:
++                rate = rates[src, &quot;USD&quot;] * rates[&quot;USD&quot;, dst]
++            except KeyError as exc:
++                raise RateUnavailable((src, dst)) from exc
++            path = (src, &quot;USD&quot;, dst)
++        fee = int((Decimal(amount_minor) * fee_bps / 10000).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        net = Decimal(amount_minor - fee).scaleb(-2)
++        converted = int((net * rate).scaleb(2).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
++        return Quote(fee, converted, rate, path)
+</pre></details>
+</details>
+<details><summary>04_ledger_reconciliation — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: reconcile a synthetic statement to ledger entries
+
+Keep `recon.engine.reconcile(statement: list[StatementLine], ledger: list[LedgerEntry]) -&gt; ReconResult`.
+Public frozen dataclasses (also exported from recon.engine):
+- `StatementLine(id: str, value_date: date, amount_minor: int, reference: str)`
+- `LedgerEntry(id: str, booking_date: date, amount_minor: int, reference: str,
+  kind: &quot;payment&quot;|&quot;refund&quot; = &quot;payment&quot;, original_reference: str|None = None)`
+- `Match(statement_ids: frozenset[str], ledger_ids: frozenset[str], rule: str)`
+- `ReconResult(matches: list[Match], unmatched_statement: dict[str,str], unmatched_ledger: set[str])`
+
+All amounts are integer minor units in one synthetic currency (CAD, 2 dp); statement amounts
+are signed, ledger payment/refund amounts positive. Dates are calendar dates. IDs are unique
+within each input, strings sort lexicographically. Inputs are valid and must not be mutated.
+Apply complete passes in the following order; each id can appear in at most one match:
+
+1. R1: process statements by `(value_date,id)`. Match an unmatched ledger **payment** with equal
+   reference and equal signed amount, date difference &lt;=3 calendar days. Choose smallest absolute
+   date difference, then earliest booking_date, then smallest id.
+2. R2: process remaining ledger payments by `(reference,booking_date,id)`. For each payment,
+   collect **all** unmatched statement lines of the same reference within +/-3 days of that payment.
+   If at least two lines and their signed sum equals its amount, match the whole group. Do not
+   search subsets. Negative lines, if present, contribute their signed amount to this pass.
+3. R3: process remaining negative statements by `(value_date,id)`. Match an unmatched ledger
+   **refund**, with original_reference equal to the statement reference and positive amount equal
+   to abs(statement amount). There is no date restriction in R3. Choose earliest booking_date,
+   then smallest id. The refund&#x27;s own reference need not equal the original reference.
+4. R4: each remaining statement identical in `(value_date,amount_minor,reference)` to any matched
+   statement gets reason `duplicate`; otherwise `no_match`. Unused ledger ids form unmatched_ledger.
+
+Use rule strings `R1`, `R2`, `R3`. Match-list order is not graded. Exact membership, reasons,
+partitions and no reuse are graded. Empty inputs produce empty collections.
+Run from starter: `python -m pytest tests -q`.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — reconciliation reviewer notes
+
+Counts alone hide identity reuse. The three realistic candidates respectively reuse an entry,
+implement only the common R1 case, or normalize a negative amount too early. Alternative
+uses remaining-record maps and indexed references; reference maintains consumed-id sets.
+
+## Blind review
+Author self-review on ticket plus starter. Ambiguities: R2 traversal with repeated references,
+negative R2 amounts, R3 tie breaks/date window, ordering of result lists. Ticket now states all
+of these. Predictions: exact amount at +3 days -&gt; R1; duplicate exact statement -&gt; one R1 and
+one duplicate; parts 40+60 against 100 -&gt; one R2 with both ids. No unresolved graded ambiguity.
+Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/recon\engine.py
++++ alt_valid/recon\engine.py
+@@ -1,37 +1,49 @@
++from collections import defaultdict
+ from recon.models import StatementLine, LedgerEntry, Match, ReconResult  # noqa: F401
+ 
+ 
+ def reconcile(statement, ledger):
+-    ordered = sorted(statement, key=lambda s: (s.value_date, s.id))
+-    used_s, used_l, matches = set(), set(), []
++    pending = {s.id: s for s in statement}
++    remaining = {e.id: e for e in ledger}
++    by_reference = defaultdict(list)
++    for entry in ledger:
++        if entry.kind == &quot;payment&quot;:
++            by_reference[entry.reference].append(entry)
++    output = []
++    consumed_signatures = set()
+ 
+-    def record(lines, entry, rule):
+-        used_s.update(s.id for s in lines)
+-        used_l.add(entry.id)
+-        matches.append(Match(frozenset(s.id for s in lines), frozenset([entry.id]), rule))
++    def take(ids, target, rule):
++        for identifier in ids:
++            line = pending.pop(identifier)
++            consumed_signatures.add((line.value_date, line.amount_minor, line.reference))
++        del remaining[target]
++        output.append(Match(frozenset(ids), frozenset([target]), rule))
+ 
+-    for s in ordered:
+-        candidates = [e for e in ledger if e.id not in used_l and e.kind == &quot;payment&quot;
+-                      and e.reference == s.reference and e.amount_minor == s.amount_minor
+-                      and abs((e.booking_date - s.value_date).days) == 0]
+-        if candidates:
+-            chosen = min(candidates, key=lambda e: (abs((e.booking_date - s.value_date).days), e.booking_date, e.id))
+-            record([s], chosen, &quot;R1&quot;)
+-    for e in sorted(ledger, key=lambda e: (e.reference, e.booking_date, e.id)):
+-        if e.id in used_l or e.kind != &quot;payment&quot;:
++    for line in sorted(statement, key=lambda v: (v.value_date, v.id)):
++        possible = sorted((abs((e.booking_date - line.value_date).days), e.booking_date, e.id)
++                          for e in by_reference[line.reference]
++                          if e.id in remaining and e.amount_minor == line.amount_minor
++                          and abs((e.booking_date - line.value_date).days) &lt;= 3)
++        if possible:
++            take([line.id], possible[0][2], &quot;R1&quot;)
++    for target in sorted(ledger, key=lambda v: (v.reference, v.booking_date, v.id)):
++        if target.id not in remaining or target.kind != &quot;payment&quot;:
+             continue
+-        group = [s for s in ordered if s.id not in used_s and s.reference == e.reference
+-                 and abs((e.booking_date - s.value_date).days) == 0]
+-        if len(group) &gt;= 2 and sum(s.amount_minor for s in group) == e.amount_minor:
+-            record(group, e, &quot;R2&quot;)
+-    for s in ordered:
+-        if s.id in used_s or s.amount_minor &gt;= 0:
++        ids = [i for i, s in pending.items() if s.reference == target.reference
++               and abs((s.value_date - target.booking_date).days) &lt;= 3]
++        total = sum(pending[i].amount_minor for i in ids)
++        if len(ids) &gt; 1 and total == target.amount_minor:
++            take(ids, target.id, &quot;R2&quot;)
++    for line in sorted(list(pending.values()), key=lambda v: (v.value_date, v.id)):
++        if line.amount_minor &gt;= 0:
+             continue
+-        candidates = [e for e in ledger if e.id not in used_l and e.kind == &quot;refund&quot;
+-                      and e.original_reference == s.reference and e.amount_minor == -s.amount_minor]
+-        if candidates:
+-            record([s], min(candidates, key=lambda e: (e.booking_date, e.id)), &quot;R3&quot;)
+-    matched_signatures = {(s.value_date, s.amount_minor, s.reference) for s in statement if s.id in used_s}
+-    unmatched = {s.id: &quot;duplicate&quot; if (s.value_date, s.amount_minor, s.reference) in matched_signatures
+-                 else &quot;no_match&quot; for s in ordered if s.id not in used_s}
+-    return ReconResult(matches, unmatched, {e.id for e in ledger} - used_l)
++        refunds = sorted((e.booking_date, e.id) for e in remaining.values()
++                         if e.kind == &quot;refund&quot; and e.original_reference == line.reference
++                         and e.amount_minor + line.amount_minor == 0)
++        if refunds:
++            take([line.id], refunds[0][1], &quot;R3&quot;)
++    reasons = {}
++    for identifier, line in pending.items():
++        signature = line.value_date, line.amount_minor, line.reference
++        reasons[identifier] = &quot;duplicate&quot; if signature in consumed_signatures else &quot;no_match&quot;
++    return ReconResult(output, reasons, set(remaining))
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/recon\engine.py
++++ reference/recon\engine.py
+@@ -13,7 +13,7 @@
+     for s in ordered:
+         candidates = [e for e in ledger if e.id not in used_l and e.kind == &quot;payment&quot;
+                       and e.reference == s.reference and e.amount_minor == s.amount_minor
+-                      and abs((e.booking_date - s.value_date).days) == 0]
++                      and abs((e.booking_date - s.value_date).days) &lt;= 3]
+         if candidates:
+             chosen = min(candidates, key=lambda e: (abs((e.booking_date - s.value_date).days), e.booking_date, e.id))
+             record([s], chosen, &quot;R1&quot;)
+@@ -21,7 +21,7 @@
+         if e.id in used_l or e.kind != &quot;payment&quot;:
+             continue
+         group = [s for s in ordered if s.id not in used_s and s.reference == e.reference
+-                 and abs((e.booking_date - s.value_date).days) == 0]
++                 and abs((e.booking_date - s.value_date).days) &lt;= 3]
+         if len(group) &gt;= 2 and sum(s.amount_minor for s in group) == e.amount_minor:
+             record(group, e, &quot;R2&quot;)
+     for s in ordered:
+</pre></details>
+<details><summary>wrong_no_consumption diff</summary><pre>--- starter/recon\engine.py
++++ wrong_no_consumption/recon\engine.py
+@@ -11,9 +11,9 @@
+         matches.append(Match(frozenset(s.id for s in lines), frozenset([entry.id]), rule))
+ 
+     for s in ordered:
+-        candidates = [e for e in ledger if e.id not in used_l and e.kind == &quot;payment&quot;
++        candidates = [e for e in ledger if e.kind == &quot;payment&quot;
+                       and e.reference == s.reference and e.amount_minor == s.amount_minor
+-                      and abs((e.booking_date - s.value_date).days) == 0]
++                      and abs((e.booking_date - s.value_date).days) &lt;= 3]
+         if candidates:
+             chosen = min(candidates, key=lambda e: (abs((e.booking_date - s.value_date).days), e.booking_date, e.id))
+             record([s], chosen, &quot;R1&quot;)
+@@ -21,7 +21,7 @@
+         if e.id in used_l or e.kind != &quot;payment&quot;:
+             continue
+         group = [s for s in ordered if s.id not in used_s and s.reference == e.reference
+-                 and abs((e.booking_date - s.value_date).days) == 0]
++                 and abs((e.booking_date - s.value_date).days) &lt;= 3]
+         if len(group) &gt;= 2 and sum(s.amount_minor for s in group) == e.amount_minor:
+             record(group, e, &quot;R2&quot;)
+     for s in ordered:
+</pre></details>
+<details><summary>wrong_refund_abs diff</summary><pre>--- starter/recon\engine.py
++++ wrong_refund_abs/recon\engine.py
+@@ -12,8 +12,8 @@
+ 
+     for s in ordered:
+         candidates = [e for e in ledger if e.id not in used_l and e.kind == &quot;payment&quot;
+-                      and e.reference == s.reference and e.amount_minor == s.amount_minor
+-                      and abs((e.booking_date - s.value_date).days) == 0]
++                      and e.reference == s.reference and e.amount_minor == abs(s.amount_minor)
++                      and abs((e.booking_date - s.value_date).days) &lt;= 3]
+         if candidates:
+             chosen = min(candidates, key=lambda e: (abs((e.booking_date - s.value_date).days), e.booking_date, e.id))
+             record([s], chosen, &quot;R1&quot;)
+@@ -21,7 +21,7 @@
+         if e.id in used_l or e.kind != &quot;payment&quot;:
+             continue
+         group = [s for s in ordered if s.id not in used_s and s.reference == e.reference
+-                 and abs((e.booking_date - s.value_date).days) == 0]
++                 and abs((e.booking_date - s.value_date).days) &lt;= 3]
+         if len(group) &gt;= 2 and sum(s.amount_minor for s in group) == e.amount_minor:
+             record(group, e, &quot;R2&quot;)
+     for s in ordered:
+</pre></details>
+<details><summary>wrong_split_ignored diff</summary><pre>--- starter/recon\engine.py
++++ wrong_split_ignored/recon\engine.py
+@@ -13,17 +13,10 @@
+     for s in ordered:
+         candidates = [e for e in ledger if e.id not in used_l and e.kind == &quot;payment&quot;
+                       and e.reference == s.reference and e.amount_minor == s.amount_minor
+-                      and abs((e.booking_date - s.value_date).days) == 0]
++                      and abs((e.booking_date - s.value_date).days) &lt;= 3]
+         if candidates:
+             chosen = min(candidates, key=lambda e: (abs((e.booking_date - s.value_date).days), e.booking_date, e.id))
+             record([s], chosen, &quot;R1&quot;)
+-    for e in sorted(ledger, key=lambda e: (e.reference, e.booking_date, e.id)):
+-        if e.id in used_l or e.kind != &quot;payment&quot;:
+-            continue
+-        group = [s for s in ordered if s.id not in used_s and s.reference == e.reference
+-                 and abs((e.booking_date - s.value_date).days) == 0]
+-        if len(group) &gt;= 2 and sum(s.amount_minor for s in group) == e.amount_minor:
+-            record(group, e, &quot;R2&quot;)
+     for s in ordered:
+         if s.id in used_s or s.amount_minor &gt;= 0:
+             continue
+</pre></details>
+</details>
+<details><summary>05_double_entry — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: enforce the journal invariant
+
+`ledger.service.LedgerService(database_url)` operates a synthetic PostgreSQL ledger.
+Expose frozen `Line(account_code: str, side: &quot;debit&quot;|&quot;credit&quot;, amount_minor: int)` and:
+`create_account(code,currency)`, `post(lines: list[Line],memo: str)-&gt;int`,
+`reverse(txn_id:int,memo:str)-&gt;int`, `balance(account_code)-&gt;int`,
+`trial_balance()-&gt;dict[str,tuple[int,int]]`.
+
+Money uses integer minor units. Currencies: CAD/USD/EUR/GBP=2 dp, JPY=0, KWD/BHD=3;
+no exchange or cross-currency netting. Errors derive from LedgerError:
+UnbalancedTransaction, InvalidAmount, UnknownAccount, AlreadyReversed, CannotReverseReversal.
+
+- A post has at least two lines (otherwise UnbalancedTransaction). Each amount is a positive
+  int, never bool (otherwise InvalidAmount). Side must be debit or credit (LedgerError).
+- All accounts must exist (UnknownAccount). For EACH currency independently, sum of debits
+  equals sum of credits (otherwise UnbalancedTransaction).
+- Posting is atomic. Every rejected operation leaves balances and trial balance unchanged,
+  including a missing account after other valid lines. Inputs are not mutated.
+- Balance is debits minus credits. trial_balance keys are all currencies of created accounts,
+  values are `(total_debits,total_credits)` across all posted lines, including reversal lines.
+  A currency without postings has `(0,0)`. balance of an unknown account raises UnknownAccount.
+- reverse creates a new transaction, with every side swapped, links it to the original and
+  returns its distinct id. An original can be reversed at most once (AlreadyReversed).
+  A reversal itself cannot be reversed (CannotReverseReversal). An unknown txn raises LedgerError.
+  Reversal counts as real debit/credit turnover; it does not erase original lines.
+- State survives constructing a new service. Re-creating an account with the same code and
+  currency is idempotent; different currency, empty code or unsupported currency -&gt; LedgerError.
+- Validation priority: line count, amount/side, accounts, balancing. On reversing a reversal,
+  CannotReverseReversal takes priority. Memo is arbitrary synthetic text.
+
+The service may create its own tables; tests observe only the declared methods. Run
+`python -m pytest tests -q` from starter with DATABASE_URL pointing at a disposable database.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — journal reviewer notes
+
+Rowwise reference validation occurs within one transaction. The independent valid alternative
+checks a JSON recordset using SQL aggregation and reverses by INSERT SELECT. Three wrong
+implementations isolate cross-currency netting, per-line commit, and missing reversal lifecycle checks.
+
+## Blind review
+Author self-review from ticket and starter. Ambiguities: trial_balance key/value meaning,
+invalid side/count errors, re-created accounts, unknown transaction errors, and reversal turnover.
+All are specified in PROBLEM.md. Predictions: CAD debit100/USD credit100 -&gt; UnbalancedTransaction;
+unknown third account -&gt; UnknownAccount with unchanged balances; reverse a reversal -&gt;
+CannotReverseReversal, no change. No unresolved graded ambiguity. Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/ledger\service.py
++++ alt_valid/ledger\service.py
+@@ -1,7 +1,9 @@
+-from collections import defaultdict
++import json
+ import psycopg
+ from ledger.models import (Line, LedgerError, UnbalancedTransaction, InvalidAmount, UnknownAccount,
+                            AlreadyReversed, CannotReverseReversal, CURRENCIES, validate_lines)  # noqa: F401
++
++RECORDS = &quot;jsonb_to_recordset(%s::jsonb) AS x(account_code text, side text, amount_minor bigint)&quot;
+ 
+ 
+ __all__ = [&quot;LedgerService&quot;, &quot;Line&quot;, &quot;LedgerError&quot;, &quot;UnbalancedTransaction&quot;, &quot;InvalidAmount&quot;,
+@@ -10,73 +12,72 @@
+ 
+ class LedgerService:
+     def __init__(self, database_url):
+-        self.url = database_url
+-        with self.connect() as conn:
+-            conn.execute(&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS accounts(code text PRIMARY KEY, currency text NOT NULL);
+-                CREATE TABLE IF NOT EXISTS transactions(id bigserial PRIMARY KEY, memo text,
+-                    reversal_of bigint REFERENCES transactions(id), reversed_by bigint);
+-                CREATE TABLE IF NOT EXISTS lines(txn bigint REFERENCES transactions(id),
+-                    code text REFERENCES accounts(code), side text, amount bigint)&quot;&quot;&quot;)
+-
+-    def connect(self):
+-        return psycopg.connect(self.url)
++        self.dsn = database_url
++        with psycopg.connect(self.dsn) as c:
++            c.execute(&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS journal_accounts(name text PRIMARY KEY, denomination text);
++                CREATE TABLE IF NOT EXISTS journal_batches(number bigserial PRIMARY KEY, note text,
++                    undoes bigint, undone_by bigint);
++                CREATE TABLE IF NOT EXISTS journal_lines(batch bigint, account text, direction text, value bigint)&quot;&quot;&quot;)
+ 
+     def create_account(self, code, currency):
+         if not code or currency not in CURRENCIES:
+             raise LedgerError(&quot;invalid account&quot;)
+-        with self.connect() as conn:
+-            conn.execute(&quot;INSERT INTO accounts VALUES (%s,%s) ON CONFLICT DO NOTHING&quot;, (code, currency))
+-            if conn.execute(&quot;SELECT currency FROM accounts WHERE code=%s&quot;, (code,)).fetchone()[0] != currency:
+-                raise LedgerError(&quot;currency mismatch&quot;)
+-
+-    def _validate(self, conn, lines):
+-        validate_lines(lines)
+-        totals = defaultdict(int)
+-        for line in lines:
+-            account = conn.execute(&quot;SELECT currency FROM accounts WHERE code=%s&quot;, (line.account_code,)).fetchone()
+-            if account is None:
+-                raise UnknownAccount(line.account_code)
+-            totals[account[0]] += line.amount_minor * (1 if line.side == &quot;debit&quot; else -1)
+-
+-    def _insert(self, conn, lines, memo, reversal_of=None):
+-        txn = conn.execute(&quot;INSERT INTO transactions(memo,reversal_of) VALUES (%s,%s) RETURNING id&quot;,
+-                           (memo, reversal_of)).fetchone()[0]
+-        with conn.cursor() as cursor:
+-            cursor.executemany(&quot;INSERT INTO lines VALUES (%s,%s,%s,%s)&quot;,
+-                               [(txn, line.account_code, line.side, line.amount_minor) for line in lines])
+-        return txn
++        with psycopg.connect(self.dsn) as c:
++            c.execute(&quot;INSERT INTO journal_accounts VALUES (%s,%s) ON CONFLICT DO NOTHING&quot;, (code, currency))
++            stored, = c.execute(&quot;SELECT denomination FROM journal_accounts WHERE name=%s&quot;, (code,)).fetchone()
++            if stored != currency:
++                raise LedgerError(&quot;account already has a different denomination&quot;)
+ 
+     def post(self, lines, memo):
+-        with self.connect() as conn:
+-            self._validate(conn, lines)
+-            return self._insert(conn, lines, memo)
++        validate_lines(lines)
++        payload = json.dumps([line.as_dict() for line in lines])
++        with psycopg.connect(self.dsn) as c:
++            absent = c.execute(&quot;SELECT x.account_code FROM &quot; + RECORDS +
++                               &quot; LEFT JOIN journal_accounts a ON a.name=x.account_code WHERE a.name IS NULL&quot;,
++                               (payload,)).fetchone()
++            if absent:
++                raise UnknownAccount(absent[0])
++            imbalance = c.execute(&quot;SELECT a.denomination FROM &quot; + RECORDS +
++                                  &quot; JOIN journal_accounts a ON a.name=x.account_code GROUP BY a.denomination &quot;
++                                  &quot;HAVING SUM(CASE WHEN x.side=&#x27;debit&#x27; THEN x.amount_minor ELSE -x.amount_minor END)&lt;&gt;0&quot;,
++                                  (payload,)).fetchone()
++            if imbalance:
++                raise UnbalancedTransaction(&quot;denomination totals differ&quot;)
++            number, = c.execute(&quot;INSERT INTO journal_batches(note) VALUES (%s) RETURNING number&quot;, (memo,)).fetchone()
++            c.execute(&quot;INSERT INTO journal_lines SELECT %s,x.account_code,x.side,x.amount_minor FROM &quot; + RECORDS,
++                      (number, payload))
++            return number
+ 
+     def reverse(self, txn_id, memo):
+-        with self.connect() as conn:
+-            row = conn.execute(&quot;SELECT reversal_of,reversed_by FROM transactions WHERE id=%s FOR UPDATE&quot;, (txn_id,)).fetchone()
+-            if row is None:
+-                raise LedgerError(&quot;unknown transaction&quot;)
+-            if row[0] is not None:
++        with psycopg.connect(self.dsn) as c:
++            info = c.execute(&quot;SELECT undoes,undone_by FROM journal_batches WHERE number=%s FOR UPDATE&quot;, (txn_id,)).fetchone()
++            if info is None:
++                raise LedgerError(&quot;transaction not found&quot;)
++            original, prior = info
++            if original is not None:
+                 raise CannotReverseReversal(txn_id)
+-            if row[1] is not None:
++            if prior is not None:
+                 raise AlreadyReversed(txn_id)
+-            rows = conn.execute(&quot;SELECT code,side,amount FROM lines WHERE txn=%s&quot;, (txn_id,)).fetchall()
+-            opposite = [Line(code, &quot;credit&quot; if side == &quot;debit&quot; else &quot;debit&quot;, amount) for code, side, amount in rows]
+-            reversal = self._insert(conn, opposite, memo, txn_id)
+-            conn.execute(&quot;UPDATE transactions SET reversed_by=%s WHERE id=%s&quot;, (reversal, txn_id))
+-            return reversal
++            number, = c.execute(&quot;INSERT INTO journal_batches(note,undoes) VALUES (%s,%s) RETURNING number&quot;, (memo, txn_id)).fetchone()
++            c.execute(&quot;&quot;&quot;INSERT INTO journal_lines SELECT %s,account,
++                CASE direction WHEN &#x27;debit&#x27; THEN &#x27;credit&#x27; ELSE &#x27;debit&#x27; END,value
++                FROM journal_lines WHERE batch=%s&quot;&quot;&quot;, (number, txn_id))
++            c.execute(&quot;UPDATE journal_batches SET undone_by=%s WHERE number=%s&quot;, (number, txn_id))
++            return number
+ 
+     def balance(self, account_code):
+-        with self.connect() as conn:
+-            if conn.execute(&quot;SELECT 1 FROM accounts WHERE code=%s&quot;, (account_code,)).fetchone() is None:
++        with psycopg.connect(self.dsn) as c:
++            exists = c.execute(&quot;SELECT 1 FROM journal_accounts WHERE name=%s&quot;, (account_code,)).fetchone()
++            if not exists:
+                 raise UnknownAccount(account_code)
+-            return int(conn.execute(&quot;&quot;&quot;SELECT COALESCE(SUM(CASE WHEN side=&#x27;debit&#x27; THEN amount ELSE -amount END),0)
+-                FROM lines WHERE code=%s&quot;&quot;&quot;, (account_code,)).fetchone()[0])
++            value, = c.execute(&quot;&quot;&quot;SELECT COALESCE(SUM(value * CASE direction WHEN &#x27;debit&#x27; THEN 1 ELSE -1 END),0)
++                FROM journal_lines WHERE account=%s&quot;&quot;&quot;, (account_code,)).fetchone()
++            return int(value)
+ 
+     def trial_balance(self):
+-        with self.connect() as conn:
+-            rows = conn.execute(&quot;&quot;&quot;SELECT a.currency,
+-                COALESCE(SUM(l.amount) FILTER (WHERE l.side=&#x27;debit&#x27;),0),
+-                COALESCE(SUM(l.amount) FILTER (WHERE l.side=&#x27;credit&#x27;),0)
+-                FROM accounts a LEFT JOIN lines l ON a.code=l.code GROUP BY a.currency&quot;&quot;&quot;).fetchall()
+-        return {currency: (int(debit), int(credit)) for currency, debit, credit in rows}
++        with psycopg.connect(self.dsn) as c:
++            rows = c.execute(&quot;&quot;&quot;SELECT denomination,
++                COALESCE(SUM(CASE WHEN direction=&#x27;debit&#x27; THEN value ELSE 0 END),0),
++                COALESCE(SUM(CASE WHEN direction=&#x27;credit&#x27; THEN value ELSE 0 END),0)
++                FROM journal_accounts LEFT JOIN journal_lines ON name=account GROUP BY denomination&quot;&quot;&quot;).fetchall()
++        return {row[0]: tuple(map(int, row[1:])) for row in rows}
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/ledger\service.py
++++ reference/ledger\service.py
+@@ -37,6 +37,8 @@
+             if account is None:
+                 raise UnknownAccount(line.account_code)
+             totals[account[0]] += line.amount_minor * (1 if line.side == &quot;debit&quot; else -1)
++        if any(totals.values()):
++            raise UnbalancedTransaction(&quot;per-currency sums must balance&quot;)
+ 
+     def _insert(self, conn, lines, memo, reversal_of=None):
+         txn = conn.execute(&quot;INSERT INTO transactions(memo,reversal_of) VALUES (%s,%s) RETURNING id&quot;,
+</pre></details>
+<details><summary>wrong_cross_currency_sum diff</summary><pre>--- starter/ledger\service.py
++++ wrong_cross_currency_sum/ledger\service.py
+@@ -36,7 +36,9 @@
+             account = conn.execute(&quot;SELECT currency FROM accounts WHERE code=%s&quot;, (line.account_code,)).fetchone()
+             if account is None:
+                 raise UnknownAccount(line.account_code)
+-            totals[account[0]] += line.amount_minor * (1 if line.side == &quot;debit&quot; else -1)
++            totals[&quot;all&quot;] += line.amount_minor * (1 if line.side == &quot;debit&quot; else -1)
++        if any(totals.values()):
++            raise UnbalancedTransaction(&quot;per-currency sums must balance&quot;)
+ 
+     def _insert(self, conn, lines, memo, reversal_of=None):
+         txn = conn.execute(&quot;INSERT INTO transactions(memo,reversal_of) VALUES (%s,%s) RETURNING id&quot;,
+</pre></details>
+<details><summary>wrong_double_reverse diff</summary><pre>--- starter/ledger\service.py
++++ wrong_double_reverse/ledger\service.py
+@@ -37,6 +37,8 @@
+             if account is None:
+                 raise UnknownAccount(line.account_code)
+             totals[account[0]] += line.amount_minor * (1 if line.side == &quot;debit&quot; else -1)
++        if any(totals.values()):
++            raise UnbalancedTransaction(&quot;per-currency sums must balance&quot;)
+ 
+     def _insert(self, conn, lines, memo, reversal_of=None):
+         txn = conn.execute(&quot;INSERT INTO transactions(memo,reversal_of) VALUES (%s,%s) RETURNING id&quot;,
+@@ -58,8 +60,6 @@
+                 raise LedgerError(&quot;unknown transaction&quot;)
+             if row[0] is not None:
+                 raise CannotReverseReversal(txn_id)
+-            if row[1] is not None:
+-                raise AlreadyReversed(txn_id)
+             rows = conn.execute(&quot;SELECT code,side,amount FROM lines WHERE txn=%s&quot;, (txn_id,)).fetchall()
+             opposite = [Line(code, &quot;credit&quot; if side == &quot;debit&quot; else &quot;debit&quot;, amount) for code, side, amount in rows]
+             reversal = self._insert(conn, opposite, memo, txn_id)
+</pre></details>
+<details><summary>wrong_non_atomic diff</summary><pre>--- starter/ledger\service.py
++++ wrong_non_atomic/ledger\service.py
+@@ -37,6 +37,8 @@
+             if account is None:
+                 raise UnknownAccount(line.account_code)
+             totals[account[0]] += line.amount_minor * (1 if line.side == &quot;debit&quot; else -1)
++        if any(totals.values()):
++            raise UnbalancedTransaction(&quot;per-currency sums must balance&quot;)
+ 
+     def _insert(self, conn, lines, memo, reversal_of=None):
+         txn = conn.execute(&quot;INSERT INTO transactions(memo,reversal_of) VALUES (%s,%s) RETURNING id&quot;,
+@@ -47,9 +49,22 @@
+         return txn
+ 
+     def post(self, lines, memo):
++        validate_lines(lines)
+         with self.connect() as conn:
+-            self._validate(conn, lines)
+-            return self._insert(conn, lines, memo)
++            txn = conn.execute(&quot;INSERT INTO transactions(memo) VALUES (%s) RETURNING id&quot;, (memo,)).fetchone()[0]
++            conn.commit()
++            totals = defaultdict(int)
++            for line in lines:
++                account = conn.execute(&quot;SELECT currency FROM accounts WHERE code=%s&quot;, (line.account_code,)).fetchone()
++                if account is None:
++                    raise UnknownAccount(line.account_code)
++                totals[account[0]] += line.amount_minor * (1 if line.side == &quot;debit&quot; else -1)
++                conn.execute(&quot;INSERT INTO lines VALUES (%s,%s,%s,%s)&quot;,
++                             (txn, line.account_code, line.side, line.amount_minor))
++                conn.commit()
++            if any(totals.values()):
++                raise UnbalancedTransaction(&quot;per-currency sums must balance&quot;)
++            return txn
+ 
+     def reverse(self, txn_id, memo):
+         with self.connect() as conn:
+</pre></details>
+</details>
+<details><summary>06_available_balance — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: available balance must include active holds
+
+`holds.main.create_app(database_path,clock)-&gt;FastAPI` uses SQLite. The declared
+`holds.clock.Clock` Protocol has `now()-&gt;datetime`, always aware (otherwise ValueError).
+The factory seeds two synthetic accounts on first use, without resetting existing state:
+`acct_standard`: posted10000, overdraft0; `acct_flex`: posted10000, overdraft5000.
+All money is integer CAD minor units (2 dp). All amounts must be positive ints, never bool.
+
+- GET /accounts/{id}/balance -&gt;200 `{posted_minor,available_minor}`.
+  available = posted minus sum of active, unexpired holds.
+- POST /accounts/{id}/authorizations `{amount_minor}` -&gt;201 `{auth_id}` iff amount &lt;=
+  available + that account&#x27;s overdraft limit; otherwise402 `insufficient_funds` with no effect.
+- A hold expires exactly 7×24 hours after creation, and stops counting at that instant.
+- POST /authorizations/{id}/capture `{amount_minor}`: amount &lt;= held amount; overcapture -&gt;422
+  `capture_exceeds_hold` with no effect. Successful capture -&gt;200 `{auth_id,status:&quot;captured&quot;}`,
+  deduct amount from posted balance, close the hold and release ALL unused remainder.
+- POST /authorizations/{id}/void -&gt;200 `{auth_id,status:&quot;voided&quot;}`, close hold, no posted change.
+- Capturing/voiding an expired or already closed hold -&gt;409 `authorization_closed`, no effect.
+- Invalid body/amount -&gt;422 `invalid_amount`; unknown account/auth -&gt;404 `not_found`.
+  Errors are `{&quot;error&quot;:{&quot;code&quot;:&quot;...&quot;,&quot;message&quot;:&quot;...&quot;}}`; message text is free.
+  Validate amount before closed status for capture. Void has no JSON body.
+- Auth ids are nonempty unique strings; available may be negative within overdraft.
+  State survives creating another app on the same file. Operations are atomic and per account.
+
+Tests use the HTTP interface and the injected clock only. No real accounts, system clock delays
+or network payments. Run `python -m pytest tests -q` from starter.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — holds reviewer notes
+
+The reference filters active holds at read time; the alternative persists expiry transitions
+at each transaction boundary. Both use an injected clock and share only schema utilities.
+Wrongs omit a hold dimension, leave a partial remainder, or fail to retire expired records.
+
+## Blind review
+Author self-review clarified account seeding, exact expiry instant, partial-capture response,
+closed/overcapture error priority, persistence and amount validation in the ticket.
+Predictions: reserve1000/capture400 -&gt;posted9600/available9600; at7days hold stops counting;
+flex15000 authorized then1 declined. No unresolved graded ambiguity. Independent review owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/holds\main.py
++++ alt_valid/holds\main.py
+@@ -1,76 +1,86 @@
++from contextlib import contextmanager
+ from uuid import uuid4
+ from fastapi import FastAPI, Request
+ from fastapi.responses import JSONResponse
+ from holds.clock import instant
+-from holds.storage import transaction, initialize, account, authorization, active_total
+-
+-
+-def error(status, code):
+-    return JSONResponse({&quot;error&quot;: {&quot;code&quot;: code, &quot;message&quot;: code}}, status_code=status)
+-
+-
+-async def amount(request):
+-    try:
+-        body = await request.json()
+-    except ValueError:
+-        return None
+-    if not isinstance(body, dict) or set(body) != {&quot;amount_minor&quot;}:
+-        return None
+-    value = body[&quot;amount_minor&quot;]
+-    return value if type(value) is int and value &gt; 0 else None
++from holds.storage import initialize, transaction
+ 
+ 
+ def create_app(database_path, clock):
+     initialize(database_path)
+     instant(clock)
+-    api = FastAPI()
++    application = FastAPI()
+ 
+-    @api.get(&quot;/accounts/{id}/balance&quot;)
+-    def balance(id: str):
+-        with transaction(database_path) as db:
+-            row = account(db, id)
+-            if row is None:
+-                return error(404, &quot;not_found&quot;)
+-            return {&quot;posted_minor&quot;: row[&quot;posted&quot;], &quot;available_minor&quot;: row[&quot;posted&quot;] - active_total(db, id, instant(clock))}
++    def failure(status, code):
++        return JSONResponse({&quot;error&quot;: {&quot;code&quot;: code, &quot;message&quot;: code}}, status_code=status)
+ 
+-    @api.post(&quot;/accounts/{id}/authorizations&quot;)
+-    async def authorize(id: str, request: Request):
+-        value = await amount(request)
+-        if value is None:
+-            return error(422, &quot;invalid_amount&quot;)
+-        now = instant(clock)
+-        with transaction(database_path) as db:
+-            row = account(db, id)
+-            if row is None:
+-                return error(404, &quot;not_found&quot;)
+-            available = row[&quot;posted&quot;] - active_total(db, id, now)
+-            if value &gt; available + row[&quot;overdraft&quot;]:
+-                return error(402, &quot;insufficient_funds&quot;)
+-            identifier = uuid4().hex
+-            db.execute(&quot;INSERT INTO authorizations VALUES (?,?,?,?,&#x27;active&#x27;)&quot;, (identifier, id, value, now))
+-            return JSONResponse({&quot;auth_id&quot;: identifier}, status_code=201)
++    @contextmanager
++    def current_state():
++        with transaction(database_path) as connection:
++            connection.execute(&quot;UPDATE authorizations SET state=&#x27;expired&#x27; WHERE state=&#x27;active&#x27; AND created&lt;=?&quot;,
++                               [instant(clock) - 604800])
++            yield connection
+ 
+-    def close(id, capture=None):
+-        with transaction(database_path) as db:
+-            auth = authorization(db, id)
+-            if auth is None:
+-                return error(404, &quot;not_found&quot;)
+-            if auth[&quot;state&quot;] != &quot;active&quot; or instant(clock) &gt;= auth[&quot;created&quot;] + 7 * 86400:
+-                return error(409, &quot;authorization_closed&quot;)
+-            if capture is not None:
+-                if capture &gt; auth[&quot;amount&quot;]:
+-                    return error(422, &quot;capture_exceeds_hold&quot;)
++    async def number(request):
++        try:
++            payload = await request.json()
++            if isinstance(payload, dict) and set(payload) == {&quot;amount_minor&quot;}:
++                n = payload[&quot;amount_minor&quot;]
++                if type(n) is int and n &gt; 0:
++                    return n
++        except ValueError:
++            pass
++        return None
+ 
+-            state = &quot;captured&quot; if capture is not None else &quot;voided&quot;
+-            db.execute(&quot;UPDATE authorizations SET state=? WHERE id=?&quot;, (state, id))
+-            return {&quot;auth_id&quot;: id, &quot;status&quot;: state}
++    def funds(db, id):
++        result = db.execute(&quot;SELECT posted,overdraft FROM accounts WHERE id=?&quot;, [id]).fetchone()
++        if result is None:
++            return None
++        total, = db.execute(&quot;SELECT COALESCE(SUM(amount),0) FROM authorizations WHERE account=? AND state=&#x27;active&#x27;&quot;, [id]).fetchone()
++        return result[0], result[0] - total, result[1]
+ 
+-    @api.post(&quot;/authorizations/{id}/capture&quot;)
+-    async def capture(id: str, request: Request):
+-        value = await amount(request)
+-        return error(422, &quot;invalid_amount&quot;) if value is None else close(id, value)
++    @application.get(&quot;/accounts/{id}/balance&quot;)
++    def get_balance(id: str):
++        with current_state() as db:
++            totals = funds(db, id)
++            return failure(404, &quot;not_found&quot;) if totals is None else {&quot;posted_minor&quot;: totals[0], &quot;available_minor&quot;: totals[1]}
+ 
+-    @api.post(&quot;/authorizations/{id}/void&quot;)
+-    def void(id: str):
+-        return close(id)
+-    return api
++    @application.post(&quot;/accounts/{id}/authorizations&quot;)
++    async def reserve(id: str, request: Request):
++        n = await number(request)
++        if n is None:
++            return failure(422, &quot;invalid_amount&quot;)
++        with current_state() as db:
++            totals = funds(db, id)
++            if totals is None:
++                return failure(404, &quot;not_found&quot;)
++            if n &gt; totals[1] + totals[2]:
++                return failure(402, &quot;insufficient_funds&quot;)
++            key = str(uuid4())
++            db.execute(&quot;INSERT INTO authorizations VALUES (?,?,?,?,&#x27;active&#x27;)&quot;, [key, id, n, instant(clock)])
++            return JSONResponse({&quot;auth_id&quot;: key}, status_code=201)
++
++    def mutate(key, action, n=0):
++        with current_state() as db:
++            record = db.execute(&quot;SELECT account,amount,state FROM authorizations WHERE id=?&quot;, [key]).fetchone()
++            if record is None:
++                return failure(404, &quot;not_found&quot;)
++            owner, reserved, status = record
++            if status != &quot;active&quot;:
++                return failure(409, &quot;authorization_closed&quot;)
++            if action == &quot;captured&quot;:
++                if n &gt; reserved:
++                    return failure(422, &quot;capture_exceeds_hold&quot;)
++                db.execute(&quot;UPDATE accounts SET posted=posted-? WHERE id=?&quot;, [n, owner])
++            db.execute(&quot;UPDATE authorizations SET state=? WHERE id=?&quot;, [action, key])
++            return {&quot;auth_id&quot;: key, &quot;status&quot;: action}
++
++    @application.post(&quot;/authorizations/{id}/capture&quot;)
++    async def settle(id: str, request: Request):
++        n = await number(request)
++        return failure(422, &quot;invalid_amount&quot;) if n is None else mutate(id, &quot;captured&quot;, n)
++
++    @application.post(&quot;/authorizations/{id}/void&quot;)
++    def release(id: str):
++        return mutate(id, &quot;voided&quot;)
++    return application
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/holds\main.py
++++ reference/holds\main.py
+@@ -60,7 +60,7 @@
+             if capture is not None:
+                 if capture &gt; auth[&quot;amount&quot;]:
+                     return error(422, &quot;capture_exceeds_hold&quot;)
+-
++                db.execute(&quot;UPDATE accounts SET posted=posted-? WHERE id=?&quot;, (capture, auth[&quot;account&quot;]))
+             state = &quot;captured&quot; if capture is not None else &quot;voided&quot;
+             db.execute(&quot;UPDATE authorizations SET state=? WHERE id=?&quot;, (state, id))
+             return {&quot;auth_id&quot;: id, &quot;status&quot;: state}
+</pre></details>
+<details><summary>wrong_available_ignores_holds diff</summary><pre>--- starter/holds\main.py
++++ wrong_available_ignores_holds/holds\main.py
+@@ -2,7 +2,7 @@
+ from fastapi import FastAPI, Request
+ from fastapi.responses import JSONResponse
+ from holds.clock import instant
+-from holds.storage import transaction, initialize, account, authorization, active_total
++from holds.storage import transaction, initialize, account, authorization
+ 
+ 
+ def error(status, code):
+@@ -31,7 +31,7 @@
+             row = account(db, id)
+             if row is None:
+                 return error(404, &quot;not_found&quot;)
+-            return {&quot;posted_minor&quot;: row[&quot;posted&quot;], &quot;available_minor&quot;: row[&quot;posted&quot;] - active_total(db, id, instant(clock))}
++            return {&quot;posted_minor&quot;: row[&quot;posted&quot;], &quot;available_minor&quot;: row[&quot;posted&quot;]}
+ 
+     @api.post(&quot;/accounts/{id}/authorizations&quot;)
+     async def authorize(id: str, request: Request):
+@@ -43,7 +43,7 @@
+             row = account(db, id)
+             if row is None:
+                 return error(404, &quot;not_found&quot;)
+-            available = row[&quot;posted&quot;] - active_total(db, id, now)
++            available = row[&quot;posted&quot;]
+             if value &gt; available + row[&quot;overdraft&quot;]:
+                 return error(402, &quot;insufficient_funds&quot;)
+             identifier = uuid4().hex
+@@ -60,7 +60,7 @@
+             if capture is not None:
+                 if capture &gt; auth[&quot;amount&quot;]:
+                     return error(422, &quot;capture_exceeds_hold&quot;)
+-
++                db.execute(&quot;UPDATE accounts SET posted=posted-? WHERE id=?&quot;, (capture, auth[&quot;account&quot;]))
+             state = &quot;captured&quot; if capture is not None else &quot;voided&quot;
+             db.execute(&quot;UPDATE authorizations SET state=? WHERE id=?&quot;, (state, id))
+             return {&quot;auth_id&quot;: id, &quot;status&quot;: state}
+</pre></details>
+<details><summary>wrong_expired_holds_count diff</summary><pre>--- starter/holds\main.py
++++ wrong_expired_holds_count/holds\main.py
+@@ -60,7 +60,7 @@
+             if capture is not None:
+                 if capture &gt; auth[&quot;amount&quot;]:
+                     return error(422, &quot;capture_exceeds_hold&quot;)
+-
++                db.execute(&quot;UPDATE accounts SET posted=posted-? WHERE id=?&quot;, (capture, auth[&quot;account&quot;]))
+             state = &quot;captured&quot; if capture is not None else &quot;voided&quot;
+             db.execute(&quot;UPDATE authorizations SET state=? WHERE id=?&quot;, (state, id))
+             return {&quot;auth_id&quot;: id, &quot;status&quot;: state}
+--- starter/holds\storage.py
++++ wrong_expired_holds_count/holds\storage.py
+@@ -26,7 +26,7 @@
+ 
+ def active_total(db, account, now):
+     return db.execute(&quot;&quot;&quot;SELECT COALESCE(SUM(amount),0) FROM authorizations
+-        WHERE account=? AND state=&#x27;active&#x27; AND created&gt;?&quot;&quot;&quot;, (account, now - 7 * 86400)).fetchone()[0]
++        WHERE account=? AND state=&#x27;active&#x27;&quot;&quot;&quot;, (account,)).fetchone()[0]
+ 
+ 
+ def account(db, identifier):
+</pre></details>
+<details><summary>wrong_partial_capture_keeps_remainder diff</summary><pre>--- starter/holds\main.py
++++ wrong_partial_capture_keeps_remainder/holds\main.py
+@@ -60,9 +60,12 @@
+             if capture is not None:
+                 if capture &gt; auth[&quot;amount&quot;]:
+                     return error(422, &quot;capture_exceeds_hold&quot;)
+-
++                db.execute(&quot;UPDATE accounts SET posted=posted-? WHERE id=?&quot;, (capture, auth[&quot;account&quot;]))
+             state = &quot;captured&quot; if capture is not None else &quot;voided&quot;
+-            db.execute(&quot;UPDATE authorizations SET state=? WHERE id=?&quot;, (state, id))
++            if capture is not None and capture &lt; auth[&quot;amount&quot;]:
++                db.execute(&quot;UPDATE authorizations SET amount=amount-? WHERE id=?&quot;, (capture, id))
++            else:
++                db.execute(&quot;UPDATE authorizations SET state=? WHERE id=?&quot;, (state, id))
+             return {&quot;auth_id&quot;: id, &quot;status&quot;: state}
+ 
+     @api.post(&quot;/authorizations/{id}/capture&quot;)
+</pre></details>
+</details>
+<details><summary>07_statement_periods — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: monthly statements follow the account timezone
+
+`statements.period.period_bounds(account_tz:str,year:int,month:int)-&gt;tuple[datetime,datetime]`
+returns aware UTC instants for a half-open interval. `select(txns:list[Txn],account_tz,year,month)`
+returns transaction ids sorted by instant, then lexicographic id. Frozen `Txn(id:str,at:datetime)`
+is public. IDs are unique and timestamps may have arbitrary aware offsets and microseconds.
+
+The period is the calendar month in the account&#x27;s IANA timezone: local 00:00 on day 1 inclusive
+through local 00:00 on day 1 of the next month exclusive, converted to UTC using zoneinfo.
+Account timezone and requested month are valid (years 1900–2098); daylight saving rules apply
+independently to both endpoints. Each input timestamp must be aware with a non-None utcoffset,
+otherwise select raises ValueError, even when that transaction would be outside the month.
+Do not mutate inputs. Empty input returns []. Money is not part of this interface.
+
+Run from starter: `python -m pytest tests -q`. The records are entirely synthetic.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — period reviewer notes
+
+The alternative tests local calendar membership for each timestamp. Thus a grader requiring
+the selector to call period_bounds would be invalid. All three wrongs are common calendar shortcuts.
+
+## Blind review
+Author self-review: ordering of equal instants, microsecond precision, invalid timestamps outside
+the window and year limits clarified in the ticket. Predictions: Toronto March 2026 starts05:00Z
+and ends04:00Z; at end exactly -&gt; excluded; last microsecond before end -&gt; included.
+No unresolved graded ambiguity. Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/statements\period.py
++++ alt_valid/statements\period.py
+@@ -1,18 +1,24 @@
+-from datetime import datetime, timezone
++import calendar
++from datetime import datetime, timedelta, timezone
++from zoneinfo import ZoneInfo
+ from statements.models import Txn  # noqa: F401
+ 
+ 
+ def period_bounds(account_tz, year, month):
+-    zone = timezone.utc
+-    start = datetime(year, month, 1, tzinfo=zone)
+-    end = datetime(year + (month == 12), month % 12 + 1, 1, tzinfo=zone)
+-    return start.astimezone(timezone.utc), end.astimezone(timezone.utc)
++    local_first = datetime.fromisoformat(f&quot;{year:04d}-{month:02d}-01T00:00:00&quot;).replace(tzinfo=ZoneInfo(account_tz))
++    local_next = local_first + timedelta(days=calendar.monthrange(year, month)[1])
++    return tuple(point.astimezone(timezone.utc) for point in (local_first, local_next))
+ 
+ 
+ def select(txns, account_tz, year, month):
+-    start, end = period_bounds(account_tz, year, month)
+-    for txn in txns:
+-        if txn.at.tzinfo is None or txn.at.utcoffset() is None:
+-            raise ValueError(&quot;aware timestamps required&quot;)
+-    chosen = [t for t in txns if start &lt;= t.at.astimezone(timezone.utc) &lt; end]
+-    return [t.id for t in sorted(chosen, key=lambda t: t.at.astimezone(timezone.utc))]
++    timezone_for_account = ZoneInfo(account_tz)
++    keyed = []
++    for item in txns:
++        stamp = item.at
++        if stamp.utcoffset() is None:
++            raise ValueError(&quot;transaction timestamp has no offset&quot;)
++        local = stamp.astimezone(timezone_for_account)
++        if (local.year, local.month) == (year, month):
++            keyed.append((stamp.astimezone(timezone.utc), item.id))
++    keyed.sort()
++    return [identifier for _, identifier in keyed]
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/statements\period.py
++++ reference/statements\period.py
+@@ -1,9 +1,10 @@
+ from datetime import datetime, timezone
++from zoneinfo import ZoneInfo
+ from statements.models import Txn  # noqa: F401
+ 
+ 
+ def period_bounds(account_tz, year, month):
+-    zone = timezone.utc
++    zone = ZoneInfo(account_tz)
+     start = datetime(year, month, 1, tzinfo=zone)
+     end = datetime(year + (month == 12), month % 12 + 1, 1, tzinfo=zone)
+     return start.astimezone(timezone.utc), end.astimezone(timezone.utc)
+@@ -15,4 +16,4 @@
+         if txn.at.tzinfo is None or txn.at.utcoffset() is None:
+             raise ValueError(&quot;aware timestamps required&quot;)
+     chosen = [t for t in txns if start &lt;= t.at.astimezone(timezone.utc) &lt; end]
+-    return [t.id for t in sorted(chosen, key=lambda t: t.at.astimezone(timezone.utc))]
++    return [t.id for t in sorted(chosen, key=lambda t: (t.at.astimezone(timezone.utc), t.id))]
+</pre></details>
+<details><summary>wrong_fixed_offset diff</summary><pre>--- starter/statements\period.py
++++ wrong_fixed_offset/statements\period.py
+@@ -1,9 +1,12 @@
+ from datetime import datetime, timezone
++from zoneinfo import ZoneInfo
+ from statements.models import Txn  # noqa: F401
+ 
+ 
+ def period_bounds(account_tz, year, month):
+-    zone = timezone.utc
++    iana = ZoneInfo(account_tz)
++    january = datetime(year, 1, 1, tzinfo=iana)
++    zone = timezone(january.utcoffset() - january.dst())
+     start = datetime(year, month, 1, tzinfo=zone)
+     end = datetime(year + (month == 12), month % 12 + 1, 1, tzinfo=zone)
+     return start.astimezone(timezone.utc), end.astimezone(timezone.utc)
+@@ -15,4 +18,4 @@
+         if txn.at.tzinfo is None or txn.at.utcoffset() is None:
+             raise ValueError(&quot;aware timestamps required&quot;)
+     chosen = [t for t in txns if start &lt;= t.at.astimezone(timezone.utc) &lt; end]
+-    return [t.id for t in sorted(chosen, key=lambda t: t.at.astimezone(timezone.utc))]
++    return [t.id for t in sorted(chosen, key=lambda t: (t.at.astimezone(timezone.utc), t.id))]
+</pre></details>
+<details><summary>wrong_inclusive_2359 diff</summary><pre>--- starter/statements\period.py
++++ wrong_inclusive_2359/statements\period.py
+@@ -1,12 +1,13 @@
+-from datetime import datetime, timezone
++from datetime import datetime, timezone, timedelta
++from zoneinfo import ZoneInfo
+ from statements.models import Txn  # noqa: F401
+ 
+ 
+ def period_bounds(account_tz, year, month):
+-    zone = timezone.utc
++    zone = ZoneInfo(account_tz)
+     start = datetime(year, month, 1, tzinfo=zone)
+     end = datetime(year + (month == 12), month % 12 + 1, 1, tzinfo=zone)
+-    return start.astimezone(timezone.utc), end.astimezone(timezone.utc)
++    return start.astimezone(timezone.utc), end.astimezone(timezone.utc) - timedelta(seconds=1)
+ 
+ 
+ def select(txns, account_tz, year, month):
+@@ -15,4 +16,4 @@
+         if txn.at.tzinfo is None or txn.at.utcoffset() is None:
+             raise ValueError(&quot;aware timestamps required&quot;)
+     chosen = [t for t in txns if start &lt;= t.at.astimezone(timezone.utc) &lt; end]
+-    return [t.id for t in sorted(chosen, key=lambda t: t.at.astimezone(timezone.utc))]
++    return [t.id for t in sorted(chosen, key=lambda t: (t.at.astimezone(timezone.utc), t.id))]
+</pre></details>
+<details><summary>wrong_utc_month diff</summary><pre>--- starter/statements\period.py
++++ wrong_utc_month/statements\period.py
+@@ -15,4 +15,4 @@
+         if txn.at.tzinfo is None or txn.at.utcoffset() is None:
+             raise ValueError(&quot;aware timestamps required&quot;)
+     chosen = [t for t in txns if start &lt;= t.at.astimezone(timezone.utc) &lt; end]
+-    return [t.id for t in sorted(chosen, key=lambda t: t.at.astimezone(timezone.utc))]
++    return [t.id for t in sorted(chosen, key=lambda t: (t.at.astimezone(timezone.utc), t.id))]
+</pre></details>
+</details>
+<details><summary>08_refund_limits — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: refund only captured funds
+
+`refunds.service.RefundService(db_path)` uses SQLite and exposes `create_payment(authorized_minor)-&gt;id`,
+`capture(id,amount_minor)`, `refund(id,amount_minor)-&gt;refund_id`, `refunded_total(id)-&gt;int`.
+Exceptions: RefundExceedsCaptured, PaymentNotCaptured, InvalidAmount (all derive from ValueError).
+
+All money is integer minor units in one currency (CAD, 2 dp), never bool. Authorization, capture
+and refund amounts must be positive ints, otherwise InvalidAmount. Known payment ids are used.
+Each payment may be captured once, at most its authorization; invalid/repeated capture -&gt; InvalidAmount.
+Refund before capture -&gt; PaymentNotCaptured. Partial refunds are allowed. The cumulative successful
+refund amount may not exceed the captured amount, which may be less than authorized. Exceeding
+remaining captured funds -&gt; RefundExceedsCaptured. Rejected attempts must never count toward
+refunded_total or reduce the future budget. Validate positive amount before capture status.
+
+Refund ids are distinct positive ints. Capture and successful refunds survive a new service instance
+on the same file. Operations are atomic; no rejected operation may alter successful totals.
+No settlement network or real customer is involved. Preserve the interface and run
+`python -m pytest tests -q` from starter.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — refund reviewer notes
+
+The correct counter-based service and append-only event alternative share only the public errors
+and validation. Wrong candidates isolate a per-request check, the wrong amount basis, or counting
+rejected attempts. The last bug is over-strict, so the grader checks successful recovery too.
+
+## Blind review
+Author self-review: repeated capture, bool/zero, capture before refund and validation priority
+were unspecified in the starter. The ticket now resolves them. Predictions: auth100/capture60/
+refund40 then30 -&gt; first accepted, second RefundExceedsCaptured; reject101 then refund100 -&gt;
+accepted100; uncaptured refund1 -&gt; PaymentNotCaptured. No unresolved graded ambiguity.
+Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/refunds\service.py
++++ alt_valid/refunds\service.py
+@@ -1,50 +1,72 @@
++import json
+ import sqlite3
++from contextlib import contextmanager
+ from refunds.models import RefundExceedsCaptured, PaymentNotCaptured, InvalidAmount, validate_amount
+ 
+ __all__ = [&quot;RefundService&quot;, &quot;RefundExceedsCaptured&quot;, &quot;PaymentNotCaptured&quot;, &quot;InvalidAmount&quot;]
+ 
+ 
++@contextmanager
++def journal(filename):
++    connection = sqlite3.connect(filename)
++    try:
++        with connection:
++            connection.execute(&quot;BEGIN IMMEDIATE&quot;)
++            yield connection
++    finally:
++        connection.close()
++
++
++def append(connection, tag, owner, payload):
++    inserted = connection.execute(&quot;INSERT INTO event_log(tag,owner,payload) VALUES (?,?,?)&quot;,
++                                  [tag, owner, json.dumps(payload)])
++    return inserted.lastrowid
++
++
++def reconstruct(connection, number):
++    state = {&quot;ceiling&quot;: 0, &quot;settled&quot;: None, &quot;returned&quot;: 0}
++    history = connection.execute(&quot;SELECT tag,payload FROM event_log WHERE number=? OR owner=? ORDER BY number&quot;,
++                                 [number, number])
++    for tag, payload in history:
++        value = json.loads(payload)[&quot;minor&quot;]
++        if tag == &quot;approval&quot;:
++            state[&quot;ceiling&quot;] = value
++        elif tag == &quot;settlement&quot;:
++            state[&quot;settled&quot;] = value
++        elif tag == &quot;credit&quot;:
++            state[&quot;returned&quot;] += value
++    return state
++
++
+ class RefundService:
+     def __init__(self, db_path):
+-        self.path = str(db_path)
+-        with self.connect() as conn:
+-            conn.executescript(&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS payments(
+-                id INTEGER PRIMARY KEY, authorized INTEGER, captured INTEGER, refunded INTEGER DEFAULT 0);
+-                CREATE TABLE IF NOT EXISTS refunds(id INTEGER PRIMARY KEY, payment INTEGER, amount INTEGER)&quot;&quot;&quot;)
+-
+-    def connect(self):
+-        return sqlite3.connect(self.path, timeout=30)
++        self.filename = str(db_path)
++        with journal(self.filename) as connection:
++            connection.execute(&quot;CREATE TABLE IF NOT EXISTS event_log(number INTEGER PRIMARY KEY, tag TEXT, owner INTEGER, payload TEXT)&quot;)
+ 
+     def create_payment(self, authorized_minor):
+         validate_amount(authorized_minor)
+-        with self.connect() as conn:
+-            return conn.execute(&quot;INSERT INTO payments(authorized) VALUES (?)&quot;, (authorized_minor,)).lastrowid
++        with journal(self.filename) as connection:
++            return append(connection, &quot;approval&quot;, None, {&quot;minor&quot;: authorized_minor})
+ 
+     def capture(self, id, amount_minor):
+         validate_amount(amount_minor)
+-        with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
+-            row = conn.execute(&quot;SELECT authorized,captured FROM payments WHERE id=?&quot;, (id,)).fetchone()
+-            if row is None or amount_minor &gt; row[0]:
+-                raise InvalidAmount(&quot;invalid capture&quot;)
+-            conn.execute(&quot;UPDATE payments SET captured=? WHERE id=?&quot;, (amount_minor, id))
++        with journal(self.filename) as connection:
++            state = reconstruct(connection, id)
++            if state[&quot;settled&quot;] is not None or amount_minor &gt; state[&quot;ceiling&quot;]:
++                raise InvalidAmount(&quot;capture not permitted&quot;)
++            append(connection, &quot;settlement&quot;, id, {&quot;minor&quot;: amount_minor})
+ 
+     def refund(self, id, amount_minor):
+         validate_amount(amount_minor)
+-        with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
+-            authorized, captured, refunded = conn.execute(
+-                &quot;SELECT authorized,captured,refunded FROM payments WHERE id=?&quot;, (id,)).fetchone()
+-            if captured is None:
++        with journal(self.filename) as connection:
++            state = reconstruct(connection, id)
++            if state[&quot;settled&quot;] is None:
+                 raise PaymentNotCaptured(id)
+-            if amount_minor &gt; authorized - refunded:
+-                conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+-                conn.commit()
++            if state[&quot;returned&quot;] + amount_minor &gt; state[&quot;settled&quot;]:
+                 raise RefundExceedsCaptured(id)
+-            refund_id = conn.execute(&quot;INSERT INTO refunds(payment,amount) VALUES (?,?)&quot;, (id, amount_minor)).lastrowid
+-            conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+-            return refund_id
++            return append(connection, &quot;credit&quot;, id, {&quot;minor&quot;: amount_minor})
+ 
+     def refunded_total(self, id):
+-        with self.connect() as conn:
+-            return conn.execute(&quot;SELECT refunded FROM payments WHERE id=?&quot;, (id,)).fetchone()[0]
++        with journal(self.filename) as connection:
++            return reconstruct(connection, id)[&quot;returned&quot;]
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/refunds\service.py
++++ reference/refunds\service.py
+@@ -23,23 +23,21 @@
+     def capture(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             row = conn.execute(&quot;SELECT authorized,captured FROM payments WHERE id=?&quot;, (id,)).fetchone()
+-            if row is None or amount_minor &gt; row[0]:
++            if row is None or row[1] is not None or amount_minor &gt; row[0]:
+                 raise InvalidAmount(&quot;invalid capture&quot;)
+             conn.execute(&quot;UPDATE payments SET captured=? WHERE id=?&quot;, (amount_minor, id))
+ 
+     def refund(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             authorized, captured, refunded = conn.execute(
+                 &quot;SELECT authorized,captured,refunded FROM payments WHERE id=?&quot;, (id,)).fetchone()
+             if captured is None:
+                 raise PaymentNotCaptured(id)
+-            if amount_minor &gt; authorized - refunded:
+-                conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+-                conn.commit()
++            if amount_minor &gt; captured - refunded:
+                 raise RefundExceedsCaptured(id)
+             refund_id = conn.execute(&quot;INSERT INTO refunds(payment,amount) VALUES (?,?)&quot;, (id, amount_minor)).lastrowid
+             conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+</pre></details>
+<details><summary>wrong_checks_single_refund diff</summary><pre>--- starter/refunds\service.py
++++ wrong_checks_single_refund/refunds\service.py
+@@ -23,23 +23,21 @@
+     def capture(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             row = conn.execute(&quot;SELECT authorized,captured FROM payments WHERE id=?&quot;, (id,)).fetchone()
+-            if row is None or amount_minor &gt; row[0]:
++            if row is None or row[1] is not None or amount_minor &gt; row[0]:
+                 raise InvalidAmount(&quot;invalid capture&quot;)
+             conn.execute(&quot;UPDATE payments SET captured=? WHERE id=?&quot;, (amount_minor, id))
+ 
+     def refund(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             authorized, captured, refunded = conn.execute(
+                 &quot;SELECT authorized,captured,refunded FROM payments WHERE id=?&quot;, (id,)).fetchone()
+             if captured is None:
+                 raise PaymentNotCaptured(id)
+-            if amount_minor &gt; authorized - refunded:
+-                conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+-                conn.commit()
++            if amount_minor &gt; captured:
+                 raise RefundExceedsCaptured(id)
+             refund_id = conn.execute(&quot;INSERT INTO refunds(payment,amount) VALUES (?,?)&quot;, (id, amount_minor)).lastrowid
+             conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+</pre></details>
+<details><summary>wrong_counts_rejected diff</summary><pre>--- starter/refunds\service.py
++++ wrong_counts_rejected/refunds\service.py
+@@ -23,21 +23,21 @@
+     def capture(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             row = conn.execute(&quot;SELECT authorized,captured FROM payments WHERE id=?&quot;, (id,)).fetchone()
+-            if row is None or amount_minor &gt; row[0]:
++            if row is None or row[1] is not None or amount_minor &gt; row[0]:
+                 raise InvalidAmount(&quot;invalid capture&quot;)
+             conn.execute(&quot;UPDATE payments SET captured=? WHERE id=?&quot;, (amount_minor, id))
+ 
+     def refund(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             authorized, captured, refunded = conn.execute(
+                 &quot;SELECT authorized,captured,refunded FROM payments WHERE id=?&quot;, (id,)).fetchone()
+             if captured is None:
+                 raise PaymentNotCaptured(id)
+-            if amount_minor &gt; authorized - refunded:
++            if amount_minor &gt; captured - refunded:
+                 conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+                 conn.commit()
+                 raise RefundExceedsCaptured(id)
+</pre></details>
+<details><summary>wrong_uses_authorized diff</summary><pre>--- starter/refunds\service.py
++++ wrong_uses_authorized/refunds\service.py
+@@ -23,23 +23,21 @@
+     def capture(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             row = conn.execute(&quot;SELECT authorized,captured FROM payments WHERE id=?&quot;, (id,)).fetchone()
+-            if row is None or amount_minor &gt; row[0]:
++            if row is None or row[1] is not None or amount_minor &gt; row[0]:
+                 raise InvalidAmount(&quot;invalid capture&quot;)
+             conn.execute(&quot;UPDATE payments SET captured=? WHERE id=?&quot;, (amount_minor, id))
+ 
+     def refund(self, id, amount_minor):
+         validate_amount(amount_minor)
+         with self.connect() as conn:
+-            conn.execute(&quot;BEGIN&quot;)
++            conn.execute(&quot;BEGIN IMMEDIATE&quot;)
+             authorized, captured, refunded = conn.execute(
+                 &quot;SELECT authorized,captured,refunded FROM payments WHERE id=?&quot;, (id,)).fetchone()
+             if captured is None:
+                 raise PaymentNotCaptured(id)
+             if amount_minor &gt; authorized - refunded:
+-                conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+-                conn.commit()
+                 raise RefundExceedsCaptured(id)
+             refund_id = conn.execute(&quot;INSERT INTO refunds(payment,amount) VALUES (?,?)&quot;, (id, amount_minor)).lastrowid
+             conn.execute(&quot;UPDATE payments SET refunded=refunded+? WHERE id=?&quot;, (amount_minor, id))
+</pre></details>
+</details>
+<details><summary>09_tiered_fees — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: price the whole payment at its selected tier
+
+`fees.schedule.compute_fee(amount_minor:int,schedule:Schedule)-&gt;int` returns integer minor units.
+Public frozen dataclasses: `Tier(up_to_minor:int|None,bps:int,fixed_minor:int)` and
+`Schedule(tiers:list[Tier],min_fee_minor:int,max_fee_minor:int)`.
+
+Amounts are nonnegative ints, never bool; negative/noninteger -&gt; ValueError. Schedule tiers are
+ordered by strictly increasing nonnegative upper bounds, ending with exactly one None (infinity).
+Bps/fixed/min/max are nonnegative ints, min &lt;= max. Invalid schedules raise ValueError.
+
+- Select the FIRST tier where amount &lt;= up_to_minor, or None. Upper bounds are INCLUSIVE.
+- Pricing is non-marginal: apply that selected tier&#x27;s bps to the ENTIRE amount, then add its
+  fixed fee. Do not sum bands.
+- Raw fee = amount × bps / 10000 + fixed_minor. Round once to an integer using ROUND_HALF_UP,
+  then clamp to [min_fee_minor,max_fee_minor]. This deliberately differs from interest&#x27;s half-even.
+- Zero amounts still incur the selected fixed fee, subject to the clamp. Input schedules are not
+  mutated. The currency is implicit; all numbers use the same minor unit (e.g. CAD has 2 dp).
+
+Run from starter: `python -m pytest tests -q`. No real fees, networks or institutions are represented.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — fee reviewer notes
+
+Integer numerator rounding is independent of the alternative&#x27;s Decimal quantization. The
+marginal candidate is plausible but predicted to fail even the naive mid-tier examples;
+no artificial effort is made to make every wrong implementation pass the naive grader.
+Float counterexamples are discovered by tools/find_ties.py, not chosen to fit a test.
+
+## Blind review
+Author self-review: upper-bound inclusivity, zero, fixed-fee clamp order and malformed schedules
+were ambiguous in the starter; all are explicit in the ticket. Predictions: amount5000/bps3 -&gt;2;
+amount10000 uses the first inclusive tier; zero with fixed5/min10 -&gt;10.
+No unresolved graded ambiguity. Independent review remains owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/fees\schedule.py
++++ alt_valid/fees\schedule.py
+@@ -1,12 +1,17 @@
++from decimal import Decimal, ROUND_HALF_UP, localcontext
+ from fees.models import Tier, Schedule  # noqa: F401
+ 
+ 
+ def compute_fee(amount_minor, schedule):
+-    if type(amount_minor) is not int or amount_minor &lt; 0:
+-        raise ValueError(&quot;nonnegative integer amount required&quot;)
+-    for tier in schedule.tiers:
+-        if tier.up_to_minor is None or amount_minor &lt;= tier.up_to_minor:
+-            numerator = amount_minor * tier.bps + tier.fixed_minor * 10000
+-            rounded = (numerator + 5000) // 10000
+-            return rounded
+-    raise ValueError(&quot;unbounded tier required&quot;)
++    if not isinstance(amount_minor, int) or isinstance(amount_minor, bool) or amount_minor &lt; 0:
++        raise ValueError(&quot;invalid payment amount&quot;)
++    selected = next(t for t in schedule.tiers if t.up_to_minor is None or t.up_to_minor &gt;= amount_minor)
++    with localcontext() as ctx:
++        ctx.prec = max(34, len(str(amount_minor)) + len(str(selected.bps)) + 10)
++        raw = Decimal(amount_minor) * Decimal(selected.bps) / Decimal(10000) + selected.fixed_minor
++        fee = int(raw.quantize(Decimal(1), rounding=ROUND_HALF_UP))
++    if fee &lt; schedule.min_fee_minor:
++        return schedule.min_fee_minor
++    if fee &gt; schedule.max_fee_minor:
++        return schedule.max_fee_minor
++    return fee
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/fees\schedule.py
++++ reference/fees\schedule.py
+@@ -8,5 +8,5 @@
+         if tier.up_to_minor is None or amount_minor &lt;= tier.up_to_minor:
+             numerator = amount_minor * tier.bps + tier.fixed_minor * 10000
+             rounded = (numerator + 5000) // 10000
+-            return rounded
++            return min(schedule.max_fee_minor, max(schedule.min_fee_minor, rounded))
+     raise ValueError(&quot;unbounded tier required&quot;)
+</pre></details>
+<details><summary>wrong_exclusive_boundary diff</summary><pre>--- starter/fees\schedule.py
++++ wrong_exclusive_boundary/fees\schedule.py
+@@ -5,8 +5,8 @@
+     if type(amount_minor) is not int or amount_minor &lt; 0:
+         raise ValueError(&quot;nonnegative integer amount required&quot;)
+     for tier in schedule.tiers:
+-        if tier.up_to_minor is None or amount_minor &lt;= tier.up_to_minor:
++        if tier.up_to_minor is None or amount_minor &lt; tier.up_to_minor:
+             numerator = amount_minor * tier.bps + tier.fixed_minor * 10000
+             rounded = (numerator + 5000) // 10000
+-            return rounded
++            return min(schedule.max_fee_minor, max(schedule.min_fee_minor, rounded))
+     raise ValueError(&quot;unbounded tier required&quot;)
+</pre></details>
+<details><summary>wrong_float_bps diff</summary><pre>--- starter/fees\schedule.py
++++ wrong_float_bps/fees\schedule.py
+@@ -1,3 +1,5 @@
++import math
++
+ from fees.models import Tier, Schedule  # noqa: F401
+ 
+ 
+@@ -6,7 +8,6 @@
+         raise ValueError(&quot;nonnegative integer amount required&quot;)
+     for tier in schedule.tiers:
+         if tier.up_to_minor is None or amount_minor &lt;= tier.up_to_minor:
+-            numerator = amount_minor * tier.bps + tier.fixed_minor * 10000
+-            rounded = (numerator + 5000) // 10000
+-            return rounded
++            rounded = math.floor(amount_minor * (tier.bps / 10000) + tier.fixed_minor + .5)
++            return min(schedule.max_fee_minor, max(schedule.min_fee_minor, rounded))
+     raise ValueError(&quot;unbounded tier required&quot;)
+</pre></details>
+<details><summary>wrong_marginal diff</summary><pre>--- starter/fees\schedule.py
++++ wrong_marginal/fees\schedule.py
+@@ -3,10 +3,13 @@
+ 
+ def compute_fee(amount_minor, schedule):
+     if type(amount_minor) is not int or amount_minor &lt; 0:
+-        raise ValueError(&quot;nonnegative integer amount required&quot;)
++        raise ValueError(&quot;nonnegative integer required&quot;)
++    total, lower = 0, 0
+     for tier in schedule.tiers:
+-        if tier.up_to_minor is None or amount_minor &lt;= tier.up_to_minor:
+-            numerator = amount_minor * tier.bps + tier.fixed_minor * 10000
+-            rounded = (numerator + 5000) // 10000
+-            return rounded
+-    raise ValueError(&quot;unbounded tier required&quot;)
++        upper = amount_minor if tier.up_to_minor is None else min(amount_minor, tier.up_to_minor)
++        total += max(0, upper - lower) * tier.bps
++        if upper == amount_minor:
++            total += tier.fixed_minor * 10000
++            break
++        lower = upper
++    return min(schedule.max_fee_minor, max(schedule.min_fee_minor, (total + 5000) // 10000))
+</pre></details>
+</details>
+<details><summary>10_batch_parser — ticket, notes and diffs</summary>
+<h3>PROBLEM.md</h3><pre># Ticket: validate invented SBF-80 batch files atomically
+
+`batch.parser.parse(data:bytes)-&gt;BatchResult` returns frozen dataclasses exported from that module:
+`Payment(payee_account:str,amount_minor:int,reference:str)`, `BatchError(line_no:int,code:str)`,
+`BatchResult(accepted:bool,payments:list[Payment],errors:list[BatchError])`.
+
+SBF-80 is invented for this synthetic task. Each record is exactly 80 printable ASCII characters,
+followed by LF or CRLF. A final terminator is optional; mixed LF/CRLF is accepted. Strip the
+terminator before checking width and slicing. Interior blank lines are records and invalid.
+Bare CR, non-ASCII or control bytes are invalid_encoding. All positions below are 1-based inclusive.
+
+| Record | Columns | Field |
+|---|---|---|
+| H | 1 | H |
+| H | 2–13 | batch id: 12 uppercase ASCII letters/digits |
+| H | 14–21 | creation date YYYYMMDD, valid calendar date |
+| H | 22–24 | currency CAD, USD, EUR, GBP, JPY, KWD or BHD |
+| H | 25–80 | spaces |
+| D | 1 | D |
+| D | 2–13 | 12 ASCII digits, payee account (retain leading zeros) |
+| D | 14–25 | 12 ASCII digits, positive zero-padded integer minor units |
+| D | 26–45 | 20 printable chars, nonblank reference, right-space padded |
+| D | 46–80 | spaces |
+| T | 1 | T |
+| T | 2–7 | detail count, 6 ASCII digits |
+| T | 8–22 | control total of amounts, 15 ASCII digits |
+| T | 23–32 | hash total, 10 ASCII digits |
+| T | 33–80 | spaces |
+
+Exactly one header first, then one or more details, then exactly one trailer last. The count is
+the number of D records, including malformed D records. Control total and hash total use only
+fully valid detail records. Hash = sum(int(last 8 digits of each payee account)) mod 10**10.
+Money is in header-currency minor units: CAD/USD/EUR/GBP=2 dp, JPY=0, KWD/BHD=3. Do not convert.
+Returned references remove right padding only. Preserve detail order and account strings.
+
+Any error rejects the whole batch: accepted=False and payments=[]. Report all detectable errors,
+deduplicated by (line_no,code), sorted by line_no then code. Continue checking other records.
+For a wrong-width or invalid-encoding record, report only that local error (no field errors),
+but structural/order and trailer comparisons can still be reported. Field errors are one code per
+record even if multiple fields are invalid. Trailer totals compare independently when its fields
+are valid, even if other records failed.
+
+Codes: invalid_encoding, line_length, record_type, record_order, invalid_header, invalid_detail,
+invalid_trailer, count_mismatch, control_total_mismatch, hash_total_mismatch, missing_header,
+missing_trailer. H outside first position, T outside last, or D at first/last -&gt; record_order.
+Unknown type -&gt; record_type. A missing first H -&gt; missing_header at line1; missing final T -&gt;
+missing_trailer at the last line (line1 for empty input). An empty detail section -&gt; count_mismatch
+on the trailer. Header/trailer field errors include invalid reserved spaces. No other codes.
+
+Run from starter: `python -m pytest tests -q`. No real batch format, institution or customer is used.
+</pre>
+<h3>NOTES.md</h3><pre># Private draft — batch parser reviewer notes
+
+Both valid parsers share field decoding but differ in accumulation and control-flow design.
+The CRLF candidate checks the physical line&#x27;s 81-character length before removing CR. CR at
+the end does not shift earlier columns; the actual defect is validating/slicing before line-ending
+normalization, not a claim that CR shifts the first field. Fixtures generate CRLF from bytes.
+
+## Blind review
+Author self-review: positions, terminators, malformed-field error granularity, cascading trailer
+checks, ordering and line numbers all needed explicit rules. The ticket now contains them.
+Predictions: account000000000123 contributes123 to hash; count mismatch -&gt; rejected/no payments;
+valid CRLF -&gt; accepted/same records as LF. No unresolved graded ambiguity. Independent review owed.
+
+Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.
+</pre>
+<details><summary>alt_valid diff</summary><pre>--- starter/batch\parser.py
++++ alt_valid/batch\parser.py
+@@ -1,36 +1,44 @@
+ from batch.models import BatchResult, Payment, BatchError  # noqa: F401
+-from batch.records import decode, fields, physical_lines
++from batch.records import fields, decode, physical_lines
+ 
+ 
+ def parse(data):
+-    rows = physical_lines(data)
+-    errors, payments, trailers = set(), [], []
+-    if not rows or rows[0][:1] != b&quot;H&quot;:
+-        errors.add((1, &quot;missing_header&quot;))
+-    if not rows or rows[-1][:1] != b&quot;T&quot;:
+-        errors.add((max(1, len(rows)), &quot;missing_trailer&quot;))
+-    count = sum(row[:1] == b&quot;D&quot; for row in rows)
+-    for line_no, raw in enumerate(rows, 1):
+-        kind = raw[:1]
+-        if ((kind == b&quot;H&quot; and line_no != 1) or (kind == b&quot;T&quot; and line_no != len(rows))
+-                or (kind == b&quot;D&quot; and line_no in {1, len(rows)})):
+-            errors.add((line_no, &quot;record_order&quot;))
+-        text, local_error = decode(raw)
+-        if local_error:
+-            errors.add((line_no, local_error))
+-            continue
+-        value, field_error = fields(text)
+-        if field_error:
+-            errors.add((line_no, field_error))
+-        elif text[0] == &quot;D&quot;:
+-            payments.append(value)
+-        elif text[0] == &quot;T&quot;:
+-            trailers.append((line_no, value))
+-    for line_no, (declared_count, total, hash_total) in trailers:
+-        if count == 0:
+-            errors.add((line_no, &quot;count_mismatch&quot;))
+-        if total != sum(p.amount_minor for p in payments):
+-            errors.add((line_no, &quot;control_total_mismatch&quot;))
+-        if hash_total != sum(int(p.payee_account[-8:]) for p in payments) % 10**10:
+-            errors.add((line_no, &quot;hash_total_mismatch&quot;))
+-    return BatchResult(not errors, [] if errors else payments, [BatchError(*e) for e in sorted(errors)])
++    physical = physical_lines(data)
++    issues = set()
++    details = []
++    number_of_details, amount_sum, account_sum = 0, 0, 0
++    controls = []
++    last_index = len(physical)
++    if not physical or not physical[0].startswith(b&quot;H&quot;):
++        issues.add((1, &quot;missing_header&quot;))
++    if not physical or not physical[-1].startswith(b&quot;T&quot;):
++        issues.add((max(last_index, 1), &quot;missing_trailer&quot;))
++    for index, physical_record in enumerate(physical, start=1):
++        marker = physical_record[:1]
++        if marker == b&quot;D&quot;:
++            number_of_details += 1
++        expected_position = {b&quot;H&quot;: index == 1, b&quot;T&quot;: index == last_index,
++                             b&quot;D&quot;: 1 &lt; index &lt; last_index}
++        if marker in expected_position and not expected_position[marker]:
++            issues.add((index, &quot;record_order&quot;))
++        record, issue = decode(physical_record)
++        if issue is None:
++            value, issue = fields(record)
++            if issue is None and marker == b&quot;D&quot;:
++                details.append(value)
++                amount_sum += value.amount_minor
++                account_sum = (account_sum + int(value.payee_account[-8:])) % 10**10
++            elif issue is None and marker == b&quot;T&quot;:
++                controls.append((index, value))
++        if issue:
++            issues.add((index, issue))
++    for index, declared in controls:
++        observed = number_of_details, amount_sum, account_sum
++        codes = &quot;count_mismatch&quot;, &quot;control_total_mismatch&quot;, &quot;hash_total_mismatch&quot;
++        for i, code in enumerate(codes):
++            if declared[i] != observed[i] or (i == 0 and number_of_details == 0):
++                issues.add((index, code))
++    ordered_errors = [BatchError(line, code) for line, code in sorted(issues)]
++    if ordered_errors:
++        return BatchResult(False, [], ordered_errors)
++    return BatchResult(True, details, [])
+</pre></details>
+<details><summary>reference diff</summary><pre>--- starter/batch\parser.py
++++ reference/batch\parser.py
+@@ -27,7 +27,7 @@
+         elif text[0] == &quot;T&quot;:
+             trailers.append((line_no, value))
+     for line_no, (declared_count, total, hash_total) in trailers:
+-        if count == 0:
++        if count == 0 or count != declared_count:
+             errors.add((line_no, &quot;count_mismatch&quot;))
+         if total != sum(p.amount_minor for p in payments):
+             errors.add((line_no, &quot;control_total_mismatch&quot;))
+</pre></details>
+<details><summary>wrong_crlf_slicing diff</summary><pre>--- starter/batch\parser.py
++++ wrong_crlf_slicing/batch\parser.py
+@@ -1,9 +1,11 @@
+ from batch.models import BatchResult, Payment, BatchError  # noqa: F401
+-from batch.records import decode, fields, physical_lines
++from batch.records import decode, fields
+ 
+ 
+ def parse(data):
+-    rows = physical_lines(data)
++    rows = data.split(b&quot;\n&quot;)
++    if rows and rows[-1] == b&quot;&quot;:
++        rows.pop()
+     errors, payments, trailers = set(), [], []
+     if not rows or rows[0][:1] != b&quot;H&quot;:
+         errors.add((1, &quot;missing_header&quot;))
+@@ -15,6 +17,9 @@
+         if ((kind == b&quot;H&quot; and line_no != 1) or (kind == b&quot;T&quot; and line_no != len(rows))
+                 or (kind == b&quot;D&quot; and line_no in {1, len(rows)})):
+             errors.add((line_no, &quot;record_order&quot;))
++        if len(raw) != 80:
++            errors.add((line_no, &quot;line_length&quot;))
++            continue
+         text, local_error = decode(raw)
+         if local_error:
+             errors.add((line_no, local_error))
+@@ -27,7 +32,7 @@
+         elif text[0] == &quot;T&quot;:
+             trailers.append((line_no, value))
+     for line_no, (declared_count, total, hash_total) in trailers:
+-        if count == 0:
++        if count == 0 or count != declared_count:
+             errors.add((line_no, &quot;count_mismatch&quot;))
+         if total != sum(p.amount_minor for p in payments):
+             errors.add((line_no, &quot;control_total_mismatch&quot;))
+</pre></details>
+<details><summary>wrong_ignores_hash_total diff</summary><pre>--- starter/batch\parser.py
++++ wrong_ignores_hash_total/batch\parser.py
+@@ -27,10 +27,8 @@
+         elif text[0] == &quot;T&quot;:
+             trailers.append((line_no, value))
+     for line_no, (declared_count, total, hash_total) in trailers:
+-        if count == 0:
++        if count == 0 or count != declared_count:
+             errors.add((line_no, &quot;count_mismatch&quot;))
+         if total != sum(p.amount_minor for p in payments):
+             errors.add((line_no, &quot;control_total_mismatch&quot;))
+-        if hash_total != sum(int(p.payee_account[-8:]) for p in payments) % 10**10:
+-            errors.add((line_no, &quot;hash_total_mismatch&quot;))
+     return BatchResult(not errors, [] if errors else payments, [BatchError(*e) for e in sorted(errors)])
+</pre></details>
+<details><summary>wrong_partial_accept diff</summary><pre>--- starter/batch\parser.py
++++ wrong_partial_accept/batch\parser.py
+@@ -27,10 +27,12 @@
+         elif text[0] == &quot;T&quot;:
+             trailers.append((line_no, value))
+     for line_no, (declared_count, total, hash_total) in trailers:
+-        if count == 0:
++        if count == 0 or count != declared_count:
+             errors.add((line_no, &quot;count_mismatch&quot;))
+         if total != sum(p.amount_minor for p in payments):
+             errors.add((line_no, &quot;control_total_mismatch&quot;))
+         if hash_total != sum(int(p.payee_account[-8:]) for p in payments) % 10**10:
+             errors.add((line_no, &quot;hash_total_mismatch&quot;))
++    if payments and any(code == &quot;invalid_detail&quot; for _, code in errors):
++        return BatchResult(True, payments, [BatchError(*e) for e in sorted(errors)])
+     return BatchResult(not errors, [] if errors else payments, [BatchError(*e) for e in sorted(errors)])
+</pre></details>
+</details>
+<footer><p>Environment: {&quot;python&quot;: &quot;3.14.7&quot;, &quot;postgres&quot;: &quot;16.13&quot;, &quot;hypothesis_profile&quot;: &quot;ci&quot;, &quot;platform&quot;: &quot;Windows-11-10.0.26200-SP0&quot;}</p><p>Reproduce: python -m harness.run_all --grader all; python -m harness.report --latest.</p>
+<p>Limitations: authored variants are a finite adversarial sample. Same-host subprocess isolation is not a security sandbox.
+Independent blind review, Docker timing, and live Harbor orchestration are still outstanding. Synthetic data only.</p></footer></html>
