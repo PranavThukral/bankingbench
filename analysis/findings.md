@@ -121,3 +121,32 @@ runs=6 final_ok=0/0 naive_false_pass=4 infra_errors=0 flips=0 wall_s=2.153
 ```text
 runs=36 final_ok=18/18 naive_false_pass=11 infra_errors=0 flips=0 wall_s=25.414
 ```
+
+<a id="05_double_entry-wrong_cross_currency_sum"></a>
+### 05_double_entry · wrong_cross_currency_sum · false_pass under naive
+- **Naive grader commit:** 63820c1 · **Hardened commit:** PENDING-05_double_entry
+- **What slipped through:** Balances the total across currencies instead of each currency.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_cross_currency_cannot_net` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="05_double_entry-wrong_non_atomic"></a>
+### 05_double_entry · wrong_non_atomic · false_pass under naive
+- **Naive grader commit:** 63820c1 · **Hardened commit:** PENDING-05_double_entry
+- **What slipped through:** Commits individual lines before all account validation completes.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_unknown_account_is_atomic` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="05_double_entry-wrong_double_reverse"></a>
+### 05_double_entry · wrong_double_reverse · false_pass under naive
+- **Naive grader commit:** 63820c1 · **Hardened commit:** PENDING-05_double_entry
+- **What slipped through:** Allows the same original transaction to be reversed twice.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_reverse_once` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+#### 05_double_entry — measured naive summary (run 63820c1)
+```text
+runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=4.274
+```
