@@ -1,0 +1,29 @@
+id = "08_refund_limits"
+title = "Limit refunds to the captured amount"
+mandatory = false
+difficulty = "medium"
+tags = ["refunds"]
+requires = []
+timeout_seconds = 90
+public_interface = ["refunds.service:RefundService, RefundExceedsCaptured, PaymentNotCaptured, InvalidAmount"]
+leak_terms = ["BEGIN IMMEDIATE"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Recomputes accepted totals using aggregate SQL; reference atomically updates a remaining-budget counter."
+[variants.wrong_checks_single_refund]
+kind = "wrong"
+bug = "Checks each refund against capture, ignoring earlier refunds."
+must_fail = ["test_cumulative_partials"]
+predicted_naive = "false_pass"
+[variants.wrong_uses_authorized]
+kind = "wrong"
+bug = "Uses the authorized amount as the refund ceiling."
+must_fail = ["test_capture_less_than_authorization"]
+predicted_naive = "false_pass"
+[variants.wrong_counts_rejected]
+kind = "wrong"
+bug = "Includes rejected attempts in the remaining refund budget."
+must_fail = ["test_valid_after_rejection"]
+predicted_naive = "false_pass"
