@@ -354,3 +354,32 @@ runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=1.560
 ```text
 runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=1.901
 ```
+
+<a id="06_available_balance-wrong_available_ignores_holds"></a>
+### 06_available_balance · wrong_available_ignores_holds · false_pass under naive
+- **Naive grader commit:** 6cf4a11 · **Hardened commit:** PENDING-06_available_balance
+- **What slipped through:** Authorizes against posted funds, ignoring existing holds.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_existing_holds_reduce_available` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="06_available_balance-wrong_partial_capture_keeps_remainder"></a>
+### 06_available_balance · wrong_partial_capture_keeps_remainder · false_pass under naive
+- **Naive grader commit:** 6cf4a11 · **Hardened commit:** PENDING-06_available_balance
+- **What slipped through:** Leaves the remainder held after a partial capture.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_partial_capture_releases_remainder` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+<a id="06_available_balance-wrong_expired_holds_count"></a>
+### 06_available_balance · wrong_expired_holds_count · false_pass under naive
+- **Naive grader commit:** 6cf4a11 · **Hardened commit:** PENDING-06_available_balance
+- **What slipped through:** Counts expired active records against availability.
+- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.
+- **Hardening:** add observable tests `test_expiry_exactly_seven_days` plus the task invariants.
+- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.
+
+#### 06_available_balance — measured naive summary (run 6cf4a11)
+```text
+runs=6 final_ok=0/0 naive_false_pass=3 infra_errors=0 flips=0 wall_s=3.535
+```
