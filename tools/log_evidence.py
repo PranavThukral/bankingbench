@@ -33,7 +33,7 @@ def main():
             anchor = f"{task.id}-{variant.name}"
             text += (f'\n<a id="{anchor}"></a>\n### {task.id} · {variant.name} · {run["verdict"]} under naive\n'
                      f'- **Naive grader commit:** {sha()} · **Hardened commit:** PENDING-{task.id}\n'
-                     f'- **What slipped through:** {variant.bug or "Valid behavior rejected."}\n'
+                     f'- **What slipped through:** {variant.bug or "The unmodified starter satisfies ordinary examples but omits required behavior."}\n'
                      '- **Why missed:** the ordinary example fixtures do not exercise this distinct state or boundary.\n'
                      f'- **Hardening:** add observable tests `{", ".join(variant.must_fail)}` plus the task invariants.\n'
                      '- **Lesson:** passing examples do not establish behavior across lifecycle, identity and numeric boundaries.\n')
