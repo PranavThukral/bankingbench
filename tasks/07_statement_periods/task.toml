@@ -1,0 +1,29 @@
+id = "07_statement_periods"
+title = "Select transactions by the account calendar month"
+mandatory = false
+difficulty = "medium"
+tags = ["statements"]
+requires = []
+timeout_seconds = 90
+public_interface = ["statements.period:period_bounds, select, Txn"]
+leak_terms = ["fold="]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Selects via local calendar membership rather than comparing UTC interval bounds."
+[variants.wrong_utc_month]
+kind = "wrong"
+bug = "Uses UTC calendar months for every account."
+must_fail = ["test_local_midnight_boundaries"]
+predicted_naive = "false_pass"
+[variants.wrong_inclusive_2359]
+kind = "wrong"
+bug = "Ends at 23:59:59, excluding fractional seconds before midnight."
+must_fail = ["test_microsecond_boundary"]
+predicted_naive = "false_pass"
+[variants.wrong_fixed_offset]
+kind = "wrong"
+bug = "Keeps a standard-time offset throughout the year."
+must_fail = ["test_dst_months"]
+predicted_naive = "false_pass"
