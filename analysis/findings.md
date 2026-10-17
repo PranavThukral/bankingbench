@@ -393,3 +393,68 @@ runs=108 final_ok=54/54 naive_false_pass=31 infra_errors=0 flips=0 wall_s=116.89
 ```text
 runs=108 final_ok=54/54 naive_false_pass=31 infra_errors=0 flips=0 wall_s=116.892
 ```
+
+#### 06_available_balance — measured final summary (run 3645a05, re-measured at 451d92e)
+```text
+runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=50.634
+```
+
+#### Full matrix — committed snapshot (results/final/matrix.json)
+```text
+runs=120 final_ok=60/60 naive_false_pass=34 infra_errors=0 flips=0 wall_s=151.997
+```
+Naive graders let through 29 of 30 wrong variants and 5 of 10 unmodified starters. The one
+wrong variant the naive grader caught was 09 `wrong_marginal` (its mid-tier examples already
+disagree with marginal pricing), and even that was flagged `ok_wrong_reason`.
+
+## Patterns
+
+1. **State over time is invisible to one-shot examples.** 01 `wrong_retry_race`,
+   01 `wrong_inmemory_cache`, 05 `wrong_double_reverse`, 06 `wrong_expired_holds_count` and
+   08 `wrong_checks_single_refund` each behave correctly for any single request. The bug appears
+   only across a second request, a restart, a clock advance or a concurrent caller. Hardened
+   graders needed sequences, restarts, fake clocks and a barrier-synchronized race.
+2. **Numeric bugs live on measure-zero inputs.** 02 `wrong_half_up`, 02 `wrong_float`,
+   03 `wrong_round_cross_leg`, 09 `wrong_float_bps`, 09 `wrong_exclusive_boundary` and
+   07 `wrong_inclusive_2359` agree with the reference on almost every input. A tolerance check
+   (`abs(diff) <= 0.01`) or "one mid-tier value" passes all of them. The fix is searched tie and
+   boundary inputs (`tools/find_ties.py`), cross-checked by exact Fraction arithmetic
+   (`tools/verify_cases.py`), and exact type and exponent assertions.
+3. **Counts and totals hide identity and scope bugs.** 04 `wrong_no_consumption`,
+   04 `wrong_refund_abs`, 01 `wrong_key_scope`, 05 `wrong_cross_currency_sum` and
+   08 `wrong_uses_authorized` produce plausible totals or match counts with the wrong pairing,
+   namespace or base. Asserting on sets of id pairs, per-scope results and per-currency
+   invariants catches them.
+4. **Rejection paths need state assertions, not just error assertions.** 05 `wrong_non_atomic`,
+   10 `wrong_partial_accept` and 08 `wrong_counts_rejected` raise or report the right error, but
+   leave the system in the wrong state. Every hardened grader now checks observable state
+   (trial balance, payments list, the next valid refund) after each rejected operation.
+5. **Hardening itself regresses.** The first hardened grader for task 10 dropped the naive
+   count-mismatch test, so the unmodified starter passed 9/9 final tests. Graders for 05 and 08
+   first produced false fails on valid code (a timeout from redundant database I/O, and a Windows
+   file-lock in fixture cleanup). Running the starter and alt_valid through every grader version
+   is what exposed these.
+
+## Limitations
+
+- Every task, solution and grader was written by one author. The wrong variants are the bugs that author predicted. Real model failures may
+  cluster differently (see the M5 stretch goal, not run).
+- The blind reviews (S5) are disciplined self-reviews, not independent reviews. GATES.md tracks
+  the independent review that is still owed.
+- Verified natively on Windows 11 with Python 3.14 and PostgreSQL 16.13. The Docker path
+  (Python 3.12 image) was written but not executed, so S4 is unmeasured.
+- The Harbor export follows only documented task.toml keys. Mount paths and compose conventions
+  are labeled assumptions, validated by a local simulation rather than the Harbor runtime.
+- Isolation is for reproducibility, not for hostile code. Candidate code runs as the same user.
+
+## Implications for task authoring at scale
+
+- Run the unmodified starter and a structurally different valid solution through every grader
+  version. Both caught grader defects here (a dropped regression, an overfitted fixture) that
+  reference-only checks would have missed.
+- For numeric tasks, require searched tie and boundary inputs with an exact-arithmetic oracle.
+  Hand-picked examples nearly never land on the inputs that separate correct from plausible code.
+- Require at least one stateful test (sequence, restart, clock or concurrency) for any task
+  whose ticket mentions persistence, retries, limits or lifecycle.
+- Treat "fails for the declared reason" (`must_fail`) as part of grader QA. A wrong solution that
+  fails for an incidental reason is a latent false pass for the next variant.
