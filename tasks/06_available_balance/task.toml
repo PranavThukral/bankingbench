@@ -1,0 +1,29 @@
+id = "06_available_balance"
+title = "Track active authorization holds and available balance"
+mandatory = false
+difficulty = "medium"
+tags = ["holds"]
+requires = []
+timeout_seconds = 90
+public_interface = ["holds.main:create_app(database_path, clock) -> FastAPI", "holds.clock:Clock", "HTTP POST /accounts/{id}/authorizations, POST /authorizations/{id}/capture, POST /authorizations/{id}/void, GET /accounts/{id}/balance"]
+leak_terms = ["BEGIN IMMEDIATE"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Retires expired records at transaction entry and dispatches mutations centrally; reference filters active holds by timestamp."
+[variants.wrong_available_ignores_holds]
+kind = "wrong"
+bug = "Authorizes against posted funds, ignoring existing holds."
+must_fail = ["test_existing_holds_reduce_available"]
+predicted_naive = "false_pass"
+[variants.wrong_partial_capture_keeps_remainder]
+kind = "wrong"
+bug = "Leaves the remainder held after a partial capture."
+must_fail = ["test_partial_capture_releases_remainder"]
+predicted_naive = "false_pass"
+[variants.wrong_expired_holds_count]
+kind = "wrong"
+bug = "Counts expired active records against availability."
+must_fail = ["test_expiry_exactly_seven_days"]
+predicted_naive = "false_pass"
