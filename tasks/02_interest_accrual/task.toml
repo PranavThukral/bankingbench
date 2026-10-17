@@ -1,0 +1,29 @@
+id = "02_interest_accrual"
+title = "Accrue CAD interest at posting boundaries"
+mandatory = true
+difficulty = "medium"
+tags = ["interest"]
+requires = []
+timeout_seconds = 90
+public_interface = ["interest.accrual:accrue, Posting"]
+leak_terms = ["Fraction", "localcontext", "ROUND_HALF_EVEN"]
+[variants.reference]
+kind = "reference"
+[variants.alt_valid]
+kind = "alt_valid"
+structural_difference = "Closed-form exact rational segments and manual integer half-even rounding instead of daywise Decimal accrual."
+[variants.wrong_float]
+kind = "wrong"
+bug = "Binary floating point loses precision on ties and large principals."
+must_fail = ["test_large_principal_exact", "test_half_cent_ties_bankers"]
+predicted_naive = "false_pass"
+[variants.wrong_half_up]
+kind = "wrong"
+bug = "Rounds ties away from zero instead of to even."
+must_fail = ["test_half_cent_ties_bankers"]
+predicted_naive = "false_pass"
+[variants.wrong_round_daily]
+kind = "wrong"
+bug = "Rounds daily accrual before the posting boundary."
+must_fail = ["test_small_balance_daily_accrues"]
+predicted_naive = "false_pass"
