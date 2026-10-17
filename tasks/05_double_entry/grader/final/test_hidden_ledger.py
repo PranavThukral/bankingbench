@@ -1,7 +1,7 @@
 import os
 from uuid import uuid4
 import pytest
-from hypothesis import settings, strategies as st
+from hypothesis import Phase, settings, strategies as st
 from hypothesis.stateful import RuleBasedStateMachine, invariant, precondition, rule
 
 from ledger.service import (LedgerService, Line, LedgerError, UnbalancedTransaction, InvalidAmount,
@@ -149,4 +149,4 @@ class JournalMachine(RuleBasedStateMachine):
 
 TestJournal = JournalMachine.TestCase
 TestJournal.settings = settings(max_examples=20, stateful_step_count=12, deadline=None,
-                                derandomize=True, database=None)
+                                derandomize=True, database=None, phases=[Phase.generate])
