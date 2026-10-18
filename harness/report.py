@@ -1,12 +1,23 @@
+"""Render matrix.json as one self-contained, offline HTML report (inline CSS and fonts, no JavaScript)."""
 import argparse
+import base64
 import difflib
 from html import escape
 import json
 from pathlib import Path
 from string import Template
+import tomllib
 
 from harness import config
 from harness.run_all import latest
+
+TEMPLATES = config.ROOT / "harness/templates"
+COLUMNS = ("starter", "reference", "alt_valid")
+# verdict -> (css tone, icon, short meaning)
+TONES = {"ok": ("good", "✓", "as expected"), "ok_wrong_reason": ("warn", "~", "rejected for an undeclared reason"),
+         "false_pass": ("bad", "✗", "false pass"), "false_fail": ("bad", "✗", "false fail"),
+         "infra_error": ("bad", "!", "infrastructure error")}
+OUTCOME = {"PASS": "accepted", "FAIL": "rejected", "ERROR": "error"}
 
 
 def variant_diff(task_path, variant):
@@ -22,53 +33,201 @@ def variant_diff(task_path, variant):
     return "".join(lines)
 
 
+def highlight_diff(text):
+    out = []
+    for line in text.splitlines():
+        kind = ("meta" if line.startswith(("+++", "---")) else "add" if line.startswith("+")
+                else "del" if line.startswith("-") else "hunk" if line.startswith("@@") else "")
+        out.append(f'<span class="{kind}">{escape(line)}</span>' if kind else escape(line))
+    return "\n".join(out) or "No changes against the starter."
+
+
+def font_face(family, filename):
+    data = base64.b64encode((TEMPLATES / "fonts" / filename).read_bytes()).decode("ascii")
+    return (f"@font-face{{font-family:'{family}';font-style:normal;font-weight:400 700;font-display:swap;"
+            f"src:url(data:font/woff2;base64,{data}) format('woff2')}}")
+
+
+def task_title(path):
+    try:
+        return tomllib.loads((path / "task.toml").read_text(encoding="utf-8")).get("title", path.name)
+    except (OSError, tomllib.TOMLDecodeError):
+        return path.name
+
+
+def outcome(run):
+    if "outcome" in run:
+        return run["outcome"]
+    tests = run["tests"]
+    return "PASS" if tests["total"] and tests["passed"] == tests["total"] else "FAIL"
+
+
+def anchor(task, variant):
+    return f"run-{task}-{variant}"
+
+
+def badge(run, label):
+    if run is None:
+        return f'<span class="badge none"><b>{label}</b> not run</span>'
+    tone, icon, _ = TONES.get(run["verdict"], TONES["infra_error"])
+    tests = run["tests"]
+    return (f'<span class="badge {tone}"><b>{label}</b><i aria-hidden="true">{icon}</i>'
+            f'{OUTCOME.get(outcome(run), "error")}<small>{tests["passed"]}/{tests["total"]}</small></span>')
+
+
+def failed_list(run):
+    failed = run["failed_tests"]
+    if not failed:
+        total = run["tests"]["total"]
+        return f'<p class="allpass">All {total} hidden test{"s" if total != 1 else ""} passed.</p>'
+    hits = set(run.get("must_fail_hit") or [])
+    items = []
+    for test in failed:
+        name = test.split("::")[-1]
+        flag = ' <em class="tag">declared must_fail</em>' if name in hits else ""
+        items.append(f"<li><code>{escape(test)}</code>{flag}</li>")
+    return f'<ul class="failed">{"".join(items)}</ul>'
+
+
+def run_panel(run, grader, caught):
+    tone, icon, meaning = TONES.get(run["verdict"], TONES["infra_error"])
+    tests = run["tests"]
+    facts = [f'<dt>Verdict</dt><dd><span class="pill {tone}">{icon} {escape(run["verdict"])}</span> {meaning}</dd>',
+             f'<dt>Expected</dt><dd>{escape(run.get("expected", "?"))}, observed {escape(outcome(run))}</dd>',
+             f'<dt>Duration</dt><dd>{run.get("duration_s", 0):.2f} s</dd>']
+    if grader == "naive" and run.get("predicted_naive"):
+        match = "matched" if run["predicted_naive"] == run["verdict"] else "missed"
+        facts.append(f'<dt>Prediction</dt><dd>{escape(run["predicted_naive"])} ({match})</dd>')
+    if caught:
+        facts.append(f'<dt>Hardening</dt><dd><a href="../../analysis/findings.md">caught by hardening</a></dd>')
+    transcript = run.get("stderr_tail") or "No transcript was captured for this run."
+    summary = f'{escape(run["variant"])}: {escape(run["verdict"])} {tests["passed"]}/{tests["total"]}'
+    return (f'<details class="run"><summary><span class="grader">{grader.title()} grader</span>'
+            f'<span class="pill {tone}">{icon} {summary}</span></summary><div class="db">'
+            f'<h5>Failed tests</h5>{failed_list(run)}<dl class="facts">{"".join(facts)}</dl>'
+            f'<details class="transcript"><summary>Pytest output (last 40 lines)</summary><div class="db">'
+            f'<pre>{escape(transcript)}</pre></div></details></div></details>')
+
+
 def render(matrix, tasks_root=config.TASKS):
-    runs = matrix["runs"]
-    task_ids = sorted({r["task"] for r in runs})
-    final_bad = [r for r in runs if r["grader"] == "final" and r["verdict"] != "ok"]
+    runs = [r for r in matrix["runs"] if r.get("repeat", 0) == 0] or matrix["runs"]
+    tasks = sorted({r["task"] for r in runs})
     index = {(r["task"], r["variant"], r["grader"]): r for r in runs}
-    sections = []
-    for grader in ("final", "naive"):
-        if not any(r["grader"] == grader for r in runs):
-            continue
-        sections.append(f"<h2>{grader.title()} matrix</h2><table><thead><tr><th>Task</th>"
-                        "<th>starter</th><th>reference</th><th>alt_valid</th><th>wrong variants</th></tr></thead><tbody>")
-        for task in task_ids:
-            def cell(variant):
-                run = index.get((task, variant, grader))
-                if run is None:
-                    return "<td>not run</td>"
-                tests = run["tests"]
-                prior = index.get((task, variant, "naive"), {})
-                caught = grader == "final" and run["verdict"] == "ok" and prior.get("verdict") == "false_pass"
-                anchor = f"{task}-{variant}"
-                annotation = f'<a href="../../analysis/findings.md#{anchor}">caught by hardening</a>' if caught else ""
-                prediction = run.get("predicted_naive", "") if grader == "naive" else ""
-                detail = "\n".join(run["failed_tests"]) or "No failed test ids"
-                return (f'<td class="{escape(run["verdict"])}"><details><summary>{escape(variant)}: '
-                        f'{escape(run["verdict"])} {tests["passed"]}/{tests["total"]}</summary>'
-                        f'<pre>{escape(detail)}</pre><p>Prediction: {escape(prediction)}</p></details>{annotation}</td>')
-            sections.append(f'<tr id="{grader}-{task}"><th>{escape(task)}</th>')
-            sections.extend(cell(v) for v in ("starter", "reference", "alt_valid"))
-            wrong = sorted({r["variant"] for r in runs if r["task"] == task and r["kind"] == "wrong"})
-            sections.append("<td><table><tr>" + "".join(cell(v) for v in wrong) + "</tr></table></td></tr>")
-        sections.append("</tbody></table>")
-    for task in task_ids:
+    final = [r for r in runs if r["grader"] == "final"]
+    naive = [r for r in runs if r["grader"] == "naive"]
+    final_bad = [r for r in final if r["verdict"] != "ok"]
+
+    def is_caught(r):
+        prior = index.get((r["task"], r["variant"], "naive"), {})
+        return r["grader"] == "final" and r["verdict"] == "ok" and prior.get("verdict") == "false_pass"
+
+    caught = [r for r in final if is_caught(r)]
+    wrong_naive = [r for r in naive if r["kind"] == "wrong"]
+    wrong_final = [r for r in final if r["kind"] == "wrong"]
+    valid_final = [r for r in final if r["kind"] in ("reference", "alt_valid")]
+
+    def kpi(value, label, tone=""):
+        return f'<div class="kpi {tone}"><span class="num">{value}</span><span class="lbl">{label}</span></div>'
+
+    kpis = [kpi(f'{len(final) - len(final_bad)}/{len(final)}', "final verdicts as expected",
+                "good" if not final_bad else "bad")]
+    if naive:
+        passed = sum(r["verdict"] == "false_pass" for r in wrong_naive)
+        kpis.append(kpi(f"{passed}/{len(wrong_naive)}", "wrong solutions accepted by naive graders", "bad" if passed else ""))
+    kpis.append(kpi(f'{sum(r["verdict"] == "false_pass" for r in wrong_final)}/{len(wrong_final)}',
+                    "wrong solutions accepted by final graders"))
+    kpis.append(kpi(f'{sum(r["verdict"] == "false_fail" for r in valid_final)}/{len(valid_final)}',
+                    "valid solutions rejected by final graders"))
+
+    body = []
+    if final_bad:
+        rows = "".join(f'<li><a href="#{anchor(r["task"], r["variant"])}">{escape(r["task"])} · {escape(r["variant"])}'
+                       f'</a> — {escape(r["verdict"])}{failed_list(r)}</li>' for r in final_bad)
+        body.append(f'<section class="alert"><h2>FINAL DEVIATIONS — review these first</h2><ul>{rows}</ul></section>')
+
+    caught_html = ""
+    if caught:
+        rows = []
+        for r in caught:
+            prior = index[(r["task"], r["variant"], "naive")]
+            tests = "".join(f"<li><code>{escape(t.split('::')[-1])}</code></li>" for t in r["failed_tests"])
+            rows.append(f'<tr><td><a href="#{anchor(r["task"], r["variant"])}"><code>{escape(r["task"])}</code><br>'
+                        f'<code class="variant">{escape(r["variant"])}</code></a></td>'
+                        f'<td>{badge(prior, "Naive")}</td><td>{badge(r, "Final")}</td><td><ul class="failed">{tests}</ul></td></tr>')
+        caught_html = ('<section id="caught"><h2>What hardening caught</h2><p class="lede">Each row is a wrong solution (or an '
+                    'unmodified starter) that the naive grader accepted, alongside the final-grader tests that '
+                    'reject it. Each one is caught by hardening and logged in <a href="../../analysis/findings.md">'
+                    'findings.md</a>.</p><div class="scroll"><table class="caught"><thead><tr><th>Task · solution</th>'
+                    '<th>Naive</th><th>Final</th><th>Final tests that fail</th></tr></thead><tbody>'
+                    + "".join(rows) + "</tbody></table></div></section>")
+
+    wrong_by_task = {t: sorted({r["variant"] for r in runs if r["task"] == t and r["kind"] == "wrong"}) for t in tasks}
+    width = max((len(v) for v in wrong_by_task.values()), default=0)
+    head = "".join(f"<th>{c.replace('_', ' ').capitalize()}</th>" for c in COLUMNS)
+    head += f'<th colspan="{width}">Wrong solutions</th>' if width else ""
+    grid = []
+    for task in tasks:
+        cells = []
+        for variant in [*COLUMNS, *wrong_by_task[task]]:
+            n, f = index.get((task, variant, "naive")), index.get((task, variant, "final"))
+            if n is None and f is None:
+                cells.append('<td class="empty">—</td>')
+                continue
+            tip = " · ".join(f'{variant}: {r["verdict"]} {r["tests"]["passed"]}/{r["tests"]["total"]} ({g})'
+                             for g, r in (("naive", n), ("final", f)) if r)
+            label = f'<code class="variant">{escape(variant.removeprefix("wrong_"))}</code>' if variant.startswith("wrong_") else ""
+            mark = '<span class="caught-tag">caught by hardening</span>' if f and is_caught(f) else ""
+            cells.append(f'<td><a class="cell" href="#{anchor(task, variant)}" title="{escape(tip)}">{label}'
+                         f'{badge(n, "Naive") if naive else ""}{badge(f, "Final")}{mark}</a></td>')
+        cells.extend('<td class="empty"></td>' for _ in range(width - len(wrong_by_task[task])))
+        grid.append(f'<tr id="matrix-{escape(task)}"><th scope="row"><code>{escape(task)}</code>'
+                    f'<span class="sub">{escape(task_title(Path(tasks_root) / task))}</span></th>{"".join(cells)}</tr>')
+    body.append('<section id="matrix"><h2>Hardening matrix</h2><p class="lede">One row per task, one column per solution. '
+                'Each cell shows what the naive and final graders did with that solution; select it for the failing '
+                'tests and pytest output.</p>'
+                '<ul class="legend"><li><span class="pill good">✓</span> as expected</li>'
+                '<li><span class="pill bad">✗</span> false pass, false fail or error</li>'
+                '<li><span class="pill warn">~</span> rejected, but not by a declared test</li></ul>'
+                f'<div class="scroll"><table class="matrix"><thead><tr><th>Task</th>{head}</tr></thead>'
+                f'<tbody>{"".join(grid)}</tbody></table></div></section>')
+
+    body.append(caught_html)
+
+    panels = []
+    for task in tasks:
         path = Path(tasks_root) / task
-        sections.append(f"<details><summary>{escape(task)} — ticket, notes and diffs</summary>")
-        for name in ("PROBLEM.md", "NOTES.md"):
+        parts = []
+        for name, label in (("PROBLEM.md", "Ticket (PROBLEM.md)"), ("NOTES.md", "Reviewer notes (NOTES.md)")):
             text = (path / name).read_text(encoding="utf-8") if (path / name).exists() else "Fixture text"
-            sections.append(f"<h3>{name}</h3><pre>{escape(text)}</pre>")
-        for variant in sorted({r["variant"] for r in runs if r["task"] == task and r["variant"] != "starter"}):
-            sections.append(f"<details><summary>{escape(variant)} diff</summary><pre>"
-                            f"{escape(variant_diff(path, variant))}</pre></details>")
-        sections.append("</details>")
-    template = Template((config.ROOT / "harness/templates/report.html").read_text(encoding="utf-8"))
+            parts.append(f'<details><summary>{label}</summary><div class="db"><pre class="doc">{escape(text)}</pre></div></details>')
+        variants = [*COLUMNS, *wrong_by_task[task]]
+        for variant in [v for v in variants if any((task, v, g) in index for g in ("naive", "final"))]:
+            sample = index.get((task, variant, "final")) or index.get((task, variant, "naive"))
+            graders = "".join(run_panel(index[(task, variant, g)], g, g == "final" and is_caught(index[(task, variant, g)]))
+                              for g in ("final", "naive") if (task, variant, g) in index)
+            diff = ""
+            if variant != "starter":
+                diff = (f'<details class="diff"><summary>Diff against the starter</summary><div class="db"><pre>'
+                        f'{highlight_diff(variant_diff(path, variant))}</pre></div></details>')
+            parts.append(f'<div class="variant-block"><div id="{anchor(task, variant)}" class="anchor"></div>'
+                         f'<h4><code>{escape(variant)}</code><span class="kind">{escape(sample["kind"])}</span></h4>'
+                         f'{graders}{diff}</div>')
+        panels.append(f'<details class="task"><summary><code>{escape(task)}</code><span class="sub">'
+                      f'{escape(task_title(path))}</span></summary><div class="db">{"".join(parts)}</div></details>')
+    body.append('<section><h2>Runs by task</h2><p class="lede">Each run lists its failed tests first, then the '
+                'tail of its pytest output.</p>' + "".join(panels) + "</section>")
+
+    env = matrix.get("env", {})
+    facts = [("Commit", matrix.get("git_sha", "unknown")),
+             ("Working tree", "dirty" if matrix.get("dirty") else "clean"),
+             ("Generated", str(matrix.get("generated_at", "fixture")).replace("T", " ")[:19] + " UTC"),
+             ("Runs", f'{len(matrix["runs"])}' + (f' in {matrix["wall_s"]:.0f} s' if matrix.get("wall_s") else "")),
+             *[(k.replace("_", " ").capitalize(), str(v)) for k, v in env.items()]]
+    facts_html = "".join(f"<dt>{escape(k)}</dt><dd><code>{escape(v)}</code></dd>" for k, v in facts)
+    template = Template((TEMPLATES / "report.html").read_text(encoding="utf-8"))
     return template.substitute(
-        sha=escape(matrix.get("git_sha", "unknown")), stamp=escape(matrix.get("generated_at", "fixture")),
-        total=str(len(runs)), deviations=str(len(final_bad)),
-        banner='<p class="alert">FINAL DEVIATIONS — review failures below</p>' if final_bad else '',
-        body="\n".join(sections), env=escape(json.dumps(matrix.get("env", {}))),
+        fonts=font_face("Source Serif 4", "source-serif-4.woff2") + font_face("JetBrains Mono", "jetbrains-mono.woff2"),
+        facts=facts_html, kpis="".join(kpis), body="\n".join(body), status=escape(matrix.get("status", "private draft")),
     )
 
 

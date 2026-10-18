@@ -1,4 +1,5 @@
 from copy import deepcopy
+import re
 
 from harness.report import render
 
@@ -21,7 +22,8 @@ def test_report_renders():
     assert "toy_task" in html and "fixture123" in html
     assert "caught by hardening" in html
     assert "FINAL DEVIATIONS" not in html
-    assert "None" not in html and "nan" not in html
+    visible = re.sub(r"base64,[A-Za-z0-9+/=]+", "", html)  # embedded font bytes can spell anything
+    assert "None" not in visible and "nan" not in visible
     assert '<script' not in html and 'src="http' not in html
 
 

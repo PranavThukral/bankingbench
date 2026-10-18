@@ -1,21 +1,146 @@
 <!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Private draft — verifier audit</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verifier hardening audit</title>
 <style>
-body{font:15px/1.5 system-ui,sans-serif;margin:2rem;color:#182232;background:#f6f8fb}
-table{border-collapse:collapse;width:100%;background:white;margin:1rem 0}
-td,th{border:1px solid #aeb8c7;padding:.6rem;text-align:left;vertical-align:top}
-td table{margin:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
-.ok{background:#d9f2e3}.ok_wrong_reason{background:#fff0b3}
-.false_pass,.false_fail,.infra_error,.alert{background:#ffd9d9}
-.alert{padding:1rem;font-weight:bold}details{margin:.5rem 0}summary{cursor:pointer}
-a{color:#174b85}h1{font-size:1.8rem}footer{margin-top:2rem;border-top:2px solid #aeb8c7}
-</style>
-<h1>Private draft · synthetic payment verifier audit</h1>
-<p>Commit $sha · $stamp · $total runs · $deviations final deviations</p>
-$banner
-<p>Green means the expected outcome, including rejection of a wrong variant. Red means a verifier deviation.</p>
+$fonts
+:root{
+  --serif:'Source Serif 4',Charter,'Iowan Old Style',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --bg:#f5f3ee;--surface:#fffefb;--surface-2:#efece4;--ink:#1c1b19;--muted:#5f5b53;--rule:#d9d4c8;
+  --head:#26323f;--head-ink:#f5f3ee;--accent:#2f5f8f;
+  --good:#1f6b4a;--good-bg:#e1f0e7;--bad:#a8322b;--bad-bg:#f8e1de;--warn:#8a5a00;--warn-bg:#fbefd2;
+  --add-bg:#e3f1e6;--del-bg:#f7e2e0;--shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#151514;--surface:#1d1d1b;--surface-2:#262522;--ink:#ebe8e1;--muted:#a39e93;--rule:#38362f;
+  --head:#2c3a48;--head-ink:#ebe8e1;--accent:#8fb6e0;
+  --good:#7fcfa4;--good-bg:#1d3328;--bad:#f0948b;--bad-bg:#3d201d;--warn:#e7bd62;--warn-bg:#3a2f15;
+  --add-bg:#1c3022;--del-bg:#3a1f1d;--shadow:none;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--serif);-webkit-font-smoothing:antialiased}
+main{max-width:1400px;margin:0 auto;padding:40px 32px 64px}
+h1,h2,h3,h4,h5{font-family:var(--serif);line-height:1.2;margin:0}
+h1{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:650;margin:48px 0 8px}
+h4{font-size:17px;font-weight:600;display:flex;gap:12px;align-items:baseline;margin:0 0 8px}
+h5{font:600 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:4px 0 8px}
+code,pre,.badge,.pill,.kpi .num,dl.facts dd,.tag,.caught-tag,.grader,.kind{font-family:var(--mono)}
+code{font-size:.86em}
+a{color:var(--accent);text-underline-offset:3px}
+.lede{color:var(--muted);max-width:72ch;margin:0 0 16px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;box-shadow:var(--shadow)}
+
+/* header */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;align-items:start}
+.eyebrow{font:600 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.intro{font-size:18px;max-width:62ch;margin:16px 0 0}
+.howto{margin:16px 0 0;padding:12px 16px;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;max-width:62ch}
+.howto b{font-weight:650}
+.runbox{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.runbox h3{font-size:15px;font-weight:650;margin-bottom:10px}
+dl.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;margin:0;font-size:14px}
+dl.facts dt{color:var(--muted)}
+dl.facts dd{margin:0;overflow-wrap:anywhere;font-size:13px}
+.runbox dd code{font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:32px 0 0}
+.kpi{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .num{display:block;font-size:28px;font-weight:600;line-height:1.1}
+.kpi .lbl{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+.kpi.good .num{color:var(--good)}.kpi.bad .num{color:var(--bad)}
+
+/* tables */
+table{border-collapse:separate;border-spacing:0;width:100%;background:var(--surface)}
+th,td{padding:10px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule)}
+thead th{background:var(--head);color:var(--head-ink);font:600 12px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+tbody tr:last-child>*{border-bottom:0}
+tbody th{background:var(--surface-2);font-weight:600}
+tbody th code{font-size:13px}
+.sub{display:block;font-family:var(--serif);font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
+td.empty{color:var(--muted)}
+table.matrix{table-layout:fixed;min-width:1180px}
+table.matrix thead th:first-child{width:212px}
+.variant{overflow-wrap:anywhere}
+.cell{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:inherit;padding:4px;margin:-4px;border-radius:8px}
+.cell:hover,.cell:focus-visible{background:var(--surface-2)}
+.variant{font-size:12px;color:var(--muted)}
+.badge{display:flex;align-items:center;gap:5px;font-size:12px;padding:3px 7px;border-radius:6px;white-space:nowrap;border:1px solid transparent}
+.badge b{font-weight:600;min-width:38px}
+.badge i{font-style:normal;font-weight:700}
+.badge small{margin-left:auto;padding-left:6px;opacity:.8}
+.good{color:var(--good)}.badge.good,.pill.good{background:var(--good-bg);border-color:color-mix(in srgb,var(--good) 25%,transparent)}
+.bad{color:var(--bad)}.badge.bad,.pill.bad{background:var(--bad-bg);border-color:color-mix(in srgb,var(--bad) 30%,transparent)}
+.warn{color:var(--warn)}.badge.warn,.pill.warn{background:var(--warn-bg);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.badge.none{color:var(--muted);background:var(--surface-2)}
+.pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid transparent}
+.caught-tag{align-self:flex-start;font-size:11px;color:var(--accent);border:1px dashed var(--accent);border-radius:4px;padding:1px 6px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;list-style:none;padding:0;margin:0 0 12px;font-size:14px;color:var(--muted)}
+table.caught td{vertical-align:middle}
+table.caught td:first-child a{text-decoration:none}
+ul.failed{margin:0;padding:0;list-style:none}
+ul.failed li{position:relative;padding-left:18px;margin:2px 0;font-size:14px}
+ul.failed li::before{content:"✗";position:absolute;left:0;color:var(--bad);font:700 12px/1.7 var(--mono)}
+ul.failed code{font-size:12.5px;overflow-wrap:anywhere}
+.allpass{margin:0;color:var(--good);font-size:14px}
+.tag{font-style:normal;font-size:11px;color:var(--muted);margin-left:6px}
+.alert{background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px;padding:16px 20px;margin-top:32px}
+.alert h2{margin:0 0 8px;color:var(--bad)}
+
+/* disclosure: everything inside sits to the right of the chevron */
+details{margin:6px 0}
+summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:6px 0;border-radius:6px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"";flex:none;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-2px) rotate(-45deg);transition:transform .15s}
+details[open]>summary::before{transform:translateY(-4px) rotate(45deg)}
+summary:hover{color:var(--accent)}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.db{margin-left:3px;padding:4px 0 8px 17px;border-left:1px solid var(--rule)}
+details.task{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:8px 16px;margin:10px 0;box-shadow:var(--shadow)}
+details.task>summary{font-weight:600;font-size:17px;flex-wrap:wrap}
+details.task>summary code{font-size:14px}
+details.task>summary .sub{display:inline;margin:0}
+.variant-block{padding:16px 0 8px;border-top:1px solid var(--rule);margin-top:8px}
+.anchor{position:relative;top:-16px}
+.kind{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.grader{font-size:13px;font-weight:600;min-width:110px}
+details.run>summary .pill{font-size:12px}
+dl.facts{margin:12px 0 4px}
+pre{font-size:12.5px;line-height:1.55;background:var(--surface-2);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:6px 0;overflow:auto;max-height:420px;white-space:pre}
+pre.doc{white-space:pre-wrap;font-family:var(--serif);font-size:15px;line-height:1.6;max-height:none;background:var(--surface)}
+pre .add{background:var(--add-bg);display:inline-block;min-width:100%}
+pre .del{background:var(--del-bg);display:inline-block;min-width:100%}
+pre .hunk{color:var(--accent)}pre .meta{color:var(--muted)}
+:target+h4{color:var(--accent)}
+
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);color:var(--muted);font-size:14px;max-width:80ch}
+footer p{margin:6px 0}
+
+@media (max-width:900px){.hero{grid-template-columns:1fr}.runbox{max-width:520px}}
+@media (max-width:560px){main{padding:24px 16px 48px}h2{font-size:21px;margin-top:36px}.kpi .num{font-size:24px}
+  details.task{padding:6px 10px}.db{padding-left:12px}.grader{min-width:0}}
+</style></head>
+<body><main>
+<header class="hero">
+  <div>
+    <p class="eyebrow">$status · synthetic data only</p>
+    <h1>Verifier hardening audit</h1>
+    <p class="intro">Ten banking and payments coding tasks. Each is graded twice: by a naive grader written first,
+    and by a hardened final grader. Every task also ships a reference solution, a structurally different valid
+    alternative, and plausible wrong solutions.</p>
+    <p class="howto"><b>How to review:</b> scan the <a href="#matrix">matrix</a> for red naive “accepted ✗” badges sitting above green
+    final “rejected ✓” badges, then select any cell to see its failing tests and pytest output.</p>
+  </div>
+  <aside class="runbox" aria-label="Run details">
+    <h3>Run details</h3>
+    <dl class="facts">$facts</dl>
+  </aside>
+</header>
+<div class="kpis">$kpis</div>
 $body
-<footer><p>Environment: $env</p><p>Reproduce: python -m harness.run_all --grader all; python -m harness.report --latest.</p>
-<p>Limitations: authored variants are a finite adversarial sample. Same-host subprocess isolation is not a security sandbox.
-Independent blind review, Docker timing, and live Harbor orchestration are still outstanding. Synthetic data only.</p></footer></html>
+<footer>
+  <p><b>Reproduce:</b> <code>python -m harness.run_all --grader all</code>, then <code>python -m harness.report --latest</code>.</p>
+  <p><b>Limitations:</b> the solutions are a finite, author-written sample, and same-host subprocess isolation is not
+  a security boundary. Independent blind review, Docker timing and a live Harbor run are still outstanding.</p>
+  <p>Fonts: Source Serif 4 and JetBrains Mono, SIL Open Font License 1.1.</p>
+</footer>
+</main></body></html>
