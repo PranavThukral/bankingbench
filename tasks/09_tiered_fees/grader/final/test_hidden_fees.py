@@ -46,3 +46,17 @@ def test_fee_properties(amount, extra, bps, fixed, floor, cap):
     assert type(result) is int and floor <= result <= cap
     assert result == expected(amount, tier, floor, cap)
     assert compute_fee(amount + extra, schedule) >= result
+
+
+@pytest.mark.parametrize("tiers,floor,cap", [
+    ([], 0, 100),
+    ([Tier(1000, 1, 0)], 0, 100),
+    ([Tier(1000, 1, 0), Tier(1000, 2, 0), Tier(None, 3, 0)], 0, 100),
+    ([Tier(2000, 1, 0), Tier(1000, 2, 0), Tier(None, 3, 0)], 0, 100),
+    ([Tier(None, 1, 0), Tier(None, 2, 0)], 0, 100),
+    ([Tier(None, 1, 0)], 20, 10),
+])
+def test_invalid_schedule_raises_for_any_amount(tiers, floor, cap):
+    for amount in (0, 1, 5000):
+        with pytest.raises(ValueError):
+            compute_fee(amount, Schedule(tiers, floor, cap))
