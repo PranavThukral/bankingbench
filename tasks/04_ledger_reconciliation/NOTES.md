@@ -1,8 +1,13 @@
 # Private draft — reconciliation reviewer notes
 
-Counts alone hide identity reuse. The three realistic candidates respectively reuse an entry,
-implement only the common R1 case, or normalize a negative amount too early. Alternative
-uses remaining-record maps and indexed references; reference maintains consumed-id sets.
+Counts alone hide identity reuse. v2 starter (see analysis/findings.md F-0xx v2 redesign): the
+starter implements R1 only, with a same-day window, no ledger consumption and a flat `no_match`
+reason; the window, consumption, R2 split, R3 refund and R4 duplicate classification are the
+ticket. The wrong variants are plausible completions of that starter: `wrong_no_consumption`
+adds the window, R2, R3 and R4 but keeps the starter's non-consuming candidate lookup;
+`wrong_split_ignored` adds everything except R2; `wrong_refund_abs` compares absolute amounts in
+the exact rule. The alternative uses remaining-record maps and indexed references; the reference
+extends the starter's candidate helpers and tracks consumed ids.
 
 ## Blind review
 Author self-review on ticket plus starter. Ambiguities: R2 traversal with repeated references,

@@ -27,6 +27,18 @@ Apply complete passes in the following order; each id can appear in at most one 
 4. R4: each remaining statement identical in `(value_date,amount_minor,reference)` to any matched
    statement gets reason `duplicate`; otherwise `no_match`. Unused ledger ids form unmatched_ledger.
 
+Worked example (CAD minor units; every reference is a synthetic invoice id):
+
+| Statement id | value_date | amount | reference |  | Ledger id | booking_date | amount | reference |
+|---|---|---:|---|---|---|---|---:|---|
+| s1 | 2026-01-05 | 10000 | INV-1 |  | l1 | 2026-01-03 | 10000 | INV-1 |
+| s2 | 2026-01-06 | 4000 | INV-2 |  | l2 | 2026-01-06 | 10000 | INV-2 |
+| s3 | 2026-01-07 | 6000 | INV-2 |  |  |  |  |  |
+
+`s1` matches `l1` by R1 (two days apart, inside the window). `s2` and `s3` are the only unmatched
+lines for `INV-2` inside the window of `l2` and sum to 10000, so R2 matches both to `l2`.
+Nothing is left unmatched.
+
 Use rule strings `R1`, `R2`, `R3`. Match-list order is not graded. Exact membership, reasons,
 partitions and no reuse are graded. Empty inputs produce empty collections.
 Run from starter: `python -m pytest tests -q`.

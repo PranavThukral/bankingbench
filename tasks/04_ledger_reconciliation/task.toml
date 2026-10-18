@@ -21,7 +21,7 @@ predicted_naive = "false_pass"
 kind = "wrong"
 bug = "Omits aggregate split matches."
 must_fail = ["test_split_all_lines"]
-predicted_naive = "false_pass"
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_refund_abs]
 kind = "wrong"
 bug = "Treats negative statement amounts as payments of the absolute amount."
