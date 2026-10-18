@@ -465,6 +465,34 @@ runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=4.555
 runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=71.753
 ```
 
+<a id="06_available_balance-v2"></a>
+### F-103 · 06_available_balance · v2 redesign
+- **Why v1 was redesigned:** review R1. The v1 starter differed from the reference by 2 lines (one
+  `UPDATE accounts SET posted=posted-?`), and 2 of the 3 v1 wrongs described holds behaviour the v1
+  starter already implemented (it already counted active holds, expired them and closed them on
+  capture). v1 entries for this task are **superseded by v2**. Also the v1 starter (191 lines, tests
+  included) failed S1.
+- **v2 starter:** authorizations are recorded and approved against `posted + overdraft`, but
+  `available_minor == posted_minor`; there is no holds model, no capture or void route and no
+  expiry; plus CLI, CSV export, seed and manual-clock support code (about 215 non-test lines).
+  `ref_diff_lines` 2 -> 40 (floor 25).
+- **v2 wrong variants:** `wrong_available_ignores_holds` (capture/void/expiry added, starter
+  availability kept), `wrong_partial_capture_keeps_remainder` (leaves the unused part held),
+  `wrong_expired_holds_count` (holds counted without the expiry cut-off). None is regressive.
+- **Naive grader (commit 4c7bb1c):** 3 tests: `test_full_capture`, `test_ticket_worked_example`
+  (authorize 3000, available 7000; capture 1200, posted/available 8800), `test_invalid_amount_rejected`.
+  Because the ticket's own example now shows the hold reducing `available` and the remainder being
+  released, the naive grader **caught** `wrong_available_ignores_holds` and
+  `wrong_partial_capture_keeps_remainder` (both `ok_wrong_reason`: they fail
+  `test_ticket_worked_example`, not the declared must_fail tests). `wrong_expired_holds_count` is a
+  **false_pass**: the naive clock never moves, so no fixture can distinguish an expired hold from an
+  active one. The unmodified starter fails `test_full_capture` and `test_ticket_worked_example`.
+  All predictions matched.
+- **Hardened commit:** 4c7bb1c. The v1 final grader (6 tests incl. the random operation model) needed no change.
+```text
+runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=48.248
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
