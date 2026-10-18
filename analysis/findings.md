@@ -578,6 +578,38 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=7.574
 runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=9.912
 ```
 
+<a id="08_refund_limits-v2"></a>
+### F-107 · 08_refund_limits · v2 redesign
+- **Why v1 was redesigned:** review R1 (10 changed lines between starter and reference; the v1
+  starter already had a cumulative counter and an explicit write transaction, and differed mainly
+  in using `authorized` instead of `captured` as the ceiling). v1 entries for this task, including
+  the Windows `TemporaryDirectory` false_fail on the v1 reference (fb4e73e), are **superseded by v2**
+  for the variants, but that fixture fix is kept (the final grader still collects connection cycles).
+- **v2 starter:** records any refund of a captured payment with no limit, lets a payment be captured
+  repeatedly, has no explicit write transaction and no unknown-id handling (AttributeError); plus
+  store, CSV and report support code (221 non-test lines). PROBLEM.md gained the unknown-id rule and
+  a worked example. `ref_diff_lines` 10 -> 42 (floor 25; the first attempt at the unknown-id rule alone
+  reached 24, so the reference also gained a `store.immediate` transaction helper that always closes
+  its connection, which the starter never did).
+- **v2 wrong variants:** `wrong_checks_single_refund` (per-refund cap), `wrong_uses_authorized`
+  (cap on authorized minus refunded), `wrong_counts_rejected` (adds a rejected attempt to the
+  counter). None is regressive.
+- **Naive grader (commit b8d844f):** 4 tests: `test_single_full_refund`, `test_over_refund_rejected`,
+  `test_ticket_worked_example` (capture 6000, refund 4000, refund 2500 rejected, total still 4000),
+  `test_refund_before_capture_rejected`. **All three wrongs were caught by the naive grader**
+  (`ok_wrong_reason`, each failing `test_ticket_worked_example`): the ticket's own example
+  already contains a cumulative over-refund, which defeats the per-refund and authorized-ceiling
+  variants, and its closing `refunded_total == 4000` assertion exposes the counted rejection.
+  Two predictions matched; **`wrong_counts_rejected` was predicted false_pass and was caught**
+  (I had not accounted for the example's final assertion). The unmodified starter fails
+  `test_over_refund_rejected` and `test_ticket_worked_example`.
+- **Hardened commit:** 8195086. Final grader additions: `test_unknown_payment_id_raises_value_error`
+  and `test_capture_once_and_within_authorization` (capture-once was only in the visible tests).
+  All variants `ok` under final.
+```text
+runs=12 final_ok=6/6 naive_false_pass=0 infra_errors=0 flips=0 wall_s=64.444
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
