@@ -520,6 +520,33 @@ runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=48.248
 runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=5.838
 ```
 
+<a id="10_batch_parser-v2"></a>
+### F-105 · 10_batch_parser · v2 redesign
+- **Why v1 was redesigned:** review R1. The v1 starter differed from the reference by 2 changed
+  lines (`or count != declared_count`); it already stripped CRLF, validated headers and trailers,
+  checked the hash total and rejected whole batches, so all three v1 wrongs (`wrong_partial_accept`,
+  `wrong_ignores_hash_total`, `wrong_crlf_slicing`) were regressions. v1 entries for this task
+  (including the "starter passed 9/9 final tests" finding, which concerned the v1 starter) are
+  **superseded by v2**.
+- **v2 starter:** interprets detail records only, splits the file on LF only, never looks at the
+  header or trailer, and returns the valid payments of a batch whose other detail lines were
+  malformed; plus error-description, summary and CSV support code (224 non-test lines).
+  `ref_diff_lines` 2 -> 63 (floor 25). The alternative has an independent regex-based records module
+  (alt distance 0.451; 0.736 while it shared the reference's records module).
+- **v2 wrong variants:** `wrong_partial_accept` (keeps accepting the valid details of a batch with
+  malformed details), `wrong_ignores_hash_total` (count and control total only), `wrong_crlf_slicing`
+  (full validation, but the starter's LF-only line splitting). None is regressive.
+- **Naive grader (commit fd8c3c3):** 3 tests: `test_valid_lf`, `test_ticket_worked_example` (the
+  two-payment batch in PROBLEM.md, accepted), `test_count_mismatch`. All three wrongs are
+  **false_pass**, as predicted: every accepted naive file is LF-terminated and internally consistent
+  (so CRLF and the hash total are never exercised), and the only rejection test corrupts the trailer
+  count, which all three wrongs still detect. The unmodified starter fails only `test_count_mismatch`.
+- **Hardened commit:** fd8c3c3. The v1 final grader (10 tests incl. the round-trip property) needed
+  no change; the starter fails 9 of 10.
+```text
+runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=7.574
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
