@@ -601,6 +601,23 @@ runs=12 final_ok=6/6 naive_false_pass=4 infra_errors=0 flips=0 wall_s=14.767
 runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=10.258
 ```
 
+<a id="05_double_entry-timeout-v2"></a>
+### F-111 · 05_double_entry · valid candidates · infra_error from the 90 s verifier timeout (v2 full matrix)
+- **Observed:** in the first clean full run of the v2 pack (`run_all --grader all`, 4 workers, tree clean at 6320cec) the
+  `reference` and `alt_valid` variants of task 05 hit the 90 s timeout under the final grader (`infra_error`, 91.3 s and
+  90.8 s, 0 tests collected in the junit file). The other 118 runs were fine. This is the same stateful-machine cost as
+  F-003: in the v1 matrix the same two valid runs already took 76.8 s and 76.9 s, 14 s below the limit, so the margin was
+  never large.
+- **Cause:** the `JournalMachine` state machine (20 examples x 12 steps) opens a new PostgreSQL connection per service call
+  and creates eight accounts per example; the valid solutions pass every step, so they run the full history, while wrong
+  variants stop early.
+- **Correction:** `timeout_seconds` for task 05 raised from 90 to 240 in task.toml. No test, example, step count, rule or
+  assertion was changed or removed, so this does not weaken the grader; it removes a false-fail (infra error) risk on
+  slower machines. The other nine tasks' slowest valid run is 28.6 s.
+- **Scope:** the two timeout runs are not candidate failures. A new complete matrix was taken after the change.
+- **Lesson:** time budgets must be measured on the slowest *valid* run, with headroom for parallel workers, not on the
+  typical run.
+
 <a id="02_interest_accrual-starter"></a>
 ### F-201 · 02_interest_accrual · starter · false_pass under naive
 - **Naive grader commit:** 5f8b094 · **Hardened commit:** 5f8b094 (final grader unchanged since d86532e)

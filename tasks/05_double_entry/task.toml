@@ -4,7 +4,7 @@ mandatory = true
 difficulty = "hard"
 tags = ["ledger", "postgres"]
 requires = ["postgres"]
-timeout_seconds = 90
+timeout_seconds = 240
 public_interface = ["ledger.service:LedgerService, Line, LedgerError, UnbalancedTransaction, InvalidAmount, UnknownAccount, AlreadyReversed, CannotReverseReversal"]
 leak_terms = ["jsonb_to_recordset"]
 [variants.reference]
