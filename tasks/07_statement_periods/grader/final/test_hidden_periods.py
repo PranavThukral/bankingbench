@@ -55,3 +55,18 @@ def test_thirteen_month_partition(zone, offsets):
             if first + timedelta(seconds=offset) < last]
     selected = [identifier for year, month in months for identifier in select(txns, zone, year, month)]
     assert sorted(selected) == sorted(t.id for t in txns)
+
+
+@pytest.mark.parametrize("args", [("Not/AZone", 2026, 1), ("", 2026, 1), ("UTC", 2026, 0), ("UTC", 2026, 13),
+                                  ("UTC", 1899, 1), ("UTC", 2099, 1), ("UTC", True, 1), ("UTC", 2026, True),
+                                  ("UTC", 2026.0, 1)])
+def test_invalid_zone_month_or_year_raises(args):
+    with pytest.raises(ValueError):
+        period_bounds(*args)
+    with pytest.raises(ValueError):
+        select([], *args)
+
+
+def test_supported_year_range_edges():
+    assert period_bounds("UTC", 1900, 1)[0] == datetime(1900, 1, 1, tzinfo=timezone.utc)
+    assert period_bounds("UTC", 2098, 12)[1] == datetime(2099, 1, 1, tzinfo=timezone.utc)
