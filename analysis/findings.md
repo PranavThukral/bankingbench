@@ -439,6 +439,32 @@ and marked superseded. Naive runs are `run_all --tasks NN --grader all` on a cle
 runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=4.555
 ```
 
+<a id="05_double_entry-v2"></a>
+### F-102 · 05_double_entry · v2 redesign
+- **Why v1 was redesigned:** review R1. The v1 starter differed from the reference by 2 changed
+  lines (the per-currency balance check), so "enforce the invariant" was a one-line bug hunt and
+  `wrong_non_atomic` / `wrong_double_reverse` described features the starter already had. v1
+  entries for this task are **superseded by v2**.
+- **v2 starter:** autocommit connection; lines are inserted one by one with no balance
+  validation, no transaction wrapper and no reversal (`reverse` and the reversal columns do not
+  exist); plus formatting and CSV import support code (211 non-test lines). `ref_diff_lines` 2 -> 52 (floor 40).
+- **v2 wrong variants:** `wrong_cross_currency_sum` (validates one grand total),
+  `wrong_non_atomic` (adds validation and reversal but keeps the starter's autocommit connection and
+  validates while inserting), `wrong_double_reverse` (reversal without the once-only check). None is regressive.
+- **Naive grader (commit 72eacbc):** 3 tests: `test_balanced_post`, `test_unbalanced_rejected`
+  (single-currency, asserts only `pytest.raises`), `test_ticket_example_post_then_reverse`
+  (balances only). All three wrongs are **false_pass**, as predicted: every naive fixture is
+  single-currency (so grand-total balancing is indistinguishable), no fixture reverses twice, and
+  no fixture references an unknown account or inspects state after a rejection. The unmodified
+  starter fails two naive tests (`test_unbalanced_rejected`, `test_ticket_example_post_then_reverse`).
+- **Hardened commit:** 72eacbc. The v1 final grader (10 tests incl. the stateful machine) needed
+  no change. Side observation: `wrong_non_atomic` also fails `test_cross_currency_cannot_net`
+  because its rejected cross-currency post leaves lines behind, which the test's trial-balance
+  comparison sees; the declared `test_unknown_account_is_atomic` also fails.
+```text
+runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=71.753
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
