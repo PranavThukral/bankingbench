@@ -21,5 +21,10 @@ start raise ValueError. These are dates, not timestamps; any datetime instead of
   precision at least 28 or exact arithmetic. Both money fields must be Decimal with exponent -2,
   even when zero. Return the resulting balance after each posting.
 
+Worked example: principal 1000.00, rate 0.0365 (so 0.0001 per day), start 2026-01-01, end 2026-03-01.
+Both methods post on 2026-01-31 (31 days) and 2026-02-28 (28 days). January: 1000.00 x 0.0365 x 31 / 365 =
+3.10, balance 1003.10. February: 1003.10 x 0.0365 x 28 / 365 = 2.8087..., posted as 2.81, balance 1005.91.
+(With `daily_compound` the unrounded January interest is 3.1048...; both methods round to the same cents here.)
+
 Only the declared interface is graded; internal representation and algorithms are unrestricted.
 Run from starter: `python -m pytest tests -q`. All examples and accounts are synthetic.
