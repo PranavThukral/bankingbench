@@ -1,6 +1,7 @@
 """SQLite persistence for the synthetic account adapter."""
 from contextlib import contextmanager
 import sqlite3
+from holds.seed import seed_accounts
 
 
 @contextmanager
@@ -20,11 +21,14 @@ def initialize(path):
         db.executescript("""CREATE TABLE IF NOT EXISTS accounts(id TEXT PRIMARY KEY, posted INTEGER, overdraft INTEGER);
             CREATE TABLE IF NOT EXISTS authorizations(id TEXT PRIMARY KEY, account TEXT, amount INTEGER,
                 created REAL, state TEXT)""")
-        db.executemany("INSERT OR IGNORE INTO accounts VALUES (?,?,?)",
-                       [("acct_standard", 10000, 0), ("acct_flex", 10000, 5000)])
+        seed_accounts(db)
+
+
+HOLD_SECONDS = 7 * 86400
 
 
 def active_total(db, account, now):
+    """Sum of the account's active holds that have not yet expired at `now` (epoch seconds)."""
     return db.execute("""SELECT COALESCE(SUM(amount),0) FROM authorizations
         WHERE account=? AND state='active'""", (account,)).fetchone()[0]
 
@@ -35,3 +39,18 @@ def account(db, identifier):
 
 def authorization(db, identifier):
     return db.execute("SELECT * FROM authorizations WHERE id=?", (identifier,)).fetchone()
+
+
+def all_authorizations(db):
+    return db.execute("SELECT * FROM authorizations ORDER BY created, id").fetchall()
+
+
+def accounts_overview(db):
+    """Every account with the number of authorization records in each state."""
+    rows = db.execute("SELECT id, posted, overdraft FROM accounts ORDER BY id").fetchall()
+    states = db.execute("SELECT account, state, COUNT(*) AS n FROM authorizations GROUP BY account, state").fetchall()
+    counts = {}
+    for item in states:
+        counts.setdefault(item["account"], {})[item["state"]] = item["n"]
+    return [dict(id=r["id"], posted=r["posted"], overdraft=r["overdraft"], authorizations=counts.get(r["id"], {}))
+            for r in rows]

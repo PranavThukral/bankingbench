@@ -17,6 +17,16 @@ def test_full_capture(tmp_path):
     assert client.get("/accounts/acct_standard/balance").json() == {"posted_minor": 9000, "available_minor": 9000}
 
 
-def test_initial_balance(tmp_path):
+def test_ticket_worked_example(tmp_path):
     client = TestClient(create_app(tmp_path / "db", Clock()))
-    assert client.get("/accounts/acct_standard/balance").json() == {"posted_minor": 10000, "available_minor": 10000}
+    identifier = client.post("/accounts/acct_standard/authorizations", json={"amount_minor": 3000}).json()["auth_id"]
+    assert client.get("/accounts/acct_standard/balance").json() == {"posted_minor": 10000, "available_minor": 7000}
+    assert client.post(f"/authorizations/{identifier}/capture", json={"amount_minor": 1200}).status_code == 200
+    assert client.get("/accounts/acct_standard/balance").json() == {"posted_minor": 8800, "available_minor": 8800}
+
+
+def test_invalid_amount_rejected(tmp_path):
+    client = TestClient(create_app(tmp_path / "db", Clock()))
+    result = client.post("/accounts/acct_standard/authorizations", json={"amount_minor": 0})
+    assert result.status_code == 422
+    assert result.json()["error"]["code"] == "invalid_amount"

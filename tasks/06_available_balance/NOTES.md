@@ -1,8 +1,13 @@
-# Private draft — holds reviewer notes
+# Private draft - holds reviewer notes
 
-The reference filters active holds at read time; the alternative persists expiry transitions
-at each transaction boundary. Both use an injected clock and share only schema utilities.
-Wrongs omit a hold dimension, leave a partial remainder, or fail to retire expired records.
+v2 starter (see analysis/findings.md F-103): authorizations are recorded and approved against posted
+funds plus overdraft, and `available_minor` always equals `posted_minor`; there is no holds model, no
+capture or void endpoint and no expiry. The wrong variants are plausible completions of that starter:
+`wrong_available_ignores_holds` adds capture, void and expiry but keeps the starter's availability;
+`wrong_partial_capture_keeps_remainder` adds holds but leaves the unused part of a partially captured
+hold active; `wrong_expired_holds_count` adds holds and rejects expired capture/void but still counts
+expired active records against availability. The alternative retires expired records at transaction
+entry and recomputes availability from the remaining active records.
 
 ## Blind review
 Author self-review clarified account seeding, exact expiry instant, partial-capture response,

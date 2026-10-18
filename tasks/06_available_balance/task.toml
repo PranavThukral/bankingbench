@@ -16,12 +16,12 @@ structural_difference = "Retires expired records at transaction entry and dispat
 kind = "wrong"
 bug = "Authorizes against posted funds, ignoring existing holds."
 must_fail = ["test_existing_holds_reduce_available"]
-predicted_naive = "false_pass"
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_partial_capture_keeps_remainder]
 kind = "wrong"
 bug = "Leaves the remainder held after a partial capture."
 must_fail = ["test_partial_capture_releases_remainder"]
-predicted_naive = "false_pass"
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_expired_holds_count]
 kind = "wrong"
 bug = "Counts expired active records against availability."

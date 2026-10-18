@@ -22,5 +22,10 @@ All money is integer CAD minor units (2 dp). All amounts must be positive ints, 
 - Auth ids are nonempty unique strings; available may be negative within overdraft.
   State survives creating another app on the same file. Operations are atomic and per account.
 
+Worked example (`acct_standard`, CAD minor units): authorize 3000 -> 201 and the balance is
+`{posted_minor: 10000, available_minor: 7000}`. Capture 1200 -> 200 and the balance is
+`{posted_minor: 8800, available_minor: 8800}`: the 1200 is deducted from posted and the unused 1800 of the
+hold is released. A further authorization of 8801 is declined with 402 `insufficient_funds`; 8800 is approved.
+
 Tests use the HTTP interface and the injected clock only. No real accounts, system clock delays
 or network payments. Run `python -m pytest tests -q` from starter.

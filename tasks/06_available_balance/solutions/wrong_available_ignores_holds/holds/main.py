@@ -2,22 +2,9 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from holds.clock import instant
-from holds.storage import transaction, initialize, account, authorization
-
-
-def error(status, code):
-    return JSONResponse({"error": {"code": code, "message": code}}, status_code=status)
-
-
-async def amount(request):
-    try:
-        body = await request.json()
-    except ValueError:
-        return None
-    if not isinstance(body, dict) or set(body) != {"amount_minor"}:
-        return None
-    value = body["amount_minor"]
-    return value if type(value) is int and value > 0 else None
+from holds.errors import error
+from holds.storage import transaction, initialize, account, authorization, HOLD_SECONDS
+from holds.validation import amount
 
 
 def create_app(database_path, clock):
@@ -55,7 +42,7 @@ def create_app(database_path, clock):
             auth = authorization(db, id)
             if auth is None:
                 return error(404, "not_found")
-            if auth["state"] != "active" or instant(clock) >= auth["created"] + 7 * 86400:
+            if auth["state"] != "active" or instant(clock) >= auth["created"] + HOLD_SECONDS:
                 return error(409, "authorization_closed")
             if capture is not None:
                 if capture > auth["amount"]:

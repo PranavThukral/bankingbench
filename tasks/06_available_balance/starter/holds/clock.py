@@ -18,3 +18,19 @@ def instant(clock):
     if result.utcoffset() is None:
         raise ValueError("aware clock required")
     return result.timestamp()
+
+
+class ManualClock:
+    """Settable clock for local development and demos; time only moves when advance() is called."""
+
+    def __init__(self, start):
+        if start.utcoffset() is None:
+            raise ValueError("aware start required")
+        self._now = start
+
+    def now(self):
+        return self._now
+
+    def advance(self, delta):
+        self._now = self._now + delta
+        return self._now
