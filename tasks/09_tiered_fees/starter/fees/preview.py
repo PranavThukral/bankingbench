@@ -1,14 +1,19 @@
 """Offline fee preview input/output."""
 import argparse
 import csv
-import json
 from pathlib import Path
-from fees.models import Schedule, FeePreview
+from fees.catalog import get_schedule
+from fees.loader import load_schedule_file
+from fees.models import FeePreview
+from fees.report import render_summary
 from fees.schedule import compute_fee
 
 
-def read_schedule(path):
-    return Schedule.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
+def read_schedule(source):
+    """A schedule file path, or `name:<catalog name>` for a built-in synthetic schedule."""
+    if str(source).startswith("name:"):
+        return get_schedule(str(source)[5:])
+    return load_schedule_file(source)
 
 
 def preview(amounts, schedule):
@@ -16,8 +21,18 @@ def preview(amounts, schedule):
 
 
 def read_amounts(path):
+    """Read the `amount_minor` column; report the file line of any unusable value."""
+    amounts = []
     with Path(path).open(encoding="utf-8", newline="") as stream:
-        return [int(row["amount_minor"]) for row in csv.DictReader(stream)]
+        reader = csv.DictReader(stream)
+        if "amount_minor" not in (reader.fieldnames or []):
+            raise ValueError("amount_minor column required")
+        for row in reader:
+            text = (row["amount_minor"] or "").strip()
+            if not text.isdigit():
+                raise ValueError(f"line {reader.line_num}: amount_minor must be a nonnegative integer")
+            amounts.append(int(text))
+    return amounts
 
 
 def write_preview(path, rows):
@@ -29,11 +44,15 @@ def write_preview(path, rows):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Preview synthetic payment fees")
-    parser.add_argument("schedule", type=Path)
+    parser.add_argument("schedule", help="schedule JSON file or name:<catalog name>")
     parser.add_argument("amounts", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--summary", action="store_true", help="also print totals for the preview")
     args = parser.parse_args(argv)
-    write_preview(args.output, preview(read_amounts(args.amounts), read_schedule(args.schedule)))
+    rows = preview(read_amounts(args.amounts), read_schedule(args.schedule))
+    write_preview(args.output, rows)
+    if args.summary:
+        print(render_summary(rows), end="")
 
 
 if __name__ == "__main__":

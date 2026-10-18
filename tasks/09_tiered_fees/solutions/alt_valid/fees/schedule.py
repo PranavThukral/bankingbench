@@ -2,9 +2,21 @@ from decimal import Decimal, ROUND_HALF_UP, localcontext
 from fees.models import Tier, Schedule  # noqa: F401
 
 
+def check(schedule):
+    bounds = [t.up_to_minor for t in schedule.tiers]
+    if not bounds or bounds[-1] is not None or None in bounds[:-1]:
+        raise ValueError("bounded tiers then one unbounded tier required")
+    bounded = bounds[:-1]
+    if any(later <= earlier for earlier, later in zip(bounded, bounded[1:])):
+        raise ValueError("tier bounds must strictly increase")
+    if not 0 <= schedule.min_fee_minor <= schedule.max_fee_minor:
+        raise ValueError("invalid fee limits")
+
+
 def compute_fee(amount_minor, schedule):
     if not isinstance(amount_minor, int) or isinstance(amount_minor, bool) or amount_minor < 0:
         raise ValueError("invalid payment amount")
+    check(schedule)
     selected = next(t for t in schedule.tiers if t.up_to_minor is None or t.up_to_minor >= amount_minor)
     with localcontext() as ctx:
         ctx.prec = max(34, len(str(amount_minor)) + len(str(selected.bps)) + 10)

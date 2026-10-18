@@ -24,3 +24,11 @@ def test_preview_and_csv(tmp_path):
     path = tmp_path / "preview.csv"
     write_preview(path, rows)
     assert "1000,15,1015" in path.read_text(encoding="utf-8")
+
+
+def test_read_amounts_reports_the_bad_line(tmp_path):
+    import pytest
+    path = tmp_path / "amounts.csv"
+    path.write_text("amount_minor\n100\n-5\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="line 3"):
+        read_amounts(path)

@@ -28,13 +28,13 @@ def test_invalid_amount(amount):
                                    [Tier(None, 1, 0), Tier(None, 2, 0)]])
 def test_invalid_tier_order(tiers):
     with pytest.raises(ValueError):
-        Schedule(tiers, 0, 100)
+        compute_fee(100, Schedule(tiers, 0, 100))
 
 
 def test_invalid_limits():
     for floor, cap in [(-1, 10), (20, 10), (0, -1)]:
         with pytest.raises(ValueError):
-            Schedule([Tier(None, 100, 0)], floor, cap)
+            compute_fee(100, Schedule([Tier(None, 100, 0)], floor, cap))
 
 
 def test_invalid_tier_components():
