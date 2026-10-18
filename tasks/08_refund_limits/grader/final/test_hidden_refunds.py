@@ -64,6 +64,29 @@ def test_invalid_and_uncaptured(tmp_path):
     assert s.refunded_total(p) == 0
 
 
+def test_unknown_payment_id_raises_value_error(tmp_path):
+    s = RefundService(tmp_path / "db")
+    for call in (lambda: s.capture(99, 1), lambda: s.refund(99, 1), lambda: s.refunded_total(99)):
+        with pytest.raises(ValueError):
+            call()
+    with pytest.raises(InvalidAmount):
+        s.refund(99, 0)
+
+
+def test_capture_once_and_within_authorization(tmp_path):
+    s = RefundService(tmp_path / "db")
+    p = s.create_payment(100)
+    with pytest.raises(InvalidAmount):
+        s.capture(p, 101)
+    s.capture(p, 60)
+    for amount in (60, 50, 100):
+        with pytest.raises(InvalidAmount):
+            s.capture(p, amount)
+    assert s.refund(p, 60) > 0
+    with pytest.raises(RefundExceedsCaptured):
+        s.refund(p, 1)
+
+
 @given(capture=st.integers(1, 100000), extra=st.integers(0, 100000),
        attempts=st.lists(st.integers(1, 100000), max_size=30))
 def test_refund_sequence_matches_greedy_oracle(capture, extra, attempts):
