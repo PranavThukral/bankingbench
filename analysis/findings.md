@@ -610,6 +610,28 @@ runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=9.912
 runs=12 final_ok=6/6 naive_false_pass=0 infra_errors=0 flips=0 wall_s=64.444
 ```
 
+<a id="01_idempotent_payments-v2"></a>
+### F-108 · 01_idempotent_payments · v2 starter adjustment
+- **Why:** review R1 floor check. The v1 starter was already a real feature gap (no idempotency at
+  all) but `ref_diff_lines` was 33, below the hard floor of 40. This entry does **not** replace the
+  v1 findings for this task; the wrong variants are unchanged in spirit.
+- **Change:** the starter no longer contains the request fingerprint (`PaymentRequest.fingerprint`)
+  or the `Idempotency-Key` length validation (`idempotency_key_required`); both are now part of the
+  ticket. `ref_diff_lines` 33 -> 41. The reference and the three wrongs carry the reference
+  `contracts.py`; the alternative performs the key check itself (alt distance 0.282). Reporting
+  support code keeps the starter at 248 non-test lines.
+- **Regressive variant:** `wrong_key_scope`. The starter has no keys, so it passes
+  `test_same_key_different_merchants_independent` trivially; rationale recorded in task.toml and NOTES.md.
+  The other two wrongs (`wrong_retry_race`, `wrong_inmemory_cache`) fail must_fail tests the starter fails.
+- **Naive grader (commit bf30814):** unchanged, 3 tests: `test_create`, `test_retry` (the ticket's
+  retry scenario, one merchant, sequential), `test_missing_key`. All three wrongs remain **false_pass**
+  as predicted: the naive fixtures use one merchant, never restart the app and send duplicates
+  sequentially. The starter now fails `test_retry` and `test_missing_key`.
+- **Hardened commit:** bf30814 (final grader unchanged; starter fails 11 of 12 final tests).
+```text
+runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=35.110
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
