@@ -632,6 +632,29 @@ runs=12 final_ok=6/6 naive_false_pass=0 infra_errors=0 flips=0 wall_s=64.444
 runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=35.110
 ```
 
+<a id="02_interest_accrual-v2"></a>
+### F-109 · 02_interest_accrual · v2 starter and naive adjustment
+- **Why:** review R2 and R4. The v1 starter was already a real feature gap (a float whole-month
+  implementation, `ref_diff_lines` 38 >= 25) and its wrong variants were not redesigned, but it had
+  only 147 non-test lines (S1 floor 200) and a one-test naive grader. This entry does **not**
+  replace the v1 findings for this task.
+- **Change:** report and CSV support modules (starter 213 non-test lines); a worked example in
+  PROBLEM.md (1000.00 at 0.0365 from 2026-01-01 to 2026-03-01: 3.10 / 1003.10 then 2.81 / 1005.91, same
+  for both methods); naive grader expanded to three tests, still tolerance-based (`abs(diff) <= 0.01`,
+  any numeric type): `test_examples`, `test_ticket_worked_example[simple_monthly|daily_compound]`,
+  `test_empty_period_and_reversed_dates`.
+- **Regressive variant:** `wrong_round_daily`. The float starter never rounds daily, so it passes
+  `test_small_balance_daily_accrues`; rationale in task.toml and NOTES.md.
+- **Naive grader (commit 5f8b094):** all three wrongs remain **false_pass**, as predicted. The
+  worked example is within one cent for float arithmetic, half-up and per-day rounding (3.1048...
+  rounds to 3.10 and 2.8087... to 2.81 under every one of them), and no naive input is a half-cent tie
+  or a large principal. The **unmodified float starter also passes the naive grader 4/4**
+  (`false_pass`): its error on every naive input is below the 0.01 tolerance.
+- **Hardened commit:** 5f8b094 (final grader unchanged; the starter fails 7 of 8 final tests).
+```text
+runs=12 final_ok=6/6 naive_false_pass=4 infra_errors=0 flips=0 wall_s=14.767
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
