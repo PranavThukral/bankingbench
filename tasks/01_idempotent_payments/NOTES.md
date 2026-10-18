@@ -24,11 +24,12 @@ No unresolved graded ambiguity after the ticket revision. This is not an indepen
 ## Flake measurement
 
 Native Windows / PostgreSQL 16.13, 10 simultaneous callers, 150 ms gateway delay, 25 fresh-key rounds per test.
-60 final runs (20 per variant), 0 flips, all 60 verdicts ok. Wall time 152.592 s.
+v2 re-measurement (starter changed, so the 20-repeat check was re-run; commit 1f1fa3e, clean tree):
+60 final runs (20 per variant), 0 flips, all 60 verdicts ok. Wall time 149.441 s.
 Per-run duration_s in repeat order:
 
-- reference: 13.375, 13.363, 13.355, 13.313, 13.524, 14.034, 13.765, 14.007, 11.629, 11.373, 11.759, 11.776, 11.744, 11.724, 11.488, 11.506, 12.831, 12.77, 12.835, 12.823
-- alt_valid: 11.155, 11.127, 11.534, 11.224, 14.209, 14.117, 14.372, 14.435, 12.004, 12.011, 11.959, 11.839, 12.051, 12.04, 11.933, 11.789, 11.98, 11.981, 11.814, 11.943
-- wrong_retry_race: 5.157, 5.154, 4.952, 5.034, 5.528, 5.445, 5.332, 5.258, 6.434, 6.477, 6.408, 6.477, 5.253, 5.25, 5.245, 5.04, 5.335, 5.19, 5.27, 5.21
+- reference: 13.02, 12.577, 12.788, 12.738, 12.861, 12.731, 12.8, 12.917, 12.473, 12.479, 12.751, 12.489, 12.737, 12.733, 12.883, 12.804, 12.75, 12.489, 12.681, 12.685
+- alt_valid: 11.321, 11.304, 11.212, 11.318, 11.523, 11.385, 11.76, 11.727, 11.295, 11.281, 11.534, 11.466, 11.753, 11.659, 11.828, 11.745, 12.634, 12.548, 12.544, 12.524
+- wrong_retry_race: 5.362, 5.279, 5.119, 5.252, 4.921, 4.841, 4.741, 4.735, 4.979, 4.991, 5.289, 5.103, 5.531, 5.53, 5.556, 5.549, 5.558, 5.549, 5.345, 5.349
 
 Self-review confirmation (2026-10-17): re-read only PROBLEM.md and starter files from disk; the three predictions above follow from the ticket. No additional graded ambiguity found. Independent review remains owed.

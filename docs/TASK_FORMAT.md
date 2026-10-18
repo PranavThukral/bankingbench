@@ -53,6 +53,7 @@ kind = "wrong"
 bug  = "Check-then-insert: SELECT for existing key, call gateway, INSERT. Concurrent duplicates both charge."
 must_fail = ["test_concurrent_duplicates_charge_once"]
 predicted_naive = "false_pass"                    # prediction recorded before running naive grader
+# regression_rationale = "..."                   # required only if the starter already passes a must_fail test
 ```
 Expected outcome comes from `kind`: `reference` and `alt_valid` → PASS, `wrong` → FAIL. The
 implicit variant `starter` (no overlay) is always run and expected to FAIL under `final`. This
@@ -63,7 +64,11 @@ guards against tasks that are solved by doing nothing.
   mode, currency minor units, timezone, error codes), the public interface, and "how to run tests".
   It must state every rule a grader checks. It must not hint at the trap ("be careful of races"
   is a leak; "concurrent duplicate requests must result in a single charge" is a requirement).
-- **Starter** is 200–600 LOC of runnable, idiomatic code with the defect or missing feature.
+- **Starter** is 200–600 LOC of non-test package code (tests and conftest.py are not counted): a runnable, idiomatic
+  repository in which the ticket's feature is genuinely missing, with supporting code (models, I/O, CLI, storage) that is
+  not the answer. `check_realism` requires `ref_diff_lines` (changed lines from starter to reference over `.py` files) of at
+  least 40 for hard, 25 for medium and 12 for easy tasks, and requires a `regression_rationale` (repeated in NOTES.md) for
+  every wrong variant whose declared `must_fail` tests the starter already passes.
   No `TODO` comments that name the fix. No dead code that contains the answer.
 - **Visible tests** (`starter/tests/`) pass the happy path and include ≥ 1 test the starter fails,
   so the ticket is observable. **Every wrong variant must pass all visible tests** (this is

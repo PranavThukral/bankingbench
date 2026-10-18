@@ -12,14 +12,16 @@ first. It passes every sequential test, but two simultaneous retries both get ch
 
 **40–65 s — naive vs final.** *Open `results/final/report.html`, scroll from the naive grid to
 the final grid.*
-"Each row is a task; each column a solution. Under the naive graders, 29 of 30 wrong solutions
-pass, which is red. The hardened graders reject all 30, and still accept both the reference and a
+"Each row is a task; each column a solution. Under the naive graders, 20 of 30 wrong solutions
+pass, which is red (they include each ticket's own example and still miss restarts, ties, bounds and clock changes). The hardened graders reject all 30, and still accept both the reference and a
 structurally different correct solution for every task. Zero flips across repeated runs."
 
 **65–80 s — one finding.** *Open `analysis/findings.md`, the task 10 finding.*
 "The hardening process has its own failure mode. My first hardened grader for the batch-file
 parser dropped an earlier regression test, so the unmodified starter passed. Running the starter
-through every grader version caught it. That's the kind of check that scales to a task factory."
+through every grader version caught it. And a review of my own starters found they were one line
+away from the answer, so I rebuilt them with the feature genuinely missing; that is what moved the
+naive false-pass count from 29 to 20. That's the kind of check that scales to a task factory."
 
 **80–90 s — Harbor export.** *Show `dist/harbor/01_idempotent_payments/`.*
 "Every task exports to the Harbor format with an oracle check: the reference solution scores 1,
