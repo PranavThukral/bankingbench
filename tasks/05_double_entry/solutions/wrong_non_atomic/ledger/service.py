@@ -2,6 +2,7 @@ from collections import defaultdict
 import psycopg
 from ledger.models import (Line, LedgerError, UnbalancedTransaction, InvalidAmount, UnknownAccount,
                            AlreadyReversed, CannotReverseReversal, CURRENCIES, validate_lines)  # noqa: F401
+from ledger.schema import SCHEMA
 
 
 __all__ = ["LedgerService", "Line", "LedgerError", "UnbalancedTransaction", "InvalidAmount",
@@ -12,14 +13,10 @@ class LedgerService:
     def __init__(self, database_url):
         self.url = database_url
         with self.connect() as conn:
-            conn.execute("""CREATE TABLE IF NOT EXISTS accounts(code text PRIMARY KEY, currency text NOT NULL);
-                CREATE TABLE IF NOT EXISTS transactions(id bigserial PRIMARY KEY, memo text,
-                    reversal_of bigint REFERENCES transactions(id), reversed_by bigint);
-                CREATE TABLE IF NOT EXISTS lines(txn bigint REFERENCES transactions(id),
-                    code text REFERENCES accounts(code), side text, amount bigint)""")
+            conn.execute(SCHEMA)
 
     def connect(self):
-        return psycopg.connect(self.url)
+        return psycopg.connect(self.url, autocommit=True)
 
     def create_account(self, code, currency):
         if not code or currency not in CURRENCIES:
@@ -29,46 +26,35 @@ class LedgerService:
             if conn.execute("SELECT currency FROM accounts WHERE code=%s", (code,)).fetchone()[0] != currency:
                 raise LedgerError("currency mismatch")
 
-    def _validate(self, conn, lines):
-        validate_lines(lines)
-        totals = defaultdict(int)
-        for line in lines:
-            account = conn.execute("SELECT currency FROM accounts WHERE code=%s", (line.account_code,)).fetchone()
-            if account is None:
-                raise UnknownAccount(line.account_code)
-            totals[account[0]] += line.amount_minor * (1 if line.side == "debit" else -1)
-        if any(totals.values()):
-            raise UnbalancedTransaction("per-currency sums must balance")
-
     def _insert(self, conn, lines, memo, reversal_of=None):
         txn = conn.execute("INSERT INTO transactions(memo,reversal_of) VALUES (%s,%s) RETURNING id",
                            (memo, reversal_of)).fetchone()[0]
-        with conn.cursor() as cursor:
-            cursor.executemany("INSERT INTO lines VALUES (%s,%s,%s,%s)",
-                               [(txn, line.account_code, line.side, line.amount_minor) for line in lines])
+        for line in lines:
+            conn.execute("INSERT INTO lines VALUES (%s,%s,%s,%s)",
+                         (txn, line.account_code, line.side, line.amount_minor))
         return txn
 
     def post(self, lines, memo):
         validate_lines(lines)
         with self.connect() as conn:
             txn = conn.execute("INSERT INTO transactions(memo) VALUES (%s) RETURNING id", (memo,)).fetchone()[0]
-            conn.commit()
             totals = defaultdict(int)
             for line in lines:
-                account = conn.execute("SELECT currency FROM accounts WHERE code=%s", (line.account_code,)).fetchone()
+                account = conn.execute("SELECT currency FROM accounts WHERE code=%s",
+                                       (line.account_code,)).fetchone()
                 if account is None:
                     raise UnknownAccount(line.account_code)
                 totals[account[0]] += line.amount_minor * (1 if line.side == "debit" else -1)
                 conn.execute("INSERT INTO lines VALUES (%s,%s,%s,%s)",
                              (txn, line.account_code, line.side, line.amount_minor))
-                conn.commit()
             if any(totals.values()):
                 raise UnbalancedTransaction("per-currency sums must balance")
             return txn
 
     def reverse(self, txn_id, memo):
         with self.connect() as conn:
-            row = conn.execute("SELECT reversal_of,reversed_by FROM transactions WHERE id=%s FOR UPDATE", (txn_id,)).fetchone()
+            row = conn.execute("SELECT reversal_of,reversed_by FROM transactions WHERE id=%s FOR UPDATE",
+                               (txn_id,)).fetchone()
             if row is None:
                 raise LedgerError("unknown transaction")
             if row[0] is not None:

@@ -28,5 +28,11 @@ UnbalancedTransaction, InvalidAmount, UnknownAccount, AlreadyReversed, CannotRev
 - Validation priority: line count, amount/side, accounts, balancing. On reversing a reversal,
   CannotReverseReversal takes priority. Memo is arbitrary synthetic text.
 
+Worked example (CAD accounts `cash` and `revenue`, synthetic):
+`post([Line("cash","debit",5000), Line("revenue","credit",5000)], "sale")` returns id 1;
+afterwards `balance("cash") == 5000`, `balance("revenue") == -5000` and `trial_balance()["CAD"] == (5000, 5000)`.
+`reverse(1, "undo sale")` returns a different id; both balances are then 0 and the CAD trial balance is
+`(10000, 10000)`. Reversing id 1 again raises AlreadyReversed.
+
 The service may create its own tables; tests observe only the declared methods. Run
 `python -m pytest tests -q` from starter with DATABASE_URL pointing at a disposable database.

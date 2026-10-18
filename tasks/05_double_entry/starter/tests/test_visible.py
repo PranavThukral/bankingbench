@@ -29,3 +29,11 @@ def test_account_creation_is_idempotent():
     s.create_account(a, "CAD")
     s.create_account(b, "CAD")
     assert s.balance(a) == s.balance(b) == 0
+
+
+def test_reverse_restores_balances():
+    s, a, b = accounts()
+    txn = s.post([Line(a, "debit", 70), Line(b, "credit", 70)], "synthetic")
+    reversal = s.reverse(txn, "undo")
+    assert reversal != txn
+    assert (s.balance(a), s.balance(b)) == (0, 0)

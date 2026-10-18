@@ -1,8 +1,13 @@
-# Private draft — journal reviewer notes
+# Private draft - journal reviewer notes
 
-Rowwise reference validation occurs within one transaction. The independent valid alternative
-checks a JSON recordset using SQL aggregation and reverses by INSERT SELECT. Three wrong
-implementations isolate cross-currency netting, per-line commit, and missing reversal lifecycle checks.
+v2 starter (see analysis/findings.md F-102): the starter posts lines on an autocommit connection
+with no balance validation, no transaction wrapper and no reversal (no `reverse` method, no
+reversal columns). Per-currency balance validation, atomic posting and the reversal lifecycle are
+the ticket. The wrong variants are plausible completions of that starter: `wrong_cross_currency_sum`
+validates balance but sums one grand total; `wrong_non_atomic` adds validation and reversal but keeps
+the starter's autocommit connection and validates while inserting; `wrong_double_reverse` adds
+reversal without the once-only check. The independent valid alternative checks a JSON recordset
+using SQL aggregation and reverses by INSERT SELECT; it ignores the starter's schema module.
 
 ## Blind review
 Author self-review from ticket and starter. Ambiguities: trial_balance key/value meaning,
