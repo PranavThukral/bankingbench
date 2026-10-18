@@ -16,12 +16,12 @@ structural_difference = "Reconstructs state by replaying an append-only JSON eve
 kind = "wrong"
 bug = "Checks each refund against capture, ignoring earlier refunds."
 must_fail = ["test_cumulative_partials"]
-predicted_naive = "false_pass"
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_uses_authorized]
 kind = "wrong"
 bug = "Uses the authorized amount as the refund ceiling."
 must_fail = ["test_capture_less_than_authorization"]
-predicted_naive = "false_pass"
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_counts_rejected]
 kind = "wrong"
 bug = "Includes rejected attempts in the remaining refund budget."

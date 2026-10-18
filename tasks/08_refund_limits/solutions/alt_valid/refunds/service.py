@@ -23,13 +23,21 @@ def append(connection, tag, owner, payload):
     return inserted.lastrowid
 
 
+def known_state(connection, number):
+    state = reconstruct(connection, number)
+    if not state["known"]:
+        raise ValueError(f"unknown payment {number!r}")
+    return state
+
+
 def reconstruct(connection, number):
-    state = {"ceiling": 0, "settled": None, "returned": 0}
+    state = {"known": False, "ceiling": 0, "settled": None, "returned": 0}
     history = connection.execute("SELECT tag,payload FROM event_log WHERE number=? OR owner=? ORDER BY number",
                                  [number, number])
     for tag, payload in history:
         value = json.loads(payload)["minor"]
         if tag == "approval":
+            state["known"] = True
             state["ceiling"] = value
         elif tag == "settlement":
             state["settled"] = value
@@ -52,7 +60,7 @@ class RefundService:
     def capture(self, id, amount_minor):
         validate_amount(amount_minor)
         with journal(self.filename) as connection:
-            state = reconstruct(connection, id)
+            state = known_state(connection, id)
             if state["settled"] is not None or amount_minor > state["ceiling"]:
                 raise InvalidAmount("capture not permitted")
             append(connection, "settlement", id, {"minor": amount_minor})
@@ -60,7 +68,7 @@ class RefundService:
     def refund(self, id, amount_minor):
         validate_amount(amount_minor)
         with journal(self.filename) as connection:
-            state = reconstruct(connection, id)
+            state = known_state(connection, id)
             if state["settled"] is None:
                 raise PaymentNotCaptured(id)
             if state["returned"] + amount_minor > state["settled"]:
@@ -69,4 +77,4 @@ class RefundService:
 
     def refunded_total(self, id):
         with journal(self.filename) as connection:
-            return reconstruct(connection, id)["returned"]
+            return known_state(connection, id)["returned"]

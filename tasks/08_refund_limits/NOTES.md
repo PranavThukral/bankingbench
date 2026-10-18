@@ -1,8 +1,14 @@
-# Private draft — refund reviewer notes
+# Private draft - refund reviewer notes
 
-The correct counter-based service and append-only event alternative share only the public errors
-and validation. Wrong candidates isolate a per-request check, the wrong amount basis, or counting
-rejected attempts. The last bug is over-strict, so the grader checks successful recovery too.
+v2 starter (see analysis/findings.md F-107): the starter records any refund of a captured payment
+with no upper limit, lets a payment be captured repeatedly, runs without an explicit write
+transaction and fails with an AttributeError on an unknown payment id. The cumulative cap on captured
+funds, capture-once, atomic write transactions and the unknown-id rule are the ticket. The wrong
+variants are plausible completions of that starter: `wrong_checks_single_refund` caps each refund at
+the captured amount but not the running total; `wrong_uses_authorized` caps the running total at the
+authorized amount; `wrong_counts_rejected` caps correctly but adds a rejected attempt to the
+refunded counter before raising. The correct counter-based service and the append-only event
+alternative share only the public errors and validation.
 
 ## Blind review
 Author self-review: repeated capture, bool/zero, capture before refund and validation priority
