@@ -493,6 +493,33 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=71.753
 runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=48.248
 ```
 
+<a id="09_tiered_fees-v2"></a>
+### F-104 · 09_tiered_fees · v2 redesign
+- **Why v1 was redesigned:** review R1. The v1 starter differed from the reference by 2 changed
+  lines (the clamp). It already selected tiers, rounded half up in integer arithmetic and validated
+  everything, so all three v1 wrongs (`wrong_exclusive_boundary`, `wrong_float_bps`, `wrong_marginal`)
+  were regressions of code the starter got right. v1 entries for this task are **superseded by v2**.
+  The v1 starter (198 lines including tests) also failed S1.
+- **v2 starter:** prices every amount with the first tier's rate using truncating integer division;
+  no tier selection, half-up rounding, clamp, amount validation or schedule validation (the latter
+  moved from the `Schedule` constructor into `compute_fee`, and PROBLEM.md now says so); plus
+  loader, catalog and report support code (216 non-test lines). `ref_diff_lines` 2 -> 35 (floor 25).
+- **v2 wrong variants:** `wrong_exclusive_boundary` (`<` in tier selection), `wrong_float_bps`
+  (half-up via a float percentage), `wrong_marginal` (bands priced separately). None is regressive.
+- **Naive grader (commit e0e65b9):** 3 tests: `test_tier_midpoints` (5000/15000/30000, no clamp),
+  `test_ticket_worked_example_with_clamps` (adds amounts 100 and 30000 against a 25/100 clamp, away
+  from every tier boundary), `test_negative_amount_rejected`. `wrong_exclusive_boundary` and
+  `wrong_float_bps` are **false_pass**: no naive amount sits on a boundary or on a half-unit
+  tie. `wrong_marginal` is **caught** (`ok_wrong_reason`: `test_tier_midpoints` and
+  `test_ticket_worked_example_with_clamps` fail because 15000 prices to 145, not 95). All predictions
+  matched; the unmodified starter fails all three naive tests.
+- **Hardened commit:** 68ae615. One final-grader addition:
+  `test_invalid_schedule_raises_for_any_amount` (six invalid schedules x three amounts), because
+  schedule validation is now a compute_fee obligation. Every variant stayed `ok` under final.
+```text
+runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=5.838
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
