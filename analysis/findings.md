@@ -547,6 +547,37 @@ runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=5.838
 runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=7.574
 ```
 
+<a id="07_statement_periods-v2"></a>
+### F-106 · 07_statement_periods · v2 redesign
+- **Why v1 was redesigned:** review R1 (5 changed lines between starter and reference; the starter
+  already shared the reference's structure and differed mainly in the zone object). The v1 starter
+  (131 non-test lines) was also below the S1 floor once tests are excluded. v1 entries for this
+  task are **superseded by v2**.
+- **v2 starter:** every account's month is derived from UTC (`account_tz` is ignored), equal instants
+  keep input order, and there is no time-zone, month or year validation; plus month arithmetic,
+  rendering and a range preview (217 non-test lines). PROBLEM.md gained the validation rule and a
+  Toronto worked example. `ref_diff_lines` 5 -> 27 (floor 25).
+- **v2 wrong variants:** `wrong_utc_month` (validates, keeps UTC boundaries),
+  `wrong_inclusive_2359` (zone-aware, period ends one second early), `wrong_fixed_offset`
+  (standard-time offset all year). **One is regressive:** `wrong_inclusive_2359`, because the UTC
+  starter already ends the period at the exclusive next-month start, so `test_microsecond_boundary`
+  passes on the starter. The rationale is in task.toml and NOTES.md: moving to local time invites
+  rewriting the end as the last second of the local month.
+- **Naive grader (commit f030a1e):** 3 tests: `test_midmonth_utc`,
+  `test_ticket_worked_example_toronto_january` (asserts the Toronto January bounds and that a
+  23:30-local transaction is in January), `test_naive_timestamp_rejected`. `wrong_fixed_offset` is a
+  **false_pass**: January is standard time in Toronto, so no ticket-example assertion separates a
+  fixed standard offset from the real zone. `wrong_utc_month` was caught as predicted
+  (`ok_wrong_reason`). **Prediction mismatch:** `wrong_inclusive_2359` was predicted false_pass but
+  was also caught (`ok_wrong_reason`), because the worked example asserts the exact end instant
+  returned by `period_bounds`, which that variant shifts by one second; `select` alone would not
+  have caught it. The unmodified starter fails the worked example.
+- **Hardened commit:** 35f0fc3, which adds `test_invalid_zone_month_or_year_raises` and
+  `test_supported_year_range_edges` (the ticket validation rule); all variants stayed `ok` under final.
+```text
+runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=9.912
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
