@@ -43,6 +43,8 @@ def create_app(database_url, gateway):
         invalid_headers = headers(merchant_id, request_key)
         if invalid_headers is not None:
             return invalid_headers
+        if request_key is None or not 1 <= len(request_key) <= 255:
+            return error(400, "idempotency_key_required")
         try:
             parsed = PaymentRequest.parse(await request.json())
         except (ValueError, TypeError):

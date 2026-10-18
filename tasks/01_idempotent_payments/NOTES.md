@@ -4,6 +4,14 @@ The reservation implementation returns 409 during a charge; the advisory-lock im
 Both are valid under the public contract. Wrong variants isolate a realistic persistence,
 namespace, or check-then-write defect; none change visible tests.
 
+v2 note (see analysis/findings.md F-108): the starter now also lacks the request fingerprint and the
+Idempotency-Key length validation (they moved into the reference), raising `ref_diff_lines` from 33 to 41.
+
+## Regression rationale
+
+`wrong_key_scope` is regressive by `check_realism`: the starter has no idempotency keys, so it passes
+`test_same_key_different_merchants_independent` trivially. Rationale: The starter has no idempotency keys at all, so it is trivially merchant-independent; the natural first implementation uses the client-supplied key as the unique key, and scoping it by merchant is the extra step a hurried solver skips.
+
 ## Blind review
 Author self-review, restricted to the ticket and starter (independent review still owed).
 Ambiguities found: JSON equality vs member order, key length errors, merchant validation, receipt
