@@ -1,8 +1,14 @@
-# Private draft — FX reviewer notes
+# Private draft - FX reviewer notes
 
-The exact rational alternative verifies that the Decimal implementation does not define the
-answer by itself. Wrong candidates use a universal scale, round a cross leg, or charge fees in
-the destination. Ordinary two-decimal direct quotes can mask all three errors.
+v2 starter (see analysis/findings.md F-110): the starter quotes direct pairs only, assumes two decimal
+places for every currency, computes the fee but does not deduct it before conversion and has no cross
+route through USD. Per-currency minor units, the cross rate at full precision, fee-before-conversion and
+the precision rules are the ticket. The wrong variants are plausible completions of that starter:
+`wrong_two_decimals` adds the cross route and fee deduction but keeps the starter's universal scale;
+`wrong_round_cross_leg` rounds the USD leg of a cross quote to cents; `wrong_fee_after_conversion`
+converts the gross amount and subtracts a destination-side fee. The exact rational alternative verifies
+that the Decimal implementation does not define the answer by itself. Ordinary two-decimal direct
+quotes can mask all three errors.
 
 ## Blind review
 Author self-review: fee denomination, direct-rate precedence, unsupported currencies, inverse

@@ -18,5 +18,11 @@ Inputs use distinct src/dst; an unsupported currency -> RateUnavailable.
    destination minor units. Round ONLY the final destination amount HALF_EVEN to integer.
    Do not round the USD leg of a cross quote. rate_used is the full direct/product Decimal.
 
+Worked examples. (a) Cross quote: `rates = {("GBP","USD"): Decimal("1.25"), ("USD","CAD"): Decimal("1.40")}`,
+`quote_transfer(20000, "GBP", "CAD", rates, 50)`: fee = 20000 x 50 / 10000 = 100 (1.00 GBP); net 19900 = 199.00 GBP;
+rate_used = 1.25 x 1.40 = 1.7500; 199.00 x 1.7500 = 348.25 CAD, so `Quote(100, 34825, Decimal("1.7500"), ("GBP","USD","CAD"))`.
+(b) Zero-decimal currency: `quote_transfer(5000, "CAD", "JPY", {("CAD","JPY"): Decimal("110")}, 0)`: 50.00 CAD x 110 = 5500 JPY,
+so `Quote(0, 5500, Decimal("110"), ("CAD","JPY"))`.
+
 Do not mutate rates. Zero amount returns zero amounts while still resolving the declared route.
 No actual currency market or customer is represented. Run `python -m pytest tests -q` from starter.

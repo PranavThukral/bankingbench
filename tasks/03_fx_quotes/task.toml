@@ -16,7 +16,7 @@ structural_difference = "Exact Fraction scaling and integer half-even rounding i
 kind = "wrong"
 bug = "Assumes every currency has two decimal places."
 must_fail = ["test_jpy_and_kwd_units"]
-predicted_naive = "false_pass"
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_round_cross_leg]
 kind = "wrong"
 bug = "Rounds the intermediate USD amount in a cross quote."
