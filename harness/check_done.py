@@ -77,7 +77,8 @@ def collect(tasks, matrix, evidence, docker_available):
             "No unresolved graded ambiguity" in (t.path / "NOTES.md").read_text(encoding="utf-8") for t in tasks),
         S6=bool(wrong) and all(k in final and final[k]["outcome"] == "FAIL" and final[k]["must_fail_hit"] for k in wrong),
         S7=matches(realism, tasks) and expected <= {(r["task"], r["variant"]) for r in realism_rows} and
-            all(r["ok"] for r in realism_rows) and design_ok(realism, tasks),
+            all(r["ok"] for r in realism_rows) and design_ok(realism, tasks) and
+            realism.get("py312_lint", {}).get("ok") is True,
         S8=repeat_ok(evidence.get("repeat"), tasks, None, 3) and
             repeat_ok(evidence.get("flake"), [t for t in tasks if t.id[:2] == "01"],
                       {"reference", "alt_valid", "wrong_retry_race"}, 20),

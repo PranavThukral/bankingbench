@@ -1,31 +1,35 @@
-# Exact installed versions from importlib.metadata; includes Linux 3.12 and Windows deps.
-# pydantic is required transitively by FastAPI; application code does not use it.
-annotated-doc==0.0.5
-annotated-types==0.8.0
-anyio==4.15.1
-certifi==2026.7.22
-click==8.5.0
-colorama==0.4.6
-fastapi==0.142.2
-h11==0.16.0
-httpcore==1.0.9
-httpx==0.28.1
-hypothesis==6.170.1
-idna==3.20
-iniconfig==2.3.0
-opentelemetry-api==1.45.0
-packaging==26.3
-pluggy==1.6.0
-psycopg==3.3.6
-psycopg-binary==3.3.6
-pydantic==2.13.5
-pydantic-core==2.46.5
-pygments==2.21.0
-pytest==8.4.2
-ruff==0.16.10
-sortedcontainers==2.4.0
-starlette==1.7.0
-typing-extensions==4.16.0
-typing-inspection==0.4.4
-tzdata==2026.5
-uvicorn==0.54.0
+# Closed set for the runner image (python:3.12-slim, Linux). Install with:
+#   pip install --no-deps -r requirements.lock
+# Versions are the ones verified on the authoring host. `python tools/check_lock.py` recomputes the
+# dependency closure of the allow-listed packages from installed metadata and fails on any missing
+# or unexplained package. Roots (BLUEPRINT 4.2): pytest, hypothesis, fastapi, uvicorn, httpx,
+# psycopg[binary], ruff.
+annotated-doc==0.0.5            # fastapi
+annotated-types==0.8.0          # pydantic
+anyio==4.15.1                   # starlette, httpx
+certifi==2026.7.22              # httpx, httpcore
+click==8.5.0                    # uvicorn
+colorama==0.4.6 ; sys_platform == "win32"   # pytest, click on Windows only
+fastapi==0.142.2                # root
+h11==0.16.0                     # uvicorn, httpcore
+httpcore==1.0.9                 # httpx
+httpx==0.28.1                   # root
+hypothesis==6.170.1             # root
+idna==3.20                      # anyio, httpx
+iniconfig==2.3.0                # pytest
+opentelemetry-api==1.45.0       # hard requirement of fastapi 0.142.2 (its only dependency is typing-extensions)
+packaging==26.3                 # pytest
+pluggy==1.6.0                   # pytest
+psycopg==3.3.6                  # root
+psycopg-binary==3.3.6           # psycopg[binary]
+pydantic==2.13.5                # fastapi
+pydantic-core==2.46.5           # pydantic
+pygments==2.21.0                # pytest
+pytest==8.4.2                   # root
+ruff==0.16.10                   # root
+sortedcontainers==2.4.0         # hypothesis
+starlette==1.7.0                # fastapi
+typing-extensions==4.16.0       # pydantic, starlette, anyio, psycopg (python < 3.13)
+typing-inspection==0.4.4        # pydantic, fastapi
+tzdata==2026.5                  # psycopg on Windows; kept on Linux so zoneinfo never depends on the base image
+uvicorn==0.54.0                 # root

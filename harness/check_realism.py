@@ -20,6 +20,17 @@ from harness.workspace import materialize
 DIFF_FLOORS = {"hard": 40, "medium": 25, "easy": 12}
 
 
+LINT_PATHS = ("harness", "graderlib", "tasks", "tools")
+
+
+def lint_py312(root=config.ROOT):
+    """Lint the whole pack against the Python 3.12 language level used by the runner image."""
+    command = [sys.executable, "-m", "ruff", "check", "--target-version", "py312", "--no-cache",
+               *[p for p in LINT_PATHS if (Path(root) / p).exists()]]
+    proc = subprocess.run(command, cwd=root, capture_output=True, text=True)
+    return dict(ok=proc.returncode == 0, output=(proc.stdout + proc.stderr).strip()[-2000:])
+
+
 def _py_files(root):
     return {p.relative_to(root).as_posix() for p in Path(root).rglob("*.py") if "__pycache__" not in p.parts}
 
@@ -152,10 +163,15 @@ def main(argv=None):
             if not info["ok"]:
                 print(f"  {name}: regressive tests {info['tests']} without a logged regression_rationale"
                       if info["tests"] else f"  {name}: regression_rationale present but variant is not regressive")
+    lint = lint_py312()
+    print(f"\nruff check --target-version py312 {' '.join(LINT_PATHS)}: {'PASS' if lint['ok'] else 'FAIL'}", flush=True)
+    if not lint["ok"]:
+        print(lint["output"], flush=True)
     config.RESULTS.mkdir(exist_ok=True)
-    receipt = dict(task_digests=fingerprints(tasks), rows=rows, design=design)
+    receipt = dict(task_digests=fingerprints(tasks), rows=rows, design=design, py312_lint=lint)
     (config.RESULTS / "realism.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
-    return int(not rows or any(not r["ok"] for r in rows) or any(not d["ok"] for d in design))
+    return int(not rows or any(not r["ok"] for r in rows) or any(not d["ok"] for d in design)
+               or not lint["ok"])
 
 
 if __name__ == "__main__":
