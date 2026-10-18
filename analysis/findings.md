@@ -407,6 +407,40 @@ Naive graders let through 29 of 30 wrong variants and 5 of 10 unmodified starter
 wrong variant the naive grader caught was 09 `wrong_marginal` (its mid-tier examples already
 disagree with marginal pricing), and even that was flagged `ok_wrong_reason`.
 
+## v2 redesign entries (review R1, docs/REVIEW-2026-10-17.md)
+
+IDs F-0xx are the v1 audit; F-1xx are the v2 task redesigns. A v2 redesign replaces the starter,
+the wrong variants and the naive grader of a task; the v1 entries for that task are kept above
+and marked superseded. Naive runs are `run_all --tasks NN --grader all` on a clean tree.
+
+<a id="04_ledger_reconciliation-v2"></a>
+### F-101 · 04_ledger_reconciliation · v2 redesign
+- **Why v1 was redesigned:** review R1. The v1 starter differed from the reference by 4 changed
+  lines (`== 0` became `<= 3`, twice), so the ticket was "find the one-line bug" and the wrong
+  variants described bugs in code the starter already got right. By the new `regressive_wrong`
+  metric, 2 of the 3 v1 wrongs (`wrong_no_consumption`, `wrong_refund_abs`) broke `must_fail`
+  tests that the v1 starter passed. v1 entries for this task are **superseded by v2**.
+- **v2 starter:** exact same-day R1 matching only, no ledger consumption, every unmatched line
+  reported as `no_match`; plus CSV/report/preview support code (209 non-test lines). Window,
+  consumption, R2 split, R3 refund and R4 duplicate classification are the ticket.
+  `ref_diff_lines` 4 -> 64 (floor 40).
+- **v2 wrong variants (completions of the new starter):** `wrong_no_consumption` (adds window, R2,
+  R3, R4; keeps the starter's non-consuming candidate lookup), `wrong_split_ignored` (everything
+  except R2), `wrong_refund_abs` (absolute amounts in the exact rule). None is regressive.
+- **Naive grader (commit e1b318e):** 3 tests, count-based: `test_clean_one_to_one`,
+  `test_ticket_worked_example` (`len(matches) == 2`, nothing unmatched), `test_unrelated_line_is_unmatched`.
+  Observed: `wrong_no_consumption` false_pass, `wrong_refund_abs` false_pass, `wrong_split_ignored`
+  **caught** (`ok_wrong_reason`: the worked example contains a split, so the naive grader failed
+  it via `test_ticket_worked_example`, not via the declared `test_split_all_lines`). Unmodified
+  starter fails the worked example (correctly). Predictions matched all three.
+- **Hardened commit:** e1b318e. The v1 final grader (6 tests incl. the ground-truth hypothesis
+  property) needed no change: all variants `ok` under final, starter fails 5 of 6 final tests.
+```text
+runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=4.555
+```
+
+<!-- v2-entries-end -->
+
 ## Patterns
 
 1. **State over time is invisible to one-shot examples.** 01 `wrong_retry_race`,
