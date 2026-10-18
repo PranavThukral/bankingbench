@@ -655,6 +655,34 @@ runs=12 final_ok=6/6 naive_false_pass=3 infra_errors=0 flips=0 wall_s=35.110
 runs=12 final_ok=6/6 naive_false_pass=4 infra_errors=0 flips=0 wall_s=14.767
 ```
 
+<a id="03_fx_quotes-v2"></a>
+### F-110 · 03_fx_quotes · v2 redesign
+- **Why v1 was redesigned:** review R1 (check) and R2. The v1 starter already used per-currency
+  minor units, the USD cross route and exact `Decimal` rounding, and differed from the reference by
+  28 changed lines that were mostly the fee deduction and a precision context; `wrong_two_decimals`
+  and `wrong_round_cross_leg` described code the starter already got right (the `regressive_wrong`
+  metric did not flag them only because their declared tests also exercise the fee). v1 entries for
+  this task are **superseded by v2**. The v1 starter had 158 non-test lines.
+- **v2 starter:** direct pairs only, a universal two-decimal scale, the fee computed but not
+  deducted, no cross route; plus batch and report support code (212 non-test lines).
+  `ref_diff_lines` 28 -> 25 (floor 25): the reference is short, and the smaller starter removed
+  shared lines, so the margin is thin. PROBLEM.md gained a cross-quote and a JPY worked example.
+- **v2 wrong variants:** `wrong_two_decimals` (cross route and fee deduction added, universal scale
+  kept), `wrong_round_cross_leg` (USD leg rounded to cents), `wrong_fee_after_conversion` (gross
+  conversion, destination-side fee). None is regressive.
+- **Naive grader (commit 6c57023):** 4 tests: `test_direct_cad_usd`, `test_ticket_example_cross_quote`
+  (GBP to CAD via USD, exact two-decimal arithmetic), `test_ticket_example_zero_decimal_currency`
+  (CAD to JPY), `test_unknown_route_rejected`. `wrong_two_decimals` is **caught**
+  (`ok_wrong_reason`: it fails the JPY example, not the declared `test_jpy_and_kwd_units`), as
+  predicted. `wrong_round_cross_leg` and `wrong_fee_after_conversion` are **false_pass**: the cross
+  example's USD leg (199.00 x 1.25 = 248.75) is already exact to cents, and fee-after-conversion is
+  algebraically identical to fee-before-conversion whenever no rounding occurs, so no ticket
+  example separates them. The unmodified starter fails three of four naive tests.
+- **Hardened commit:** 6c57023 (final grader unchanged; the starter fails 4 of 9 final tests).
+```text
+runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=10.258
+```
+
 <!-- v2-entries-end -->
 
 ## Patterns
