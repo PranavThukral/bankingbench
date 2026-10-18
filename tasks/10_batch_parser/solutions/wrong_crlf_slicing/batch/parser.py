@@ -1,11 +1,9 @@
 from batch.models import BatchResult, Payment, BatchError  # noqa: F401
-from batch.records import decode, fields
+from batch.records import decode, fields, physical_lines
 
 
 def parse(data):
-    rows = data.split(b"\n")
-    if rows and rows[-1] == b"":
-        rows.pop()
+    rows = physical_lines(data)
     errors, payments, trailers = set(), [], []
     if not rows or rows[0][:1] != b"H":
         errors.add((1, "missing_header"))
@@ -17,9 +15,6 @@ def parse(data):
         if ((kind == b"H" and line_no != 1) or (kind == b"T" and line_no != len(rows))
                 or (kind == b"D" and line_no in {1, len(rows)})):
             errors.add((line_no, "record_order"))
-        if len(raw) != 80:
-            errors.add((line_no, "line_length"))
-            continue
         text, local_error = decode(raw)
         if local_error:
             errors.add((line_no, local_error))

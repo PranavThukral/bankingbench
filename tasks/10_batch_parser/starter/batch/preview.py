@@ -2,6 +2,8 @@
 import argparse
 import json
 from pathlib import Path
+from batch.csvout import write_payments_csv
+from batch.errors import render_errors as explain_errors
 from batch.parser import parse
 
 
@@ -28,8 +30,15 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Inspect an invented SBF-80 batch")
     parser.add_argument("input", type=Path)
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--csv", type=Path, help="write the parsed payments to a CSV file")
+    parser.add_argument("--explain", action="store_true", help="describe each error code on stderr")
     args = parser.parse_args(argv)
     result = inspect(args.input)
+    if args.csv:
+        write_payments_csv(args.csv, parse(Path(args.input).read_bytes()).payments)
+    if args.explain:
+        import sys
+        sys.stderr.write(explain_errors(parse(Path(args.input).read_bytes()).errors))
     if args.out:
         write_result(args.out, result)
     else:

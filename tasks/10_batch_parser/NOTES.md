@@ -1,9 +1,15 @@
-# Private draft — batch parser reviewer notes
+# Private draft - batch parser reviewer notes
 
-Both valid parsers share field decoding but differ in accumulation and control-flow design.
-The CRLF candidate checks the physical line's 81-character length before removing CR. CR at
-the end does not shift earlier columns; the actual defect is validating/slicing before line-ending
-normalization, not a claim that CR shifts the first field. Fixtures generate CRLF from bytes.
+v2 starter (see analysis/findings.md F-105): the starter interprets detail records only, splits the
+file on LF only, never looks at the header or trailer, and returns the good payments even when other
+detail lines were malformed. Header/trailer validation, count, control and hash totals, CRLF handling
+and whole-batch rejection are the ticket. The wrong variants are plausible completions of that starter:
+`wrong_partial_accept` adds everything but keeps accepting the valid details of a batch with
+malformed detail records; `wrong_ignores_hash_total` implements count and control totals only;
+`wrong_crlf_slicing` completes the validation but keeps the starter's LF-only line splitting, so CRLF
+files fail on the CR byte. The alternative accumulates totals in a single streaming pass.
+CR at the end does not shift earlier columns; the defect is validating/slicing before line-ending
+normalization. Fixtures generate CRLF from bytes.
 
 ## Blind review
 Author self-review: positions, terminators, malformed-field error granularity, cascading trailer

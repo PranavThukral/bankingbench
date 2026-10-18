@@ -47,4 +47,18 @@ Unknown type -> record_type. A missing first H -> missing_header at line1; missi
 missing_trailer at the last line (line1 for empty input). An empty detail section -> count_mismatch
 on the trailer. Header/trailer field errors include invalid reserved spaces. No other codes.
 
+Worked example (each record is padded with spaces to 80 characters; trailing spaces are not shown):
+
+```text
+HSYNTHBATCH0120260115CAD
+D000000012345000000010000INV-2026-001
+D000000067890000000002550INV-2026-002
+T0000020000000000125500000080235
+```
+
+The batch is accepted with two payments: `Payment("000000012345", 10000, "INV-2026-001")` and
+`Payment("000000067890", 2550, "INV-2026-002")`. Count 2; control total 10000 + 2550 = 12550; hash total
+12345 + 67890 = 80235. Changing the trailer count to `000003` rejects the whole batch with
+`BatchError(4, "count_mismatch")` and `payments == []`.
+
 Run from starter: `python -m pytest tests -q`. No real batch format, institution or customer is used.

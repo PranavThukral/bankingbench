@@ -11,7 +11,7 @@ leak_terms = ["reward.txt"]
 kind = "reference"
 [variants.alt_valid]
 kind = "alt_valid"
-structural_difference = "Streaming record accumulation and incremental totals versus a two-pass validation and control phase."
+structural_difference = "Regular-expression record decoding, a regex line splitter and a single streaming pass with incremental totals, versus column slicing and a two-pass validation and control phase."
 [variants.wrong_partial_accept]
 kind = "wrong"
 bug = "Accepts valid details from a batch containing invalid detail records."
