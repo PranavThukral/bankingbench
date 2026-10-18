@@ -16,11 +16,12 @@ structural_difference = "Selects via local calendar membership rather than compa
 kind = "wrong"
 bug = "Uses UTC calendar months for every account."
 must_fail = ["test_local_midnight_boundaries"]
-predicted_naive = "false_pass"
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_inclusive_2359]
 kind = "wrong"
 bug = "Ends at 23:59:59, excluding fractional seconds before midnight."
 must_fail = ["test_microsecond_boundary"]
+regression_rationale = "The UTC starter already ends the period at the exclusive start of the next month, so test_microsecond_boundary passes on it; moving the period to local time invites rewriting the end as the last second of the local month (23:59:59), the way monthly statements are usually described in prose, which drops the final fractional second."
 predicted_naive = "false_pass"
 [variants.wrong_fixed_offset]
 kind = "wrong"
