@@ -1,62 +1,62 @@
-# Banking challenge pack — private draft
+# Banking Challenge Pack
 
-Synthetic payment and accounting tickets paired with naive and hardened behavioral graders.
-The audit preserves plausible wrong solutions and tests structurally different valid solutions.
-Publication and independent review are pending.
+Ten synthetic banking coding tasks, each graded twice: by a first-draft ("naive") grader written first, and by a hardened grader written after measuring what the first one missed. Every task ships with a reference solution, a structurally different correct solution and three plausible wrong ones, so you can see exactly which bugs each grader lets through.
 
-Python 3.12+ is required. Dependencies are exactly pinned in requirements.lock, a closed set checked by `python tools/check_lock.py`. The verified native environment uses Python 3.14 and PostgreSQL 16.13.
+**[Website](__SITE_URL__)** · **[Results report](__SITE_URL__/results/final/report.html)** · **[Hardening log](analysis/findings.md)** · **[One-page summary](docs/SUMMARY.md)**
 
-Native PowerShell:
-```powershell
-$env:PG_ADMIN_URL = 'postgresql://postgres@localhost:54329/postgres'
-python -m pytest harness/tests -q
-python -m harness.run_all --grader all
-python -m harness.report --latest
-```
+## Results
 
-Docker reproduction (written, not executed on the authoring machine):
+| | Naive graders | Hardened graders |
+|---|---|---|
+| Wrong solutions accepted | 20 / 30 | 0 / 30 |
+| Unmodified starters accepted | 1 / 10 | 0 / 10 |
+| Correct solutions rejected | 0 / 20 | 0 / 20 |
+
+Repeated 3 times with no flips; the task 01 concurrency test ran 60 times with no flips. Every task exports to the [Harbor](https://docs.harborframework.com/tasks/overview) task format, and a local oracle check scores the reference 1 and the untouched starter 0.
+
+## The tasks
+
+| # | Area | The task |
+|---|---|---|
+| [01](tasks/01_idempotent_payments/PROBLEM.md) | Payments API | A payment endpoint must charge a card once per Idempotency-Key, no matter how the client retries. |
+| [02](tasks/02_interest_accrual/PROBLEM.md) | Interest | Accrue daily interest on a CAD balance and post it at month ends, using Actual/365 and banker's rounding. |
+| [03](tasks/03_fx_quotes/PROBLEM.md) | FX transfers | Quote a currency transfer with the fee taken in the source currency and each currency's own decimal places. |
+| [04](tasks/04_ledger_reconciliation/PROBLEM.md) | Reconciliation | Match bank statement lines to ledger entries with exact, split, refund and duplicate rules, deterministically. |
+| [05](tasks/05_double_entry/PROBLEM.md) | Ledger | Run a double-entry journal where every post balances per currency and is all-or-nothing. |
+| [06](tasks/06_available_balance/PROBLEM.md) | Card holds | Compute available balance as posted funds minus active card holds, with capture, void and expiry. |
+| [07](tasks/07_statement_periods/PROBLEM.md) | Statements | Select a month's transactions using midnight in the account's own time zone, converted to UTC. |
+| [08](tasks/08_refund_limits/PROBLEM.md) | Refunds | Allow partial refunds up to the captured amount, which may be less than what was authorized. |
+| [09](tasks/09_tiered_fees/PROBLEM.md) | Fees | Price a payment at one tier selected by an inclusive upper bound, then round and clamp the fee. |
+| [10](tasks/10_batch_parser/PROBLEM.md) | Batch files | Validate an invented 80-character fixed-width payment file and reject the whole batch on any error. |
+
+Each task lives in `tasks/<id>/`: `PROBLEM.md` (the ticket), `starter/` (the repo a solver receives), `solutions/` (reference, alternative and wrong variants as overlays on the starter), and `grader/naive` and `grader/final` (hidden tests). What each hardened grader checks is in [tasks/catalog.toml](tasks/catalog.toml).
+
+## Run it
+
+Needs Python 3.12+ and PostgreSQL 16 (tasks 01 and 05 use it).
+
 ```sh
-docker compose up -d
-make matrix
-make export
-make check
+pip install --no-deps -r requirements.lock
+export PG_ADMIN_URL=postgresql://postgres:<password>@localhost:5432/postgres   # any superuser URL on a disposable server
+
+python -m harness.run_all --grader all     # every solution against both graders → results/<stamp>/matrix.json
+python -m harness.report --latest          # offline HTML report next to it
+python -m harness.check_done               # the completion criteria in BLUEPRINT.md §1.1
 ```
-The disposable PostgreSQL data directory is tmpfs and fsync is off for speed. Never use this
-configuration for real data. The internal compose network has no internet egress.
 
-Every candidate runs in a fresh temporary workspace and, where required, fresh database.
-`BCP_TMP` overrides the tempfile-based root (the image sets `/tmp/bcp`). Hidden tests live outside
-the workspace. This is reproducibility isolation, not protection from hostile Python programs.
-`results/LATEST` is a portable pointer file, never a symlink.
+Or with Docker: `docker compose up -d && make matrix` (written to spec but not yet timed). Each run gets a fresh temporary workspace and a fresh database; graders live outside the solver's code.
 
-No remote, push or publication has been made. See GATES.md before publishing.
+Other checks: `python -m harness.check_realism` (wrong solutions compile, lint clean and pass the visible tests), `python -m harness.lint_leaks` (no answer hints in starters), `python -m harness.export_harbor --validate` (Harbor export plus oracle check), `python site/build.py` (rebuild the website).
 
-## Add a task
-Follow [docs/TASK_FORMAT.md](docs/TASK_FORMAT.md). Write the ticket, a runnable starter in which the feature is genuinely
-missing (200 to 600 lines of non-test code, `ref_diff_lines` at or above the difficulty floor), visible
-regression, valid overlays and at least two realistic wrong overlays. Declare intended failing
-tests and naive predictions in task.toml. Commit the naive grader, measure and log the gaps, then
-write and commit the hardened grader. Run the full matrix, realism, leaks and distance checks.
+## How it was built
 
-## Results snapshot (results/final/)
-Matrix produced from a clean tree at commit `ce7d671` (v2 starters, review R1 to R6 applied).
+[BLUEPRINT.md](BLUEPRINT.md) is the spec. For each task the naive grader was committed before the hardened one, and every miss is logged with its commit in [analysis/findings.md](analysis/findings.md). The pack went through three rounds: v1, then a [review](docs/REVIEW-2026-10-17.md) that rebuilt starters which were one line away from the answer, then v3, which replaced three wrong solutions that broke behaviour the starter already got right. [docs/TASK_FORMAT.md](docs/TASK_FORMAT.md) describes how to add a task.
 
-| Grader | Wrong solutions passed | Starters passed | Valid solutions rejected | Infra errors |
-|---|---|---|---|---|
-| naive | 20 / 30 | 1 / 10 | 0 / 20 | 0 |
-| final | 0 / 30 | 0 / 10 | 0 / 20 | 0 |
+## Limitations
 
-- 10 tasks, 50 solution variants plus 10 starters, 120 runs (`--grader all`). Naive graders have 3 to 4 tests, final
-  graders 6 to 18 (including generated cases).
-- v1 numbers (superseded): naive graders let 29 of 30 wrong solutions and 5 of 10 starters through. The drop to 20 of 30 and
-  1 of 10 comes from the v2 starters (the ticket's feature is now missing, not one line away) and from naive graders that
-  include the ticket's worked example and a validation case; see [analysis/findings.md](analysis/findings.md) for each variant.
-- Starter-to-reference diff (`ref_diff_lines`, changed lines over `.py` files): 01 41, 02 38, 03 25, 04 64, 05 52, 06 40,
-  07 27, 08 42, 09 35, 10 63. Three wrong variants are regressive (they break a test the starter already passes) and carry
-  a logged rationale: 01 `wrong_key_scope`, 02 `wrong_round_daily`, 07 `wrong_inclusive_2359`.
-- **Measured wall-clock (native, not Docker):** 139.7 s for the committed clean `run_all --grader all` (4 workers, Windows 11,
-  Python 3.14.7, PostgreSQL 16.13 local, fsync off). An earlier run took 223.6 s because task 05's valid solutions hit the
-  old 90 s timeout; the limit is now 240 s (F-111). The Docker timing (S4) is unmeasured.
-- `run_all --grader final --repeat 3`: 180/180 ok, 0 flips. Task 01 race test, 20 repeats x 3 variants: 60/60 ok, 0 flips.
-- `export_harbor --validate`: reference reward 1 and starter reward 0 for all 10 tasks.
-- Read [docs/SUMMARY.md](docs/SUMMARY.md) for the one-pager and [analysis/findings.md](analysis/findings.md) for the hardening log.
+- All tasks and solutions are author-written and synthetic. No real bank, customer or system is represented, and no model has been run on the tasks yet.
+- "0 wrong accepted" is measured against the wrong solutions the graders were hardened on. An independent adversarial pass wrote 44 further wrong solutions and 38 of them passed the hardened graders, mostly by breaking stated ticket rules that no test checks yet. Closing those gaps is the next round of work.
+- Solver code runs in the same process as the grader, which is fine for reproducibility but is not a sandbox against reward hacking.
+- Verified on Windows with Python 3.14 and PostgreSQL 16.13. The Docker path and Python 3.12 have not been run.
+
+MIT licensed.

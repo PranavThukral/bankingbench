@@ -58,7 +58,7 @@ solution_verdicts_by_task_and_grader = "Solution verdicts by task and grader"
 results_by_task = "Results by task"
 
 [patterns]
-items = [["Bugs that need two events.", "Restarts, retries, clock changes and concurrent calls."], ["Rounding ties and boundaries.", "Wrong code agrees with right code almost everywhere else."], ["Right totals, wrong pairing.", "Count checks miss reused entries and unscoped keys."], ["Half-applied rejections.", "The right error, with state left behind."]]
+items = [["Bugs that need two events.", "Restarts, retries, clock changes and concurrent calls."], ["Rounding ties and boundaries.", "Wrong code agrees with right code almost everywhere else."], ["Right totals, wrong pairing.", "Count checks miss reused entries and currencies netted together."], ["Half-applied rejections.", "The right error, with state left behind."]]
 what_the_first_draft_graders_missed = "What the first-draft graders missed"
 
 [footer]

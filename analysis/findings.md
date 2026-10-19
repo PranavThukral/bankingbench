@@ -413,6 +413,7 @@ runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=48.248
 
 <a id="09_tiered_fees-v2"></a>
 ### F-104 · 09_tiered_fees · v2 redesign
+- **Correction (2026-10-19):** the claim below that schedule validation moved from the data model into `compute_fee` is wrong. `starter/fees/models.py` still validates in `Schedule.__post_init__`, so `test_invalid_schedule_raises_for_any_amount` raises before `compute_fee` runs and does not test `compute_fee`. A reference with `validate_schedule` removed still passes (independent review, probe `schedule_unvalidated`). Fix pending: test a schedule mutated after construction.
 - **Why v1 was redesigned:** review R1. The v1 starter differed from the reference by 2 changed
   lines (the clamp). It already selected tiers, rounded half up in integer arithmetic and validated
   everything, so all three v1 wrongs (`wrong_exclusive_boundary`, `wrong_float_bps`, `wrong_marginal`)
@@ -933,11 +934,11 @@ F-218 and F-222, both caught when I predicted a false pass).
    daylight saving) pass the naive graders. The fix is searched tie and boundary inputs (`tools/find_ties.py`) checked
    by exact Fraction arithmetic (`tools/verify_cases.py`), exact type and exponent assertions, and examples in a
    daylight-saving month. A worked example that uses a non-default currency (03 JPY) or a non-UTC zone (07 Toronto)
-   does catch the variants built on the default; 07 `wrong_inclusive_2359` is caught only because the example asserts the
-   exact bounds returned by `period_bounds`, not just the selection.
-3. **Counts and totals hide identity and scope bugs.** 04 `wrong_no_consumption` and `wrong_refund_abs`,
-   01 `wrong_key_scope` and 05 `wrong_cross_currency_sum` pass the naive graders: `len(matches)`, one merchant and one
-   currency give the same numbers with the wrong pairing, namespace or base. Asserting the set of id pairs, results per
+   does catch the variants built on the default; 07 `wrong_offset_sign` (v3) is caught by the Toronto January example
+   because it asserts the exact bounds returned by `period_bounds`, not just the selection.
+3. **Counts and totals hide identity and scope bugs.** 04 `wrong_no_consumption` and `wrong_refund_abs`
+   and 05 `wrong_cross_currency_sum` pass the naive graders: `len(matches)` and a single currency give the same
+   numbers with the wrong pairing or base (v2's 01 `wrong_key_scope`, replaced in v3, showed the same with one merchant). Asserting the set of id pairs, results per
    scope and per-currency invariants catches them.
 4. **Rejection paths need state assertions, not just error assertions.** 05 `wrong_non_atomic` raises the right error but
    leaves lines behind; 10 `wrong_partial_accept` is rejected for a corrupt trailer count but not for a bad detail line.
@@ -946,18 +947,19 @@ F-218 and F-222, both caught when I predicted a false pass).
    valid refund) after each rejected operation.
 5. **Hardening itself regresses, and redesign exposes untested requirements.** In v1 the first hardened grader for task 10
    dropped the naive count-mismatch test, so the starter passed 9/9 final tests (F-001), and graders for 05 and 08 first
-   produced false fails on valid code (F-002, F-003). In v2, moving schedule validation (09), zone and month validation (07)
-   and unknown-id handling (08) from visible tests or constructors into the ticket showed that the v1 final graders had no
-   hidden test for them; each needed a new hardened test (F-104, F-106, F-107). A requirement enforced only by visible tests
+   produced false fails on valid code (F-002, F-003). In v2, stating zone and month validation (07) and unknown-id handling (08)
+   in the ticket showed that the v1 final graders had no hidden test for them; each needed a new hardened test (F-106,
+   F-107). F-104 (09 schedule validation) is weaker than first logged: the starter's `Schedule` constructor still
+   validates, so the added test passes without `compute_fee` checking anything (found by the independent review). A requirement enforced only by visible tests
    is silently ungraded.
 6. **The ticket's example calibrates the naive grader.** Adding the worked example and a validation case lowered the
    naive false-pass rate from 29/30 to 20/30; which variants survive depends on what the example happens to contain
    (a winter date, an exact cross leg, a sequence of two refunds). The remaining false passes are the ones whose
-   distinguishing input is a restart, a clock change, a tie, a bound, a second currency or a second merchant.
+   distinguishing input is a restart, a clock change, a tie, a bound, a second currency or a repeated decline.
 7. **The starter's shape decides which wrong variants are plausible.** The v1 starters for 04, 05, 06, 09 and 10 were
    the reference minus one line (2 to 5 changed lines); 17 of 30 wrong variants failed final tests the starter passed. In
-   v2 `ref_diff_lines` is 25 to 64 and `regressive_wrong` flags 3 of 30 variants (01 `wrong_key_scope`, 02
-   `wrong_round_daily`, 07 `wrong_inclusive_2359`), each with a logged rationale.
+   v2 `ref_diff_lines` is 25 to 64 and `regressive_wrong` flagged 3 of 30 variants; v3 replaced those three (F-301), so
+   no wrong variant now fails a hardened test that the starter passes.
 
 ## Limitations
 
