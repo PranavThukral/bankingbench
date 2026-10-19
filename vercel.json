@@ -3,7 +3,7 @@
   "redirects": [{ "source": "/", "destination": "/site/", "permanent": false }],
   "headers": [
     {
-      "source": "/(.*)\.(md|toml|py|txt|lock)",
+      "source": "/(.*)\\.(md|toml|py|txt|lock)",
       "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
     }
   ]
