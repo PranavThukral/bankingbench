@@ -37,3 +37,33 @@ def test_report_no_literals():
     assert before != after
     assert "FINAL DEVIATIONS" in after
     assert "reference: false_fail 0/1" in after
+
+
+def test_tasks_overview_without_catalog():
+    from harness.tests.test_core import TOY
+    html = render(fixture(), TOY.parent)
+    assert '<section id="tasks"><h2>Tasks</h2>' in html
+    assert '<a href="#task-toy_task">' in html
+    assert '<details class="task" id="task-toy_task">' in html
+    assert html.index('class="kpis"') < html.index('<section id="tasks">') < html.index('<section id="matrix">')
+
+
+def test_catalog_descriptions_and_checks(tmp_path):
+    task = tmp_path / "toy_task"
+    task.mkdir()
+    (task / "task.toml").write_text('title = "A toy task"', encoding="utf-8")
+    (tmp_path / "catalog.toml").write_text(
+        '[toy_task]\narea = "Payments & retries"\nsummary = "Charge <once>."\n'
+        'checks = ["A retry does not charge twice", "Reject <script> markup"]\n', encoding="utf-8")
+    html = render(fixture(), tmp_path)
+    overview = html.split('<section id="tasks">', 1)[1].split('</section>', 1)[0]
+    assert '<td>01</td>' in overview
+    assert 'Payments &amp; retries' in overview and 'Charge &lt;once&gt;.' in overview
+    assert '<a href="#task-toy_task">A toy task</a>' in overview
+    matrix = html.split('<section id="matrix">', 1)[1].split('</section>', 1)[0]
+    assert '<span class="sub">Payments &amp; retries</span>' in matrix
+    panel = html.split('<details class="task" id="task-toy_task">', 1)[1]
+    assert panel.index('Charge &lt;once&gt;.') < panel.index('What the hardened grader checks') < panel.index('Ticket (PROBLEM.md)')
+    assert '<li>A retry does not charge twice</li>' in panel
+    assert 'Reject &lt;script&gt; markup' in panel
+    assert '<script' not in html

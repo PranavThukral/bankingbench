@@ -110,6 +110,8 @@ def run_panel(run, grader, caught):
 
 
 def render(matrix, tasks_root=config.TASKS):
+    catalog_path = Path(tasks_root) / "catalog.toml"
+    catalog = tomllib.loads(catalog_path.read_text(encoding="utf-8")) if catalog_path.exists() else {}
     runs = [r for r in matrix["runs"] if r.get("repeat", 0) == 0] or matrix["runs"]
     tasks = sorted({r["task"] for r in runs})
     index = {(r["task"], r["variant"], r["grader"]): r for r in runs}
@@ -139,6 +141,16 @@ def render(matrix, tasks_root=config.TASKS):
     kpis.append(kpi(f'{sum(r["verdict"] == "false_fail" for r in valid_final)}/{len(valid_final)}',
                     "valid solutions rejected by final graders"))
 
+    task_rows = []
+    for number, task in enumerate(tasks, 1):
+        info = catalog.get(task, {})
+        task_rows.append(f'<tr><td>{number:02d}</td><td>{escape(info.get("area", ""))}</td>'
+                         f'<th scope="row"><a href="#task-{escape(task)}">'
+                         f'{escape(task_title(Path(tasks_root) / task))}</a></th>'
+                         f'<td>{escape(info.get("summary", ""))}</td></tr>')
+    tasks_html = ('<section id="tasks"><h2>Tasks</h2><div class="scroll" tabindex="0" role="region" '
+                  'aria-label="Tasks overview"><table class="task-overview"><thead><tr><th>Number</th><th>Area</th>'
+                  '<th>Title</th><th>Summary</th></tr></thead><tbody>' + "".join(task_rows) + '</tbody></table></div></section>')
     body = []
     if final_bad:
         rows = "".join(f'<li><a href="#{anchor(r["task"], r["variant"])}">{escape(r["task"])} · {escape(r["variant"])}'
@@ -181,7 +193,7 @@ def render(matrix, tasks_root=config.TASKS):
                          f'{badge(n, "Naive") if naive else ""}{badge(f, "Final")}{mark}</a></td>')
         cells.extend('<td class="empty"></td>' for _ in range(width - len(wrong_by_task[task])))
         grid.append(f'<tr id="matrix-{escape(task)}"><th scope="row"><code>{escape(task)}</code>'
-                    f'<span class="sub">{escape(task_title(Path(tasks_root) / task))}</span></th>{"".join(cells)}</tr>')
+                    f'<span class="sub">{escape(catalog.get(task, {}).get("area", task_title(Path(tasks_root) / task)))}</span></th>{"".join(cells)}</tr>')
     body.append('<section id="matrix"><h2>Hardening matrix</h2><p class="lede">One row per task, one column per solution. '
                 'Each cell shows what the naive and final graders did with that solution; select it for the failing '
                 'tests and pytest output.</p>'
@@ -197,6 +209,12 @@ def render(matrix, tasks_root=config.TASKS):
     for task in tasks:
         path = Path(tasks_root) / task
         parts = []
+        info = catalog.get(task, {})
+        if info.get("summary"):
+            parts.append(f'<p class="task-summary">{escape(info["summary"])}</p>')
+        if info.get("checks"):
+            checks = "".join(f'<li>{escape(check)}</li>' for check in info["checks"])
+            parts.append(f'<h3 class="checks-heading">What the hardened grader checks</h3><ul class="checks">{checks}</ul>')
         for name, label in (("PROBLEM.md", "Ticket (PROBLEM.md)"), ("NOTES.md", "Reviewer notes (NOTES.md)")):
             text = (path / name).read_text(encoding="utf-8") if (path / name).exists() else "Fixture text"
             parts.append(f'<details><summary>{label}</summary><div class="db"><pre class="doc">{escape(text)}</pre></div></details>')
@@ -212,7 +230,7 @@ def render(matrix, tasks_root=config.TASKS):
             parts.append(f'<div class="variant-block"><div id="{anchor(task, variant)}" class="anchor"></div>'
                          f'<h4><code>{escape(variant)}</code><span class="kind">{escape(sample["kind"])}</span></h4>'
                          f'{graders}{diff}</div>')
-        panels.append(f'<details class="task"><summary><code>{escape(task)}</code><span class="sub">'
+        panels.append(f'<details class="task" id="task-{escape(task)}"><summary><code>{escape(task)}</code><span class="sub">'
                       f'{escape(task_title(path))}</span></summary><div class="db">{"".join(parts)}</div></details>')
     body.append('<section><h2>Runs by task</h2><p class="lede">Each run lists its failed tests first, then the '
                 'tail of its pytest output.</p>' + "".join(panels) + "</section>")
@@ -227,7 +245,7 @@ def render(matrix, tasks_root=config.TASKS):
     template = Template((TEMPLATES / "report.html").read_text(encoding="utf-8"))
     return template.substitute(
         fonts=font_face("Source Serif 4", "source-serif-4.woff2") + font_face("JetBrains Mono", "jetbrains-mono.woff2"),
-        facts=facts_html, kpis="".join(kpis), body="\n".join(body), status=escape(matrix.get("status", "private draft")),
+        facts=facts_html, kpis="".join(kpis), tasks=tasks_html, body="\n".join(body), status=escape(matrix.get("status", "private draft")),
     )
 
 

@@ -77,6 +77,16 @@ table.matrix thead th:first-child{width:212px}
 .legend{display:flex;flex-wrap:wrap;gap:8px 20px;list-style:none;padding:0;margin:0 0 12px;font-size:14px;color:var(--muted)}
 table.caught td{vertical-align:middle}
 table.caught td:first-child a{text-decoration:none}
+.task-overview th[scope="row"]{min-width:240px;font-size:15px}
+.task-overview td:nth-child(2){min-width:120px;color:var(--muted)}
+.task-overview td:last-child{min-width:280px}
+.task-summary{font-size:17px;max-width:85ch;margin:8px 0 16px}
+.checks-heading{font-size:18px;margin:16px 0 8px}
+.checks{padding-left:22px;margin:0 0 20px;max-width:90ch;color:var(--muted)}
+.checks li{margin:4px 0}
+details.task:target{border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
 ul.failed{margin:0;padding:0;list-style:none}
 ul.failed li{position:relative;padding-left:18px;margin:2px 0;font-size:14px}
 ul.failed li::before{content:"✗";position:absolute;left:0;color:var(--bad);font:700 12px/1.7 var(--mono)}
@@ -136,6 +146,7 @@ footer p{margin:6px 0}
   </aside>
 </header>
 <div class="kpis">$kpis</div>
+$tasks
 $body
 <footer>
   <p><b>Reproduce:</b> <code>python -m harness.run_all --grader all</code>, then <code>python -m harness.report --latest</code>.</p>

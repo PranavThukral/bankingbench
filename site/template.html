@@ -3,271 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Banking Challenge Pack</title>
-<meta name="description" content="Synthetic finance coding tasks, each graded twice, showing which wrong solutions a naive grader lets through and how hardening catches them.">
-<style>
-/*__FONTS__*/
-:root{
-  --sans:'Jost','Futura','Century Gothic',system-ui,sans-serif;
-  --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
-  --bg:#f6f4ef;--surface:#ffffff;--surface-2:#efebe3;--ink:#16130f;--ink-2:#45403a;--muted:#7a736a;
-  --rule:#e3ddd2;--rule-strong:#cfc7b8;
-  --accent:#4b3fd8;--accent-ink:#ffffff;
-  --good:#167a52;--good-bg:#e0f2e8;--bad:#b63129;--bad-bg:#fbe3e0;--warn:#a36700;--warn-bg:#fcf0d4;
-  --night:#0c1626;--night-2:#13223a;--night-3:#1c2e4a;--night-ink:#e9eef7;--night-muted:#8fa2bf;--night-rule:#24385a;
-  --radius:18px;--shadow:0 1px 2px rgba(22,19,15,.04),0 12px 32px -12px rgba(22,19,15,.12);
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#12110f;--surface:#1b1a17;--surface-2:#24221e;--ink:#f3efe7;--ink-2:#cdc6b9;--muted:#9a9286;
-  --rule:#2e2b26;--rule-strong:#3d3933;--accent:#8f86ff;--accent-ink:#12110f;
-  --good:#6fd3a2;--good-bg:#173126;--bad:#ff8b80;--bad-bg:#3a1c19;--warn:#f0bf5c;--warn-bg:#352a12;
-  --shadow:none;color-scheme:dark;
-}}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:inherit}
-code,pre,.mono{font-family:var(--mono)}
-.wrap{max-width:1180px;margin:0 auto;padding:0 32px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.eyebrow{font:500 13px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-h1,h2,h3{font-family:var(--sans);margin:0;letter-spacing:-.02em}
-h2{font-size:clamp(34px,4.6vw,56px);font-weight:400;line-height:1.08}
-h2 .soft,h1 .soft{color:var(--muted)}
-h3{font-size:22px;font-weight:500;line-height:1.25;letter-spacing:-.01em}
-section{padding:80px 0}
-.lede{font-size:20px;color:var(--ink-2);max-width:60ch;margin:20px 0 0}
-
-/* buttons */
-.btn{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 26px;border-radius:999px;font:500 16px/1 var(--sans);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,background .15s,border-color .15s}
-.btn:hover{transform:translateY(-1px)}
-.btn:focus-visible,.chip:focus-visible,.cell:focus-visible,.tab:focus-visible,.close:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.btn.primary{background:var(--ink);color:var(--bg)}
-.btn.ghost{border-color:var(--muted);color:var(--ink);background:transparent}
-.btn.ghost:hover{border-color:var(--ink)}
-.btn .arrow{transition:transform .15s}.btn:hover .arrow{transform:translateX(3px)}
-
-/* nav */
-nav.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s}
-nav.top.scrolled{border-bottom-color:var(--rule)}
-nav.top .wrap{display:flex;align-items:center;gap:32px;height:72px}
-.brand{display:flex;align-items:center;gap:10px;font:600 18px/1 var(--sans);text-decoration:none;letter-spacing:-.01em}
-.brand i{width:22px;height:22px;border-radius:7px;background:conic-gradient(from 200deg,#4b3fd8,#ff6b4a,#ffb547,#2bb39f,#4b3fd8)}
-nav.top ul{display:flex;gap:28px;list-style:none;margin:0;padding:0;font-size:15px;color:var(--ink-2)}
-nav.top ul a{text-decoration:none}nav.top ul a:hover{color:var(--ink)}
-nav.top .btn{height:40px;padding:0 18px;font-size:14px;margin-left:auto}
-
-/* Hero: painted SVG ribbons, animated only with compositor transforms. */
-.hero{position:relative;padding:90px 0 48px;overflow:clip;isolation:isolate}
-.ribbon{position:absolute;width:1250px;height:1000px;right:-110px;top:-180px;z-index:-1;pointer-events:none;opacity:.28}
-.ribbon svg{width:100%;height:100%;overflow:visible}
-.wave{transform-origin:70% 35%;animation:flow 16s ease-in-out infinite alternate;will-change:transform}
-.wave.echo{animation-duration:22s;animation-direction:alternate-reverse}
-@keyframes flow{from{transform:translate3d(-12px,-15px,0) rotate(-5deg)}to{transform:translate3d(30px,28px,0) rotate(5deg)}}
-.ribbon.paused .wave{animation-play-state:paused}
-.hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:56px;align-items:center}
-.hero h1{font-size:clamp(50px,4.6vw,66px);font-weight:400;line-height:1.02;letter-spacing:-.045em;margin-top:24px}
-.hero h1 .soft{display:block}
-.hero .intro{font-size:21px;line-height:1.5;color:var(--ink-2);max-width:42ch;margin:26px 0 0}
-.hero .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
-.preview{background:var(--surface);border:1px solid var(--rule-strong);border-radius:22px;box-shadow:0 30px 75px -35px #38277566;overflow:hidden;margin-top:0}
-.preview-bar{display:flex;align-items:center;gap:8px;padding:16px 20px;border-bottom:1px solid var(--rule);font:11px/1.5 var(--mono);color:var(--muted);background:var(--bg)}
-.preview-bar i{width:7px;height:7px;border-radius:50%;background:var(--good)}
-.preview-bar span:last-child{margin-left:auto}
-.preview-body{padding:24px}
-.preview-kicker{font:11px/1.5 var(--mono);color:var(--muted);margin:0}
-.preview h3{font-size:23px;margin:5px 0 20px}
-.preview-score{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;padding-bottom:22px}
-.preview-score strong{display:block;font:300 54px/1 var(--sans);letter-spacing:-.04em}
-.preview-score small{display:block;font-size:12px;line-height:1.4;color:var(--ink-2);margin-top:8px}
-.preview-score .pass-arrow{color:var(--muted);font-size:22px}
-.preview-score .after strong{color:var(--good)}
-.preview-labels,.preview-row{display:grid;grid-template-columns:minmax(0,1fr) 70px 70px;gap:8px;align-items:center}
-.preview-labels{font:10px/1.5 var(--mono);color:var(--muted);padding:10px 0}
-.preview-labels span:not(:first-child){text-align:right}
-.preview-row{padding:13px 0;border-top:1px solid var(--rule);font:11px/1.5 var(--mono)}
-.preview-row code{overflow-wrap:anywhere;color:var(--ink-2)}
-.preview-row .status{text-align:right;font-size:10px}
-.status.good{color:var(--good)}.status.bad{color:var(--bad)}
-.preview-foot{display:flex;gap:10px;align-items:center;border-top:1px solid var(--rule);padding:14px 24px;background:var(--good-bg);font:11px/1.5 var(--mono);color:var(--good)}
-.preview-foot a{margin-left:auto;text-underline-offset:3px}
-
-.tag{display:inline-flex;align-items:center;gap:6px;font:500 11.5px/1 var(--mono);padding:6px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
-.tag.good{background:var(--good-bg);color:var(--good)}.tag.bad{background:var(--bad-bg);color:var(--bad)}.tag.warn{background:var(--warn-bg);color:var(--warn)}
-
-/* example */
-.example{background:var(--surface);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
-.exgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;margin-top:56px;align-items:start}
-.exnotes{position:sticky;top:110px}
-.exnotes ol{list-style:none;padding:0;margin:0}
-.window{border-radius:16px;overflow:hidden;background:#0f1726;box-shadow:0 30px 60px -30px rgba(12,22,38,.55);border:1px solid #1f2c42}
-.window .bar{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#141f33;border-bottom:1px solid #1f2c42}
-.window .bar i{width:11px;height:11px;border-radius:50%;background:#2b3a55}
-.tabs{display:flex;gap:2px;margin-left:12px;overflow-x:auto}
-.tab{font:500 12.5px/1 var(--mono);color:#8fa2bf;background:none;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
-.tab[aria-selected="true"]{background:#22324f;color:#e9eef7}
-.pane{display:none}.pane.on{display:block}
-.pane pre{margin:0;padding:22px 24px;color:#d6deeb;font-size:13px;line-height:1.65;overflow:auto;max-height:520px}
-.pane .prose{padding:26px 28px;color:#d6deeb;font:400 17px/1.6 var(--sans)}
-.pane .prose b{color:#fff;font-weight:500}
-.verdict{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 24px;background:#141f33;border-top:1px solid #1f2c42;font:500 12.5px/1.4 var(--mono);color:#8fa2bf}
-.k{color:#c792ea}.s{color:#ecc48d}.c{color:#637777;font-style:italic}.f{color:#82aaff}.hl{background:rgba(255,107,74,.16);display:inline-block;min-width:100%;box-shadow:inset 3px 0 #ff6b4a}
-
-/* matrix explorer */
-.night{background:var(--night);color:var(--night-ink)}
-.night h2 .soft{color:var(--night-muted)}
-.night .lede{color:var(--night-muted)}
-.night .eyebrow{color:var(--night-muted)}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:40px 0 20px;align-items:center}
-.chip{font:500 14px/1 var(--sans);color:var(--night-ink);background:var(--night-2);border:1px solid var(--night-rule);border-radius:999px;padding:10px 16px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
-.chip[aria-pressed="true"]{background:var(--night-ink);color:var(--night);border-color:var(--night-ink)}
-.chip .count{font:500 12px/1 var(--mono);opacity:.7}
-.legend{margin-left:auto;display:flex;gap:16px;font:400 13px/1 var(--mono);color:var(--night-muted);flex-wrap:wrap}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
-.d-good{background:#3fcf8e}.d-bad{background:#ff6b5e}.d-warn{background:#f5b84a}.d-none{background:#33476a}
-.mx{border:1px solid var(--night-rule);border-radius:var(--radius);overflow:hidden;background:var(--night-2)}
-.mx-scroll{overflow-x:auto}
-.mx table{border-collapse:collapse;width:100%;min-width:980px}
-.mx th,.mx td{padding:0;border-bottom:1px solid var(--night-rule);text-align:left}
-.mx thead th{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--night-muted);padding:16px 14px;background:var(--night-3)}
-.mx tbody tr:last-child>*{border-bottom:0}
-.mx tbody th{padding:16px 14px;width:230px;font-weight:400;vertical-align:top}
-.mx tbody th code{font-size:12.5px;color:var(--night-muted)}
-.mx tbody th b{display:block;font-weight:500;font-size:16px;line-height:1.3;margin-top:4px;color:var(--night-ink)}
-.mx td{vertical-align:top;border-left:1px solid var(--night-rule)}
-.cell{display:block;width:100%;height:100%;min-height:92px;padding:14px;background:none;border:0;color:inherit;text-align:left;cursor:pointer;font:inherit;transition:background .15s,opacity .2s}
-.cell:hover{background:var(--night-3)}
-.cell .nm{font:500 12px/1.3 var(--mono);color:var(--night-ink);display:block;margin-bottom:10px;overflow-wrap:anywhere}
-/* drawer */
-.scrim{position:fixed;inset:0;background:rgba(6,10,18,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
-.scrim.on{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,100%);background:var(--surface);color:var(--ink);z-index:50;transform:translateX(102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:-24px 0 60px -20px rgba(0,0,0,.35)}
-.drawer.on{transform:none}
-.drawer header{padding:26px 28px 20px;border-bottom:1px solid var(--rule)}
-.drawer header code{font-size:13px;color:var(--muted)}
-.drawer header h3{margin-top:6px;font-size:26px}
-.drawer header p{margin:10px 0 0;font-size:15.5px;color:var(--ink-2)}
-.close{position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;font-size:20px;line-height:1}
-.drawer .body{padding:8px 28px 40px;overflow:auto}
-.gr{padding:22px 0;border-bottom:1px solid var(--rule)}
-.gr:last-child{border-bottom:0}
-.gr .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.gr .head b{font-weight:500;font-size:18px;margin-right:4px}
-.gr .meta{font:400 13px/1.5 var(--mono);color:var(--muted);margin-top:8px}
-.gr h4{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:18px 0 8px}
-.fails{list-style:none;margin:0;padding:0}
-.fails li{font:400 13px/1.5 var(--mono);padding:7px 0 7px 22px;position:relative;border-top:1px solid var(--rule);overflow-wrap:anywhere}
-.fails li::before{content:"✗";position:absolute;left:2px;color:var(--bad);font-weight:700}
-.fails li .tag{margin-left:8px;vertical-align:1px}
-.allpass{font:400 14px/1.5 var(--mono);color:var(--good);margin:0}
-details.out{margin-top:14px}
-details.out summary{cursor:pointer;font:500 13px/1 var(--mono);color:var(--ink-2);padding:6px 0}
-details.out pre{margin:8px 0 0;background:var(--surface-2);border:1px solid var(--rule);border-radius:10px;padding:14px;font-size:12px;line-height:1.55;overflow:auto;max-height:340px}
-
-/* Compact patterns and consolidated evidence footer */
-.bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin-top:36px}
-.tile{border-top:1px solid var(--rule-strong);padding-top:20px;min-width:0}
-.tile h3{font-size:22px;margin:0 0 10px}.tile p{margin:0;font-size:17px;color:var(--ink-2)}
-.fine{border-top:1px solid var(--rule);padding:48px 0 56px;color:var(--muted);font-size:13px}
-.footer-links{display:flex;flex-wrap:wrap;gap:12px 28px;margin-bottom:24px;font-size:16px;color:var(--ink)}
-.footer-links a{text-underline-offset:4px}
-.rerun{display:block;max-width:100%;overflow:auto;padding:14px 18px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--ink-2);font:12px/1.6 var(--mono);white-space:nowrap}
-.runline{display:flex;flex-wrap:wrap;gap:6px 24px;font:11px/1.7 var(--mono);margin:20px 0}
-.fine p{max-width:110ch;margin:0}
-/* Accessibility and compact layouts */
-:root{--muted:#6e675f;--radius:20px}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--muted:#aaa195}}
-[hidden]{display:none!important}
-:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
-.night :focus-visible,.window :focus-visible{outline-color:#b4acff}
-.skip{position:fixed;left:16px;top:12px;z-index:100;transform:translateY(-160%);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:30px}
-.skip:focus{transform:none}
-html{scroll-padding-top:96px}body{overflow-x:clip}
-.eyebrow{font-size:11px;letter-spacing:.13em;line-height:1.5;margin:0 0 20px}
-h2{max-width:25ch;letter-spacing:-.035em}
-.process{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;list-style:none;padding:18px 0;margin:0 0 32px;border-block:1px solid var(--rule);font-size:14px;color:var(--ink-2)}
-.process b{display:block;font-size:17px;font-weight:500;color:var(--ink)}
-.process span{display:block;margin-top:3px}
-.exgrid{grid-template-columns:minmax(0,1fr);gap:24px;margin-top:32px}
-.exnotes{position:static}.exnotes ol{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
-.step-tab{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--rule);padding:14px 0;color:var(--muted);font:400 15px/1.5 var(--sans);cursor:pointer}
-.step-tab[aria-selected="true"]{color:var(--ink);box-shadow:inset 0 -2px var(--accent)}
-.window{min-width:0}.window .bar{padding:8px}.window .bar>i{display:none}.tabs{margin-left:0;min-width:0;width:100%;padding:4px}
-.tab{min-height:44px;padding:8px 10px;font-size:11px;color:#a7b7ce}
-.c{color:#9aaea8}.pane pre{font-size:12px;max-height:360px}.pane{max-width:100%;min-height:260px}
-.pane .prose{font-size:17px}.pane .prose p:first-child{margin-top:0}
-.verdict{overflow-wrap:anywhere;font-size:11px}.verdict .tag{font-size:10px;white-space:normal;line-height:1.5}
-.mx table{min-width:0;table-layout:fixed}.mx thead th{font-size:10px;line-height:1.4;padding:14px 10px}
-.mx thead th:first-child{width:24%}
-.mx tbody th{padding:8px 12px;vertical-align:middle}.mx tbody th b{font-size:14px;line-height:1.2;margin:0}
-.task-number{font:10px/1 var(--mono);color:var(--night-muted);margin-right:6px}
-.mx td{vertical-align:middle}
-.cell{display:flex;flex-direction:column;justify-content:center;gap:6px;width:100%;height:63px;min-height:0;padding:8px 9px;background:none;border:0;color:inherit;text-align:left;cursor:pointer;transition:background .15s}
-.cell:hover{background:var(--night-3)}
-.cell .nm{font:500 10px/1.25 var(--mono);color:var(--night-ink);display:block;overflow-wrap:anywhere;margin:0}
-.cell.caught{outline:1px dashed #c69b51;outline-offset:-5px;border-radius:10px}
-.squares{display:flex;gap:6px}.squares .dot{width:9px;height:9px;border-radius:2px}
-.filtered{display:block;text-align:center;color:var(--night-muted);font:12px var(--mono)}
-.legend{width:100%;margin:4px 0 0;font:11px/1.6 var(--sans);gap:6px 16px}.legend .dot{width:8px;height:8px;border-radius:2px}
-.legend .dash{width:14px;height:12px;border:1px dashed #c69b51;border-radius:2px}
-.chip{min-height:44px;font-size:13px;padding:10px 14px}.toolbar{margin:28px 0 18px}
-.task-cards{display:none}
-.drawer header{padding-right:68px;flex-shrink:0;max-height:40dvh;overflow:auto}
-.drawer header code,.drawer header h3{overflow-wrap:anywhere}.drawer header h3{font-size:24px}
-.drawer .body{min-height:0;overscroll-behavior:contain}.close{width:44px;height:44px;z-index:1;border-color:var(--muted)}
-.tag{line-height:1.3}.fails li .tag{white-space:normal}
-@media (prefers-reduced-motion:reduce){.wave{will-change:auto}}
-@media (max-width:1100px){
-nav.top .wrap{gap:22px}nav.top ul{gap:20px;font-size:14px}.brand{font-size:16px}
-.hero-grid{gap:30px}.hero h1{font-size:54px}.hero .intro{font-size:19px}
-.preview-body{padding:20px}.preview-score strong{font-size:48px}
-}
-@media (max-width:980px){
-nav.top ul{display:none}.hero-grid{grid-template-columns:1fr 1fr;gap:24px}.hero h1{font-size:48px}.hero .intro{font-size:18px}
-.hero .btn{padding:0 20px;font-size:14px}.preview-body{padding:18px}.preview h3{font-size:20px}
-.preview-labels,.preview-row{grid-template-columns:minmax(0,1fr) 58px 58px;gap:4px}.preview-row{font-size:10px}
-.preview-foot{padding:12px 18px;font-size:10px}.preview-bar{padding:12px 18px;font-size:10px}.preview-score strong{font-size:42px}
-.bento{grid-template-columns:1fr 1fr}.mx{display:none}.task-cards{display:grid;gap:16px;grid-template-columns:1fr 1fr}
-.task-card{border:1px solid var(--night-rule);border-radius:16px;overflow:hidden;background:var(--night-2);min-width:0}
-.task-card header{padding:14px 16px;border-bottom:1px solid var(--night-rule);background:var(--night-3)}
-.task-card header code{font-size:10px;color:var(--night-muted)}.task-card h3{font-size:19px;margin:3px 0 0;line-height:1.25}
-.task-cells{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
-.task-card .cell{height:64px;padding:9px 12px;border-bottom:1px solid var(--night-rule)}
-}
-@media (max-width:700px){
-.wrap{padding:0 22px}section{padding:56px 0}.eyebrow{font-size:10px;margin-bottom:18px}
-.hero{padding:56px 0}.hero-grid{grid-template-columns:1fr;gap:32px}
-.hero h1{font-size:48px;margin-top:0}.hero .intro{font-size:19px;margin-top:22px}.hero .ctas{gap:10px;margin-top:26px}
-.ribbon{width:1000px;height:1000px;right:-440px;top:260px;opacity:.23}
-.preview{max-width:480px;width:100%;justify-self:center}.preview-body{padding:22px}.preview h3{font-size:23px}.preview-score strong{font-size:54px}
-.preview-labels,.preview-row{grid-template-columns:minmax(0,1fr) 70px 70px;gap:8px}.preview-row{font-size:11px}
-.preview-bar{padding:14px 22px}.preview-foot{padding:14px 22px}
-.process{grid-template-columns:1fr 1fr;gap:12px 16px;padding:12px 0;font-size:11px;line-height:1.4;margin-bottom:28px}.process b{font-size:14px}.process span{margin-top:2px}
-.bento,.task-cards{grid-template-columns:1fr}.bento{gap:24px;margin-top:28px}.tile{padding-top:16px}.tile h3{font-size:21px;margin-bottom:6px}
-.brand{font-size:14px;gap:8px}.brand i{width:18px;height:18px;border-radius:5px}.brand .pack{display:none}
-nav.top .wrap{height:64px;gap:12px}nav.top .btn{height:40px;padding:0 14px;font-size:12px}
-.legend{gap:4px;font-size:10px}.legend span{gap:4px}.toolbar{gap:8px;margin-top:24px}.chip{font-size:12px;padding:10px 12px}
-.exnotes ol{grid-template-columns:1fr}.step-tab{font-size:13px;padding:12px 0}
-.drawer{top:auto;bottom:0;width:100%;height:88dvh;border-radius:22px 22px 0 0;transform:translateY(102%);box-shadow:0 -20px 60px #0005}
-.drawer header{padding:26px 66px 18px 22px;max-height:35dvh}.drawer header p{font-size:14px}
-.drawer header code{font-size:11px}.drawer .body{padding:4px 22px 30px}.drawer header h3{font-size:22px}
-.drawer::before{content:'';position:absolute;top:8px;left:calc(50% - 18px);width:36px;height:4px;background:var(--rule-strong);border-radius:10px}
-.close{top:20px;right:16px}.gr .meta,.fails li{font-size:11px}
-.btn{height:48px}.pane .prose{padding:22px;font-size:16px}.pane pre{padding:20px;font-size:11px}.pane{min-height:320px}
-.verdict{padding:14px 20px}.exgrid{gap:24px;margin-top:28px}
-.fine{padding:36px 0 48px}.footer-links{gap:10px 22px;font-size:15px}.rerun{font-size:10px}
-}
-</style>
+<title>{{page.banking_challenge_pack}}</title>
+<meta name="description" content="{{page.description}}">
+<link rel="stylesheet" href="assets/shared.css">
 </head>
 <body class="no-js">
-<a class="skip" href="#example">Skip to content</a>
-<nav class="top" aria-label="Primary"><div class="wrap">
-  <a class="brand" href="#top"><i aria-hidden="true"></i><span>Banking Challenge<span class="pack"> Pack</span></span></a>
-  <ul><li><a href="#example">Example</a></li><li><a href="#matrix">Results</a></li><li><a href="#patterns">Patterns</a></li></ul>
-  <a class="btn primary" id="navcta" href="../results/final/report.html">Full report</a>
+<a class="skip" href="#tasks">{{nav.skip_to_content}}</a>
+<nav class="top" aria-label="{{nav.primary}}"><div class="wrap">
+  <a class="brand" href="#top"><i aria-hidden="true"></i><span>{{nav.banking_challenge}}<span class="pack"> {{nav.pack}}</span></span></a>
+  <ul><li><a href="#example">{{nav.example}}</a></li><li><a href="#matrix">{{nav.results}}</a></li><li><a href="#patterns">{{nav.patterns}}</a></li></ul>
+  <a class="btn primary" id="navcta" href="../results/final/report.html">{{nav.full_report}}</a>
 </div></nav>
 
 <main id="top">
@@ -283,86 +28,90 @@ nav.top .wrap{height:64px;gap:12px}nav.top .btn{height:40px;padding:0 14px;font-
 </svg></div>
 <div class="wrap">
 <div class="hero-grid"><div>
-<p class="eyebrow">Coding tasks and graders · synthetic data</p>
-<h1>How often does a first-draft grader pass wrong code?</h1>
+<p class="eyebrow">{{hero.eyebrow}}</p>
+<h1>{{hero.heading}}</h1>
 <p class="intro" id="hero-intro"></p>
-<div class="ctas"><a class="btn primary" href="#matrix">See the results <span class="arrow" aria-hidden="true">&#8599;</span></a><a class="btn ghost" href="#example">Read one example</a></div>
-</div><div class="preview" id="hero-preview" aria-label="A preview of the measured grader results"></div></div>
+<div class="ctas"><a class="btn primary" href="#matrix">{{hero.see_the_results}} <span class="arrow" aria-hidden="true">{{hero.button_arrow}}</span></a><a class="btn ghost" href="#example">{{hero.read_one_example}}</a></div>
+</div><div class="preview" id="hero-preview" aria-label="{{hero.preview_label}}"></div></div>
 </div>
 </header>
 
+<section class="task-overview" id="tasks"><div class="wrap"><h2>{{task_list.heading}}</h2><ol class="task-list"><!--__TASK_LIST__--></ol></div></section>
+
 <section class="example" id="example"><div class="wrap">
-  <ol class="process" aria-label="How it works">
-    <li><b>1 Ticket</b><span>Observable rules and starter code.</span></li>
-    <li><b id="solution-count">2 Solutions</b><span>Correct and plausible wrong code.</span></li>
-    <li><b>3 Naive grader</b><span>First-draft tests.</span></li>
-    <li><b>4 Hardened grader</b><span>Tests for the missed bugs.</span></li>
+  <ol class="process" aria-label="{{example.how_it_works}}">
+    <li><b>{{example.ticket_step}}</b><span>{{example.observable_rules_and_starter_code}}</span></li>
+    <li><b id="solution-count">{{example.solutions_step}}</b><span>{{example.correct_and_plausible_wrong_code}}</span></li>
+    <li><b>{{example.naive_step}}</b><span>{{example.first_draft_tests}}</span></li>
+    <li><b>{{example.hardened_step}}</b><span>{{example.tests_for_the_missed_bugs}}</span></li>
   </ol>
-  <p class="eyebrow">Task 01 · idempotent payments</p>
-  <h2 class="reveal">Example: duplicate payment retries</h2>
+  <p class="eyebrow">{{example.task_01_idempotent_payments}}</p>
+  <h2 class="reveal">{{example.example_duplicate_payment_retries}}</h2>
   <div class="exgrid">
     <div class="exnotes">
-      <ol role="tablist" aria-orientation="vertical" aria-label="Example steps" id="exsteps">
-        <li role="presentation"><button class="step-tab" role="tab" id="step-0" aria-controls="pane-0" data-pane="0" aria-selected="true" tabindex="0">The ticket: concurrent duplicates must charge once.</button></li>
-        <li role="presentation"><button class="step-tab" role="tab" id="step-1" aria-controls="pane-1" data-pane="1" aria-selected="false" tabindex="-1">The bug: check for the key, charge, then save the key.</button></li>
-        <li role="presentation"><button class="step-tab" role="tab" id="step-2" aria-controls="pane-2" data-pane="2" aria-selected="false" tabindex="-1">Naive grader: retries are sequential, so the race never happens.</button></li>
-        <li role="presentation"><button class="step-tab" role="tab" id="step-3" aria-controls="pane-3" data-pane="3" aria-selected="false" tabindex="-1">Hardened grader: ten simultaneous callers, one charge allowed.</button></li>
+      <ol role="tablist" aria-orientation="vertical" aria-label="{{example.example_steps}}" id="exsteps">
+        <li role="presentation"><button class="step-tab" role="tab" id="step-0" aria-controls="pane-0" data-pane="0" aria-selected="true" tabindex="0">{{example.ticket_note}}</button></li>
+        <li role="presentation"><button class="step-tab" role="tab" id="step-1" aria-controls="pane-1" data-pane="1" aria-selected="false" tabindex="-1">{{example.bug_note}}</button></li>
+        <li role="presentation"><button class="step-tab" role="tab" id="step-2" aria-controls="pane-2" data-pane="2" aria-selected="false" tabindex="-1">{{example.naive_note}}</button></li>
+        <li role="presentation"><button class="step-tab" role="tab" id="step-3" aria-controls="pane-3" data-pane="3" aria-selected="false" tabindex="-1">{{example.hardened_note}}</button></li>
       </ol>
     </div>
     <div class="window">
       <div class="bar"><i></i><i></i><i></i>
-        <div class="tabs" role="tablist" aria-label="Files" id="extabs">
-          <button class="tab" role="tab" id="file-0" aria-controls="pane-0" tabindex="0" data-pane="0" aria-selected="true">PROBLEM.md</button>
-          <button class="tab" role="tab" id="file-1" aria-controls="pane-1" tabindex="-1" data-pane="1" aria-selected="false">wrong_retry_race/main.py</button>
-          <button class="tab" role="tab" id="file-2" aria-controls="pane-2" tabindex="-1" data-pane="2" aria-selected="false">naive/test_hidden.py</button>
-          <button class="tab" role="tab" id="file-3" aria-controls="pane-3" tabindex="-1" data-pane="3" aria-selected="false">final/test_hidden_payments.py</button>
+        <div class="tabs" role="tablist" aria-label="{{example.files}}" id="extabs">
+          <button class="tab" role="tab" id="file-0" aria-controls="pane-0" tabindex="0" data-pane="0" aria-selected="true">{{example.problem_md}}</button>
+          <button class="tab" role="tab" id="file-1" aria-controls="pane-1" tabindex="-1" data-pane="1" aria-selected="false">{{example.wrong_retry_race_main_py}}</button>
+          <button class="tab" role="tab" id="file-2" aria-controls="pane-2" tabindex="-1" data-pane="2" aria-selected="false">{{example.naive_test_hidden_py}}</button>
+          <button class="tab" role="tab" id="file-3" aria-controls="pane-3" tabindex="-1" data-pane="3" aria-selected="false">{{example.final_test_hidden_payments_py}}</button>
         </div>
       </div>
       <div class="pane on" id="pane-0" role="tabpanel" aria-labelledby="step-0 file-0" tabindex="0" data-pane="0"><div class="prose" id="ex-rule"></div></div>
-      <div class="pane" id="pane-1" role="tabpanel" aria-labelledby="step-1 file-1" tabindex="0" data-pane="1"><pre tabindex="0" aria-label="Python source code" id="ex-wrong"></pre></div>
-      <div class="pane" id="pane-2" role="tabpanel" aria-labelledby="step-2 file-2" tabindex="0" data-pane="2"><pre tabindex="0" aria-label="Python source code" id="ex-naive"></pre></div>
-      <div class="pane" id="pane-3" role="tabpanel" aria-labelledby="step-3 file-3" tabindex="0" data-pane="3"><pre tabindex="0" aria-label="Python source code" id="ex-final"></pre></div>
+      <div class="pane" id="pane-1" role="tabpanel" aria-labelledby="step-1 file-1" tabindex="0" data-pane="1"><pre tabindex="0" aria-label="{{example.python_source_code}}" id="ex-wrong"></pre></div>
+      <div class="pane" id="pane-2" role="tabpanel" aria-labelledby="step-2 file-2" tabindex="0" data-pane="2"><pre tabindex="0" aria-label="{{example.naive_code_label}}" id="ex-naive"></pre></div>
+      <div class="pane" id="pane-3" role="tabpanel" aria-labelledby="step-3 file-3" tabindex="0" data-pane="3"><pre tabindex="0" aria-label="{{example.hardened_code_label}}" id="ex-final"></pre></div>
       <div class="verdict" id="ex-verdict"></div>
     </div>
   </div>
 </div></section>
 
 <section class="night" id="matrix"><div class="wrap">
-  <h2 class="reveal">Results</h2>
-  <div class="toolbar" role="group" aria-label="Filter the matrix" id="filters"></div>
-  <div class="mx"><div class="mx-scroll"><table id="mx" aria-label="Solution verdicts by task and grader" aria-describedby="mxlegend"></table></div></div>
-  <div class="task-cards" id="task-cards" aria-label="Results by task"></div>
+  <h2 class="reveal">{{matrix.results}}</h2>
+  <div class="toolbar" role="group" aria-label="{{matrix.filter_the_matrix}}" id="filters"></div>
+  <div class="mx"><div class="mx-scroll"><table id="mx" aria-label="{{matrix.solution_verdicts_by_task_and_grader}}" aria-describedby="mxlegend"></table></div></div>
+  <div class="task-cards" id="task-cards" aria-label="{{matrix.results_by_task}}"></div>
   <span class="sr" id="mxstatus" role="status"></span>
 </div></section>
 
 <section id="patterns"><div class="wrap">
-  <h2 class="reveal">What the first-draft graders missed</h2>
+  <h2 class="reveal">{{patterns.what_the_first_draft_graders_missed}}</h2>
   <div class="bento" id="bento"></div>
 </div></section>
 
 <footer class="fine"><div class="wrap">
-  <div class="footer-links" aria-label="Evidence">
-    <a href="../results/final/report.html">Full report</a>
-    <a href="../analysis/findings.md">Hardening log</a>
-    <a href="../docs/SUMMARY.md">Summary</a>
-    <a href="../results/final/matrix.json">matrix.json</a>
-    <a id="repolink" hidden>Repository</a>
+  <div class="footer-links" aria-label="{{footer.evidence}}">
+    <a href="../results/final/report.html">{{footer.full_report}}</a>
+    <a href="../analysis/findings.md">{{footer.hardening_log}}</a>
+    <a href="../docs/SUMMARY.md">{{footer.summary}}</a>
+    <a href="../results/final/matrix.json">{{footer.matrix_json}}</a>
+    <a id="repolink" hidden>{{footer.repository}}</a>
   </div>
-  <code class="rerun">python -m harness.run_all --grader all</code>
+  <code class="rerun">{{footer.rerun_command}}</code>
   <div class="runline" id="runline"></div>
-  <p>Synthetic tasks and author-written solutions; results describe this sample, not model performance. Verified natively on Windows; the Docker path is untimed. Blind reviews are self-reviews so far.</p>
+  <p>{{footer.fine_print}}</p>
 </div></footer>
 </main>
 
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-title" aria-describedby="dr-desc" aria-hidden="true" inert>
-  <button class="close" id="dr-close" aria-label="Close">×</button>
+  <button class="close" id="dr-close" aria-label="{{drawer.close}}">{{drawer.close_symbol}}</button>
   <header><code id="dr-task"></code><h3 id="dr-title"></h3><p id="dr-desc"></p></header>
   <div class="body" id="dr-body"></div>
 </aside>
 
 <script>
 const DATA = /*__DATA__*/null;
+const COPY = /*__COPY__*/null;
+const copy = (section, key, values = {}) => COPY[section][key].replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
 document.body.classList.remove('no-js');
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -374,7 +123,7 @@ const final = runs.filter(r => r.grader === 'final'), naive = runs.filter(r => r
 const count = (list, f) => list.filter(f).length;
 const caught = r => r.kind === 'wrong' && r.grader === 'final' && r.verdict === 'ok' && get(r.task, r.variant, 'naive')?.verdict === 'false_pass';
 const tone = v => v === 'ok' ? 'good' : v === 'ok_wrong_reason' ? 'warn' : 'bad';
-const outcomeWord = r => r.outcome === 'PASS' ? 'accepted' : r.outcome === 'FAIL' ? 'rejected' : 'error';
+const outcomeWord = r => r.outcome === 'PASS' ? copy('common', 'accepted') : r.outcome === 'FAIL' ? copy('common', 'rejected') : copy('common', 'error');
 const wrongs = t => Object.entries(DATA.tasks[t].variants).filter(([, v]) => v.kind === 'wrong').map(([n]) => n).filter(n => get(t, n, 'final') || get(t, n, 'naive')).sort();
 
 // numbers
@@ -383,21 +132,21 @@ const wrongN = naive.filter(r => r.kind === 'wrong'), wrongF = W('wrong');
 const validF = final.filter(r => r.kind === 'reference' || r.kind === 'alt_valid');
 const naivePass = count(wrongN, r => r.verdict === 'false_pass'), finalPass = count(wrongF, r => r.verdict === 'false_pass');
 const m = DATA.meta;
-$('#runline').innerHTML = `<span>commit ${esc(m.git_sha)}${m.dirty ? ' (dirty)' : ''}</span><span>${runs.length} runs · ${Math.round(m.wall_s || 0)} s</span><span>Python ${esc(m.env?.python)} · PostgreSQL ${esc(m.env?.postgres)}</span>`;
+$('#runline').innerHTML = `<span>${esc(copy('computed', 'commit', {sha:m.git_sha, dirty:m.dirty ? copy('computed', 'dirty') : ''}))}</span><span>${esc(copy('computed', 'runs', {runs:runs.length, seconds:Math.round(m.wall_s || 0)}))}</span><span>${esc(copy('computed', 'environment', {python:m.env?.python, postgres:m.env?.postgres}))}</span>`;
 const wrongCounts = taskIds.map(t => wrongs(t).length);
-const wrongCount = wrongCounts.every(n => n === wrongCounts[0]) ? (wrongCounts[0] === 3 ? 'three' : String(wrongCounts[0])) : 'multiple';
-const hardenedCopy = finalPass === 0 ? 'accept none' : `accept ${finalPass} of ${wrongF.length}`;
-const correctCopy = validF.every(r => r.outcome === 'PASS') ? 'still pass every correct solution' : `pass ${count(validF, r => r.outcome === 'PASS')} of ${validF.length} correct solutions`;
-$('#hero-intro').textContent = `${taskIds.length} synthetic finance coding tasks, each with ${wrongCount} plausible wrong solutions. The first-draft graders accepted ${naivePass} of ${wrongN.length}. The hardened graders ${hardenedCopy} and ${correctCopy}.`;
+const wrongCount = wrongCounts.every(n => n === wrongCounts[0]) ? (wrongCounts[0] === 3 ? copy('common', 'three') : String(wrongCounts[0])) : copy('common', 'multiple');
+const hardenedCopy = finalPass === 0 ? copy('common', 'accept_none') : copy('computed', 'hardened_some', {final_pass: finalPass, wrong_total: wrongF.length});
+const correctCopy = validF.every(r => r.outcome === 'PASS') ? copy('common', 'all_correct') : copy('computed', 'correct_some', {passed: count(validF, r => r.outcome === 'PASS'), total: validF.length});
+$('#hero-intro').textContent = copy('computed', 'hero_intro', {tasks: taskIds.length, wrong_count: wrongCount, naive_pass: naivePass, wrong_total: wrongN.length, hardened: hardenedCopy, correct: correctCopy});
 const exampleTask = DATA.example.task;
 const sampleWrongs = wrongs(exampleTask);
-$('#solution-count').textContent = `2 ${Object.values(DATA.tasks[exampleTask].variants).filter(v => v.kind !== 'starter').length === 5 ? 'Five' : Object.values(DATA.tasks[exampleTask].variants).filter(v => v.kind !== 'starter').length} solutions`;
-$('#hero-preview').innerHTML = `<div class="preview-bar"><i aria-hidden="true"></i><span>grader / comparison</span><span>matrix.json</span></div>
-  <div class="preview-body"><h3>Wrong solutions accepted</h3>
-  <div class="preview-score"><div><strong>${naivePass}<span style="font-size:.4em;color:var(--muted)"> / ${wrongN.length}</span></strong><small>Naive graders</small></div><span class="pass-arrow" aria-hidden="true">&#8594;</span><div class="after"><strong>${finalPass}<span style="font-size:.4em;color:var(--muted)"> / ${wrongF.length}</span></strong><small>Hardened graders</small></div></div>
-  <div class="preview-labels"><span>${esc(exampleTask.split('_').slice(1).join(' '))}</span><span>naive</span><span>hardened</span></div>
-  ${sampleWrongs.map(v => { const n = get(exampleTask,v,'naive'), f = get(exampleTask,v,'final'); return `<div class="preview-row"><code>${esc(v.replace('wrong_',''))}</code><span class="status ${tone(n.verdict)}">${outcomeWord(n)}</span><span class="status ${tone(f.verdict)}">${outcomeWord(f)}</span></div>`; }).join('')}</div>
-  <div class="preview-foot"><span>&#10003; ${count(validF, r => r.outcome === 'PASS')}/${validF.length} correct solutions accepted</span><a href="#matrix" aria-label="Inspect the complete results">Inspect &#8599;</a></div>`;
+$('#solution-count').textContent = copy('computed', 'solutions_count', {count:Object.values(DATA.tasks[exampleTask].variants).filter(v => v.kind !== 'starter').length === 5 ? copy('common', 'five') : Object.values(DATA.tasks[exampleTask].variants).filter(v => v.kind !== 'starter').length});
+$('#hero-preview').innerHTML = `<div class="preview-bar"><i aria-hidden="true"></i><span>${esc(copy('preview', 'grader_comparison'))}</span><span>${esc(copy('preview', 'matrix_json'))}</span></div>
+  <div class="preview-body"><h3>${esc(copy('preview', 'wrong_solutions_accepted'))}</h3>
+  <div class="preview-score"><div><strong>${naivePass}<span style="font-size:.4em;color:var(--muted)"> / ${wrongN.length}</span></strong><small>${esc(copy('preview', 'naive_graders'))}</small></div><span class="pass-arrow" aria-hidden="true">&#8594;</span><div class="after"><strong>${finalPass}<span style="font-size:.4em;color:var(--muted)"> / ${wrongF.length}</span></strong><small>${esc(copy('preview', 'hardened_graders'))}</small></div></div>
+  <div class="preview-labels"><span>${esc(exampleTask.split('_').slice(1).join(' '))}</span><span>${esc(copy('preview', 'naive'))}</span><span>${esc(copy('preview', 'hardened'))}</span></div>
+  ${sampleWrongs.map(v => { const n = get(exampleTask,v,'naive'), f = get(exampleTask,v,'final'); return `<div class="preview-row"><code>${esc(v.replace('wrong_',''))}</code><span class="status ${tone(n.verdict)}">${esc(outcomeWord(n))}</span><span class="status ${tone(f.verdict)}">${esc(outcomeWord(f))}</span></div>`; }).join('')}</div>
+  <div class="preview-foot"><span>${esc(copy('computed', 'correct_accepted', {passed:count(validF, r => r.outcome === 'PASS'), total:validF.length}))}</span><a href="#matrix" aria-label="${esc(copy('matrix_dynamic', 'inspect'))}">${esc(copy('preview', 'inspect'))}</a></div>`;
 
 const ex = DATA.example;
 
@@ -414,12 +163,12 @@ const colour = (src, mark) => src.split('\n').map(line => {
   html += esc(line.slice(end));
   return mark && mark.some(x => line.includes(x)) ? `<span class="hl">${html}</span>` : html;
 }).join('\n');
-$('#ex-rule').innerHTML = `<p><b>From the ticket:</b> ${esc(ex.rule)}</p><p style="color:#8fa2bf;font-size:15px;margin-top:18px">Two valid designs pass: a reserved key row (409 while in flight) or an advisory lock (duplicates wait).</p>`;
+$('#ex-rule').innerHTML = `<p><b>${esc(copy('example_dynamic', 'from_the_ticket'))}</b> ${esc(ex.rule)}</p><p style="color:#8fa2bf;font-size:15px;margin-top:18px">${esc(copy('example_dynamic', 'valid_designs'))}</p>`;
 $('#ex-wrong').innerHTML = colour(ex.wrong, ['.fetchone()', 'gateway.charge(', 'INSERT INTO']);
 $('#ex-naive').innerHTML = colour(ex.naive, ['second = client.post']);
 $('#ex-final').innerHTML = colour(ex.final, ['barrier.wait()', 'assert len(calls) == 1']);
 const exN = get(ex.task, ex.variant, 'naive'), exF = get(ex.task, ex.variant, 'final');
-$('#ex-verdict').innerHTML = exN && exF ? `<span class="tag bad">naive: ${outcomeWord(exN)} ${exN.tests.passed}/${exN.tests.total}</span><span class="tag good">final: ${outcomeWord(exF)} ${exF.tests.passed}/${exF.tests.total}</span><span>fails: ${exF.failed_tests.map(t => esc(t.split('::').pop())).join(', ')}</span>` : '';
+$('#ex-verdict').innerHTML = exN && exF ? `<span class="tag bad">${esc(copy('example_dynamic', 'naive_result', {outcome:outcomeWord(exN), passed:exN.tests.passed, total:exN.tests.total}))}</span><span class="tag good">${esc(copy('example_dynamic', 'final_result', {outcome:outcomeWord(exF), passed:exF.tests.passed, total:exF.tests.total}))}</span><span>${esc(copy('example_dynamic', 'fails'))} ${exF.failed_tests.map(t => esc(t.split('::').pop())).join(', ')}</span>` : '';
 const exSteps = [...document.querySelectorAll('#exsteps .step-tab')], exTabs = [...document.querySelectorAll('#extabs .tab')], panes = [...document.querySelectorAll('.pane')];
 function showPane(i) {
   [...exSteps, ...exTabs].forEach(el => { const selected = +el.dataset.pane === i; el.setAttribute('aria-selected', selected); el.tabIndex = selected ? 0 : -1; });
@@ -442,9 +191,9 @@ showPane(1);
 
 // matrix explorer
 const FILTERS = [
-  ['all', 'All', () => true],
-  ['caught', 'Caught by hardening', (n, f) => f && caught(f)],
-  ['naivecaught', 'Naive grader caught it', (n) => n && n.kind === 'wrong' && n.outcome === 'FAIL'],
+  ['all', copy('filters', 'all'), () => true],
+  ['caught', copy('filters', 'caught'), (n, f) => f && caught(f)],
+  ['naivecaught', copy('filters', 'naive_caught'), (n) => n && n.kind === 'wrong' && n.outcome === 'FAIL'],
 ];
 let active = 'all';
 const width = Math.max(...taskIds.map(t => wrongs(t).length));
@@ -452,34 +201,34 @@ const cols = ['starter', 'reference', 'alt_valid'];
 function renderMatrix() {
   const test = FILTERS.find(f => f[0] === active)[2];
   let shown = 0;
-  const head = `<thead><tr><th scope="col">Task</th><th scope="col">Starter</th><th scope="col">Reference</th><th scope="col">Alternative</th><th scope="col" colspan="${width}">Wrong solutions</th></tr></thead>`;
+  const head = `<thead><tr><th scope="col">${esc(copy('matrix_dynamic', 'task'))}</th><th scope="col">${esc(copy('matrix_dynamic', 'starter'))}</th><th scope="col">${esc(copy('matrix_dynamic', 'reference'))}</th><th scope="col">${esc(copy('matrix_dynamic', 'alternative'))}</th><th scope="col" colspan="${width}">${esc(copy('matrix_dynamic', 'wrong_solutions'))}</th></tr></thead>`;
   const cards = [];
   const body = taskIds.map(t => {
     const mobile = [];
     const cells = [...cols, ...wrongs(t)].map(v => {
       const n = get(t, v, 'naive'), f = get(t, v, 'final');
       if (!n && !f) return '<td></td>';
-      if (!test(n, f)) return '<td><span class="filtered" aria-label="Filtered out">&mdash;</span></td>';
+      if (!test(n, f)) return `<td><span class="filtered" aria-label="${esc(copy('matrix_dynamic', 'filtered'))}">&mdash;</span></td>`;
       shown++;
-      const label = v.startsWith('wrong_') ? v.slice(6).replaceAll('_', ' ') : v === 'alt_valid' ? 'alternative' : v;
+      const label = v.startsWith('wrong_') ? v.slice(6).replaceAll('_', ' ') : v === 'alt_valid' ? copy('common', 'alternative') : (v.startsWith('wrong_') ? v : copy('common', v));
       const squares = [n, f].map(r => `<i aria-hidden="true" class="dot d-${r ? tone(r.verdict) : 'none'}"></i>`).join('');
-      const button = `<button class="cell${f && caught(f) ? ' caught' : ''}" data-t="${esc(t)}" data-v="${esc(v)}" aria-label="${esc(t)} ${esc(v)}: naive ${n ? n.verdict : 'not run'}, hardened ${f ? f.verdict : 'not run'}${f && caught(f) ? ', caught by hardening' : ''}. View tests"><span class="nm">${esc(label)}</span><span class="squares">${squares}</span></button>`;
+      const button = `<button class="cell${f && caught(f) ? ' caught' : ''}" data-t="${esc(t)}" data-v="${esc(v)}" aria-label="${esc(copy('matrix_dynamic', 'view_tests', {task:t, variant:v, naive:n ? n.verdict : copy('drawer_dynamic', 'not_run'), hardened:f ? f.verdict : copy('drawer_dynamic', 'not_run'), caught:f && caught(f) ? copy('matrix_dynamic', 'caught_suffix') : ''}))}"><span class="nm">${esc(label)}</span><span class="squares">${squares}</span></button>`;
       mobile.push(button);
       return `<td>${button}</td>`;
     });
     if (!mobile.length) return '';
     while (cells.length < cols.length + width) cells.push('<td></td>');
-    cards.push(`<article class="task-card"><header><code>Task ${esc(t.slice(0,2))}</code><h3>${esc(DATA.tasks[t].title)}</h3></header><div class="task-cells">${mobile.join('')}</div></article>`);
-    return `<tr><th scope="row"><b><span class="task-number">${esc(t.slice(0,2))}</span>${esc(DATA.tasks[t].title)}</b></th>${cells.join('')}</tr>`;
+    cards.push(`<article class="task-card"><header><code>${esc(copy('matrix_dynamic', 'task'))} ${esc(t.slice(0,2))}</code><h3><a href="tasks/${esc(t)}.html">${esc(DATA.tasks[t].title)}</a></h3></header><div class="task-cells">${mobile.join('')}</div></article>`);
+    return `<tr><th scope="row"><a class="task-link" href="tasks/${esc(t)}.html"><b><span class="task-number">${esc(t.slice(0,2))}</span>${esc(DATA.tasks[t].title)}</b></a></th>${cells.join('')}</tr>`;
   }).join('');
   $('#mx').innerHTML = head + `<tbody>${body}</tbody>`;
   $('#task-cards').innerHTML = cards.join('');
-  $('#mxstatus').textContent = `${shown} of ${final.length} solutions match.`;
+  $('#mxstatus').textContent = copy('matrix_dynamic', 'matches', {shown, total:final.length});
 }
 $('#filters').innerHTML = FILTERS.map(([k, label, f]) => {
   const n = taskIds.flatMap(t => [...cols, ...wrongs(t)].map(v => [get(t, v, 'naive'), get(t, v, 'final')])).filter(([a, b]) => (a || b) && f(a, b)).length;
-  return `<button class="chip" aria-pressed="${k === active}" data-k="${k}">${label}<span class="count">${n}</span></button>`;
-}).join('') + `<span class="legend" id="mxlegend"><span>Squares: naive → hardened</span><span><i class="dot d-good" aria-hidden="true"></i>expected</span><span title="Wrong verdict"><i class="dot d-bad" aria-hidden="true"></i>wrong</span><span title="Rejected for a different reason than intended"><i class="dot d-warn" aria-hidden="true"></i>other reason</span><span title="Caught by hardening"><i class="dash" aria-hidden="true"></i>caught</span></span>`;
+  return `<button class="chip" aria-pressed="${k === active}" data-k="${k}">${esc(label)}<span class="count">${n}</span></button>`;
+}).join('') + `<span class="legend" id="mxlegend"><span>${esc(copy('matrix_dynamic', 'squares_naive_hardened'))}</span><span><i class="dot d-good" aria-hidden="true"></i>${esc(copy('matrix_dynamic', 'expected'))}</span><span title="${esc(copy('matrix_dynamic', 'wrong_verdict'))}"><i class="dot d-bad" aria-hidden="true"></i>${esc(copy('matrix_dynamic', 'wrong'))}</span><span title="${esc(copy('matrix_dynamic', 'other_reason'))}"><i class="dot d-warn" aria-hidden="true"></i>${esc(copy('matrix_dynamic', 'other_reason_label'))}</span><span title="${esc(copy('matrix_dynamic', 'caught_title'))}"><i class="dash" aria-hidden="true"></i>${esc(copy('matrix_dynamic', 'caught'))}</span></span>`;
 $('#filters').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; active = b.dataset.k; document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === b)); renderMatrix(); });
 renderMatrix();
 
@@ -490,18 +239,18 @@ function openDrawer(t, v) {
   const task = DATA.tasks[t], spec = task.variants[v] || { kind: v };
   $('#dr-task').textContent = `${t} · ${spec.kind}`;
   $('#dr-title').textContent = v;
-  $('#dr-desc').textContent = spec.bug || spec.structural_difference || (v === 'starter' ? 'The unmodified starter repo. Every hardened grader must reject it, so a task can never be solved by doing nothing.' : v === 'reference' ? 'The reference solution.' : '');
+  $('#dr-desc').textContent = spec.bug || spec.structural_difference || (v === 'starter' ? copy('drawer_dynamic', 'starter') : v === 'reference' ? copy('drawer_dynamic', 'reference') : '');
   $('#dr-body').scrollTop = 0;
-  $('#dr-body').innerHTML = ['final', 'naive'].map(g => {
+  $('#dr-body').innerHTML = `<p class="drawer-summary">${esc(task.summary)}</p><a href="tasks/${esc(t)}.html">${esc(copy('task_list', 'open'))}</a>` + ['final', 'naive'].map(g => {
     const r = get(t, v, g); if (!r) return '';
     const hits = new Set(r.must_fail_hit || []);
-    const fails = r.failed_tests.length ? `<ul class="fails">${r.failed_tests.map(x => `<li>${esc(x)}${hits.has(x.split('::').pop()) ? '<span class="tag">declared must_fail</span>' : ''}</li>`).join('')}</ul>` : `<p class="allpass">All ${r.tests.total} tests passed.</p>`;
-    const meaning = { ok: 'as expected', false_pass: 'false pass: a wrong solution was accepted', false_fail: 'false fail: a correct solution was rejected', ok_wrong_reason: 'rejected, but not by its declared test', infra_error: 'infrastructure error' }[r.verdict] || r.verdict;
-    const pred = g === 'naive' && r.predicted_naive ? ` · predicted ${esc(r.predicted_naive)} (${r.predicted_naive === r.verdict ? 'matched' : 'missed'})` : '';
-    return `<div class="gr"><div class="head"><b>${g === 'final' ? 'Hardened' : 'Naive'} grader</b><span class="tag ${tone(r.verdict)}">${outcomeWord(r)} ${r.tests.passed}/${r.tests.total}</span>${g === 'final' && caught(r) ? '<span class="tag warn">caught by hardening</span>' : ''}</div>
-      <div class="meta">${meaning} · ${(r.duration_s || 0).toFixed(2)} s${pred}</div>
-      <h4>Failed tests</h4>${fails}
-      <details class="out"><summary>Pytest output (last 40 lines)</summary><pre>${esc(r.stderr_tail || 'No output captured.')}</pre></details></div>`;
+    const fails = r.failed_tests.length ? `<ul class="fails">${r.failed_tests.map(x => `<li>${esc(x)}${hits.has(x.split('::').pop()) ? `<span class="tag">${esc(copy('drawer_dynamic', 'declared_must_fail'))}</span>` : ''}</li>`).join('')}</ul>` : `<p class="allpass">${esc(copy('drawer_dynamic', 'all_passed', {total:r.tests.total}))}</p>`;
+    const meaning = { ok: copy('drawer_dynamic', 'ok'), false_pass: copy('drawer_dynamic', 'false_pass'), false_fail: copy('drawer_dynamic', 'false_fail'), ok_wrong_reason: copy('drawer_dynamic', 'ok_wrong_reason'), infra_error: copy('drawer_dynamic', 'infra_error') }[r.verdict] || r.verdict;
+    const pred = g === 'naive' && r.predicted_naive ? copy('drawer_dynamic', 'prediction', {prediction:r.predicted_naive, match:r.predicted_naive === r.verdict ? copy('drawer_dynamic', 'matched') : copy('drawer_dynamic', 'missed')}) : '';
+    return `<div class="gr"><div class="head"><b>${esc(copy('drawer_dynamic', 'grader', {name:g === 'final' ? copy('drawer_dynamic', 'hardened') : copy('drawer_dynamic', 'naive')}))}</b><span class="tag ${tone(r.verdict)}">${esc(outcomeWord(r))} ${r.tests.passed}/${r.tests.total}</span>${g === 'final' && caught(r) ? `<span class="tag warn">${esc(copy('drawer_dynamic', 'caught_by_hardening'))}</span>` : ''}</div>
+      <div class="meta">${esc(copy('drawer_dynamic', 'run_meta', {meaning, seconds:(r.duration_s || 0).toFixed(2), prediction:pred}))}</div>
+      <h4>${esc(copy('drawer_dynamic', 'failed_tests'))}</h4>${fails}
+      <details class="out"><summary>${esc(copy('drawer_dynamic', 'pytest_output_last_40_lines'))}</summary><pre>${esc(r.stderr_tail || copy('drawer_dynamic', 'no_output'))}</pre></details></div>`;
   }).join('');
   drawer.inert = false;
   $('main').inert = true; $('nav.top').inert = true; $('.skip').inert = true;
@@ -530,13 +279,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
-const PATTERNS = [
-  ['Bugs that need two events.', 'Restarts, retries, clock changes and concurrent calls.'],
-  ['Rounding ties and boundaries.', 'Wrong code agrees with right code almost everywhere else.'],
-  ['Right totals, wrong pairing.', 'Count checks miss reused entries and unscoped keys.'],
-  ['Half-applied rejections.', 'The right error, with state left behind.'],
-];
-$('#bento').innerHTML = PATTERNS.map(([h, p]) => `<article class="tile"><h3>${h}</h3><p>${p}</p></article>`).join('');
+const PATTERNS = COPY.patterns.items;
+$('#bento').innerHTML = PATTERNS.map(([h, p]) => `<article class="tile"><h3>${esc(h)}</h3><p>${esc(p)}</p></article>`).join('');
 
 if (DATA.repo) { const a = $('#repolink'); a.href = DATA.repo; a.hidden = false; }
 
