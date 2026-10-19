@@ -1,4 +1,4 @@
-# Private draft ? authoring contract
+# Task authoring contract
 
 ## 6. Task authoring contract
 

@@ -245,7 +245,7 @@ def render(matrix, tasks_root=config.TASKS):
     template = Template((TEMPLATES / "report.html").read_text(encoding="utf-8"))
     return template.substitute(
         fonts=font_face("Source Serif 4", "source-serif-4.woff2") + font_face("JetBrains Mono", "jetbrains-mono.woff2"),
-        facts=facts_html, kpis="".join(kpis), tasks=tasks_html, body="\n".join(body), status=escape(matrix.get("status", "private draft")),
+        facts=facts_html, kpis="".join(kpis), tasks=tasks_html, body="\n".join(body), status=escape(matrix.get("status", "results")),
     )
 
 

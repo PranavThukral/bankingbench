@@ -1,1 +1,1 @@
-"""Offline, reproducible verifier audit harness (private draft)."""
+"""Offline, reproducible verifier audit harness."""

@@ -1,4 +1,4 @@
-# Banking challenge pack — one-page summary (private draft)
+# Banking challenge pack — one-page summary
 
 ## Problem
 A coding task is only as good as its grader. A grader that accepts plausible-but-wrong code

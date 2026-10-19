@@ -90,14 +90,14 @@ def export_task(task, root):
     target.mkdir(parents=True)
     (target / "instruction.md").write_text((task.path / "PROBLEM.md").read_text(encoding="utf-8"), encoding="utf-8")
     q = json.dumps
-    text = (f'schema_version = "1.3"\n# Private draft. Only keys in HARBOR_SCHEMA_NOTES.md are emitted.\n'
+    text = (f'schema_version = "1.3"\n# Only keys in HARBOR_SCHEMA_NOTES.md are emitted.\n'
             f'[task]\nname = {q("synthetic/" + task.id)}\nauthors = [{{name = "Pranav Thukral"}}]\n'
             f'description = {q(task.title)}\nkeywords = {q(list(task.tags))}\n'
-            f'[metadata]\nsource_task = {q(task.id)}\nprivate_draft = true\n'
+            f'[metadata]\nsource_task = {q(task.id)}\n'
             f'mandatory = {str(task.mandatory).lower()}\ndifficulty = {q(task.difficulty)}\n'
             '# Authoring-only variants, must_fail and leak_terms remain in the source repository.\n'
             f'[verifier]\ntimeout_sec = {task.timeout_seconds}\nnetwork_mode = "no-network"\n'
-            '# The agent timeout and the build/resource values below are chosen limits for this private draft,\n'
+            '# The agent timeout and the build/resource values below are chosen limits,\n'
             '# not values derived from measurements: timeout_sec 1800, build_timeout_sec 600, cpus 4,\n'
             '# memory_mb 4096, storage_mb 4096. Revisit them after real agent runs (BLUEPRINT section 12).\n'
             '[agent]\ntimeout_sec = 1800\nnetwork_mode = "no-network"\n'

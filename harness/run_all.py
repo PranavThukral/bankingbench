@@ -85,7 +85,7 @@ def main(argv=None):
         output = args.out / stamp
         output.mkdir(parents=True)
         matrix = dict(schema_version=1, generated_at=datetime.now(timezone.utc).isoformat(),
-                      git_sha=sha, dirty=dirty, status="private draft",
+                      git_sha=sha, dirty=dirty, status="v3",
                       env=dict(python=platform.python_version(), postgres=db.version(),
                                hypothesis_profile="ci", platform=platform.platform()),
                       runs=runs, flips=find_flips(runs), wall_s=round(time.perf_counter() - start, 3),
