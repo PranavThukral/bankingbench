@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banking Challenge Pack</title>
+<meta name="description" content="Ten synthetic banking coding tasks, each graded twice, showing which wrong solutions a naive grader lets through and how hardening catches them.">
+<style>
+/*__FONTS__*/
+:root{
+  --sans:'Jost','Futura','Century Gothic',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --bg:#f6f4ef;--surface:#ffffff;--surface-2:#efebe3;--ink:#16130f;--ink-2:#45403a;--muted:#7a736a;
+  --rule:#e3ddd2;--rule-strong:#cfc7b8;
+  --accent:#4b3fd8;--accent-ink:#ffffff;
+  --good:#167a52;--good-bg:#e0f2e8;--bad:#c2372e;--bad-bg:#fbe3e0;--warn:#a36700;--warn-bg:#fcf0d4;
+  --night:#0c1626;--night-2:#13223a;--night-3:#1c2e4a;--night-ink:#e9eef7;--night-muted:#8fa2bf;--night-rule:#24385a;
+  --radius:18px;--shadow:0 1px 2px rgba(22,19,15,.04),0 12px 32px -12px rgba(22,19,15,.12);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12110f;--surface:#1b1a17;--surface-2:#24221e;--ink:#f3efe7;--ink-2:#cdc6b9;--muted:#9a9286;
+  --rule:#2e2b26;--rule-strong:#3d3933;--accent:#8f86ff;--accent-ink:#12110f;
+  --good:#6fd3a2;--good-bg:#173126;--bad:#ff8b80;--bad-bg:#3a1c19;--warn:#f0bf5c;--warn-bg:#352a12;
+  --shadow:none;color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+code,pre,.mono{font-family:var(--mono)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.eyebrow{font:500 13px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--sans);margin:0;letter-spacing:-.02em}
+h2{font-size:clamp(34px,4.6vw,56px);font-weight:400;line-height:1.08}
+h2 .soft,h1 .soft{color:var(--muted)}
+h3{font-size:22px;font-weight:500;line-height:1.25;letter-spacing:-.01em}
+section{padding:120px 0}
+.lede{font-size:20px;color:var(--ink-2);max-width:60ch;margin:20px 0 0}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 26px;border-radius:999px;font:500 16px/1 var(--sans);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,background .15s,border-color .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible,.chip:focus-visible,.cell:focus-visible,.tab:focus-visible,.close:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn.ghost{border-color:var(--rule-strong);color:var(--ink);background:transparent}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn .arrow{transition:transform .15s}.btn:hover .arrow{transform:translateX(3px)}
+
+/* nav */
+nav.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s}
+nav.top.scrolled{border-bottom-color:var(--rule)}
+nav.top .wrap{display:flex;align-items:center;gap:32px;height:72px}
+.brand{display:flex;align-items:center;gap:10px;font:600 18px/1 var(--sans);text-decoration:none;letter-spacing:-.01em}
+.brand i{width:22px;height:22px;border-radius:7px;background:conic-gradient(from 200deg,#4b3fd8,#ff6b4a,#ffb547,#2bb39f,#4b3fd8)}
+nav.top ul{display:flex;gap:28px;list-style:none;margin:0;padding:0;font-size:15px;color:var(--ink-2)}
+nav.top ul a{text-decoration:none}nav.top ul a:hover{color:var(--ink)}
+nav.top .btn{height:40px;padding:0 18px;font-size:14px;margin-left:auto}
+
+/* hero */
+.hero{position:relative;padding:96px 0 72px;overflow:hidden}
+.ribbon{position:absolute;inset:-20% -30% auto 38%;height:780px;pointer-events:none;filter:blur(2px);opacity:.95;transform:rotate(-12deg)}
+.ribbon span{position:absolute;border-radius:50%;mix-blend-mode:multiply;animation:drift 18s ease-in-out infinite alternate}
+.ribbon span:nth-child(1){width:620px;height:300px;left:0;top:180px;background:radial-gradient(closest-side,#7a6cff,transparent);animation-duration:16s}
+.ribbon span:nth-child(2){width:560px;height:280px;left:180px;top:120px;background:radial-gradient(closest-side,#ff7a59,transparent);animation-duration:21s}
+.ribbon span:nth-child(3){width:520px;height:260px;left:320px;top:260px;background:radial-gradient(closest-side,#ffbe4d,transparent);animation-duration:19s}
+.ribbon span:nth-child(4){width:480px;height:240px;left:80px;top:330px;background:radial-gradient(closest-side,#33c2ad,transparent);animation-duration:23s}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ribbon span{mix-blend-mode:screen;opacity:.7}}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-40px) scale(1.08)}100%{transform:translate(-40px,30px) scale(.96)}}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(44px,7vw,88px);font-weight:400;line-height:1.02;max-width:13ch;margin-top:22px}
+.hero .intro{font-size:clamp(20px,2.2vw,26px);line-height:1.4;color:var(--ink-2);max-width:34ch;margin:28px 0 0;font-weight:400}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px}
+.proofline{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:56px;font:400 13px/1.4 var(--mono);color:var(--muted)}
+.proofline b{color:var(--ink);font-weight:500}
+
+/* stat band */
+.stats{padding:0 0 40px}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule-strong)}
+.stat{padding:32px 24px 8px 0}
+.stat+.stat{padding-left:24px;border-left:1px solid var(--rule)}
+.stat .num{font:300 clamp(40px,5vw,64px)/1 var(--sans);letter-spacing:-.03em}
+.stat .num .to{color:var(--muted);font-size:.55em;margin:0 .2em}
+.stat .num .bad{color:var(--bad)}.stat .num .good{color:var(--good)}
+.stat p{margin:12px 0 0;font-size:15px;color:var(--ink-2);max-width:24ch}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:64px;counter-reset:step}
+.step{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.step .n{font:500 13px/1 var(--mono);color:var(--muted)}
+.step h3{margin:14px 0 8px}
+.step p{margin:0;font-size:15.5px;color:var(--ink-2)}
+.mock{margin-top:auto;padding-top:22px}
+.mock .card{border:1px solid var(--rule);border-radius:12px;padding:12px;background:var(--bg);font:12px/1.5 var(--mono)}
+.mock .line{height:7px;border-radius:4px;background:var(--rule-strong);margin:6px 0}
+.mock .chips{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;gap:6px;font:500 11.5px/1 var(--mono);padding:6px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.tag.good{background:var(--good-bg);color:var(--good)}.tag.bad{background:var(--bad-bg);color:var(--bad)}.tag.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* example */
+.example{background:var(--surface);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.exgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;margin-top:56px;align-items:start}
+.exnotes{position:sticky;top:110px}
+.exnotes ol{list-style:none;padding:0;margin:0}
+.exnotes li{padding:18px 0;border-top:1px solid var(--rule);cursor:pointer;color:var(--muted);transition:color .2s}
+.exnotes li:last-child{border-bottom:1px solid var(--rule)}
+.exnotes li b{display:block;font-weight:500;font-size:19px;color:inherit}
+.exnotes li span{display:block;font-size:15.5px;margin-top:4px;max-height:0;overflow:hidden;transition:max-height .3s}
+.exnotes li[aria-selected="true"]{color:var(--ink)}
+.exnotes li[aria-selected="true"] span{max-height:220px;color:var(--ink-2)}
+.window{border-radius:16px;overflow:hidden;background:#0f1726;box-shadow:0 30px 60px -30px rgba(12,22,38,.55);border:1px solid #1f2c42}
+.window .bar{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#141f33;border-bottom:1px solid #1f2c42}
+.window .bar i{width:11px;height:11px;border-radius:50%;background:#2b3a55}
+.tabs{display:flex;gap:2px;margin-left:12px;overflow-x:auto}
+.tab{font:500 12.5px/1 var(--mono);color:#8fa2bf;background:none;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:#22324f;color:#e9eef7}
+.pane{display:none}.pane.on{display:block}
+.pane pre{margin:0;padding:22px 24px;color:#d6deeb;font-size:13px;line-height:1.65;overflow:auto;max-height:520px}
+.pane .prose{padding:26px 28px;color:#d6deeb;font:400 17px/1.6 var(--sans)}
+.pane .prose b{color:#fff;font-weight:500}
+.verdict{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 24px;background:#141f33;border-top:1px solid #1f2c42;font:500 12.5px/1.4 var(--mono);color:#8fa2bf}
+.k{color:#c792ea}.s{color:#ecc48d}.c{color:#637777;font-style:italic}.f{color:#82aaff}.hl{background:rgba(255,107,74,.16);display:inline-block;min-width:100%;box-shadow:inset 3px 0 #ff6b4a}
+
+/* matrix explorer */
+.night{background:var(--night);color:var(--night-ink)}
+.night h2 .soft{color:var(--night-muted)}
+.night .lede{color:var(--night-muted)}
+.night .eyebrow{color:var(--night-muted)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:40px 0 20px;align-items:center}
+.chip{font:500 14px/1 var(--sans);color:var(--night-ink);background:var(--night-2);border:1px solid var(--night-rule);border-radius:999px;padding:10px 16px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.chip[aria-pressed="true"]{background:var(--night-ink);color:var(--night);border-color:var(--night-ink)}
+.chip .count{font:500 12px/1 var(--mono);opacity:.7}
+.legend{margin-left:auto;display:flex;gap:16px;font:400 13px/1 var(--mono);color:var(--night-muted);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.d-good{background:#3fcf8e}.d-bad{background:#ff6b5e}.d-warn{background:#f5b84a}.d-none{background:#33476a}
+.mx{border:1px solid var(--night-rule);border-radius:var(--radius);overflow:hidden;background:var(--night-2)}
+.mx-scroll{overflow-x:auto}
+.mx table{border-collapse:collapse;width:100%;min-width:980px}
+.mx th,.mx td{padding:0;border-bottom:1px solid var(--night-rule);text-align:left}
+.mx thead th{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--night-muted);padding:16px 14px;background:var(--night-3)}
+.mx tbody tr:last-child>*{border-bottom:0}
+.mx tbody th{padding:16px 14px;width:230px;font-weight:400;vertical-align:top}
+.mx tbody th code{font-size:12.5px;color:var(--night-muted)}
+.mx tbody th b{display:block;font-weight:500;font-size:16px;line-height:1.3;margin-top:4px;color:var(--night-ink)}
+.mx td{vertical-align:top;border-left:1px solid var(--night-rule)}
+.cell{display:block;width:100%;height:100%;min-height:92px;padding:14px;background:none;border:0;color:inherit;text-align:left;cursor:pointer;font:inherit;transition:background .15s,opacity .2s}
+.cell:hover{background:var(--night-3)}
+.cell .nm{font:500 12px/1.3 var(--mono);color:var(--night-ink);display:block;margin-bottom:10px;overflow-wrap:anywhere}
+.cell .row{display:flex;align-items:center;gap:8px;font:400 12px/1.9 var(--mono);color:var(--night-muted)}
+.cell .row .dot{flex:none}
+.cell .row em{font-style:normal;margin-left:auto;opacity:.8}
+.cell .flag{display:inline-block;margin-top:8px;font:500 11px/1 var(--mono);color:#ffcf7a;border:1px dashed #a07a33;border-radius:5px;padding:4px 6px}
+.cell.dim{opacity:.18}
+.mx-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;font:400 13px/1.5 var(--mono);color:var(--night-muted)}
+.mx-foot a{color:var(--night-ink)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(6,10,18,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,100%);background:var(--surface);color:var(--ink);z-index:50;transform:translateX(102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:-24px 0 60px -20px rgba(0,0,0,.35)}
+.drawer.on{transform:none}
+.drawer header{padding:26px 28px 20px;border-bottom:1px solid var(--rule)}
+.drawer header code{font-size:13px;color:var(--muted)}
+.drawer header h3{margin-top:6px;font-size:26px}
+.drawer header p{margin:10px 0 0;font-size:15.5px;color:var(--ink-2)}
+.close{position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;font-size:20px;line-height:1}
+.drawer .body{padding:8px 28px 40px;overflow:auto}
+.gr{padding:22px 0;border-bottom:1px solid var(--rule)}
+.gr:last-child{border-bottom:0}
+.gr .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gr .head b{font-weight:500;font-size:18px;margin-right:4px}
+.gr .meta{font:400 13px/1.5 var(--mono);color:var(--muted);margin-top:8px}
+.gr h4{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:18px 0 8px}
+.fails{list-style:none;margin:0;padding:0}
+.fails li{font:400 13px/1.5 var(--mono);padding:7px 0 7px 22px;position:relative;border-top:1px solid var(--rule);overflow-wrap:anywhere}
+.fails li::before{content:"✗";position:absolute;left:2px;color:var(--bad);font-weight:700}
+.fails li .tag{margin-left:8px;vertical-align:1px}
+.allpass{font:400 14px/1.5 var(--mono);color:var(--good);margin:0}
+details.out{margin-top:14px}
+details.out summary{cursor:pointer;font:500 13px/1 var(--mono);color:var(--ink-2);padding:6px 0}
+details.out pre{margin:8px 0 0;background:var(--surface-2);border:1px solid var(--rule);border-radius:10px;padding:14px;font-size:12px;line-height:1.55;overflow:auto;max-height:340px}
+
+/* patterns bento */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:56px}
+.tile{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);grid-column:span 2;display:flex;flex-direction:column;min-height:300px}
+.tile.wide{grid-column:span 3}
+.tile .ix{font:500 13px/1 var(--mono);color:var(--muted)}
+.tile h3{margin:14px 0 10px}
+.tile p{margin:0;font-size:16px;color:var(--ink-2)}
+.tile .ex{margin-top:auto;padding-top:22px;display:flex;flex-wrap:wrap;gap:6px}
+
+/* ship */
+.ship{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:56px}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:30px;box-shadow:var(--shadow)}
+.panel p{color:var(--ink-2);font-size:16px;margin:10px 0 0}
+.term{margin-top:22px;background:#0f1726;color:#d6deeb;border-radius:12px;padding:18px 20px;font:13px/1.8 var(--mono);overflow:auto}
+.term .p{color:#637777}
+.tree{margin-top:22px;font:13px/1.85 var(--mono);color:var(--ink-2);background:var(--bg);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;white-space:pre;overflow:auto}
+
+/* closing + fine print */
+.closing{text-align:center;padding:140px 0 120px}
+.closing h2{max-width:18ch;margin:0 auto}
+.closing .ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:40px}
+.fine{border-top:1px solid var(--rule);padding:40px 0 64px;font-size:13.5px;line-height:1.65;color:var(--muted)}
+.fine .cols{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px}
+.fine h4{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2);margin:0 0 12px}
+.fine ul{list-style:none;margin:0;padding:0}
+.fine li{margin:6px 0}
+.fine a{text-decoration:none}.fine a:hover{color:var(--ink)}
+
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+.no-js .reveal{opacity:1;transform:none}
+
+@media (max-width:980px){
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .exgrid{grid-template-columns:1fr;gap:32px}.exnotes{position:static}
+  .bento{grid-template-columns:1fr 1fr}.tile,.tile.wide{grid-column:span 1}
+  .ship{grid-template-columns:1fr}
+  .statgrid{grid-template-columns:repeat(2,1fr)}.stat:nth-child(3){padding-left:0;border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--rule)}
+  nav.top ul{display:none}
+}
+@media (max-width:620px){
+  .wrap{padding:0 16px}
+  section{padding:80px 0}
+  .hero{padding:56px 0 48px}
+  .ribbon{inset:-10% -60% auto 10%;height:520px;opacity:.6}
+  .steps,.bento{grid-template-columns:1fr}
+  .statgrid{grid-template-columns:1fr}.stat,.stat+.stat{padding:24px 0 8px;border-left:0}
+  .stat+.stat{border-top:1px solid var(--rule)}
+  .fine .cols{grid-template-columns:1fr}
+  .legend{margin-left:0}
+  .drawer header{padding:22px 20px 16px}.drawer .body{padding:4px 20px 32px}
+  .btn{height:48px}
+}
+</style>
+</head>
+<body class="no-js">
+<nav class="top" aria-label="Primary"><div class="wrap">
+  <a class="brand" href="#top"><i aria-hidden="true"></i>Banking Challenge Pack</a>
+  <ul><li><a href="#how">How it works</a></li><li><a href="#example">Example</a></li><li><a href="#matrix">Results</a></li><li><a href="#patterns">Patterns</a></li></ul>
+  <a class="btn primary" id="navcta" href="../results/final/report.html">Full report</a>
+</div></nav>
+
+<main id="top">
+<header class="hero">
+  <div class="ribbon" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <div class="wrap">
+    <p class="eyebrow">Coding tasks · verifier QA · synthetic data</p>
+    <h1>Graders you can actually trust.</h1>
+    <p class="intro">Ten banking coding tasks, each graded twice. A quick grader is written first, then hardened until it rejects every plausible wrong answer and still accepts every correct one.</p>
+    <div class="ctas">
+      <a class="btn primary" href="#matrix">Explore the results <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="btn ghost" href="#how">How it works</a>
+    </div>
+    <p class="proofline" id="proofline"></p>
+  </div>
+</header>
+
+<section class="stats" aria-label="Headline numbers"><div class="wrap">
+  <div class="statgrid" id="stats"></div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <p class="eyebrow">How it works</p>
+  <h2 class="reveal">A grader is only as good as the wrong answers it rejects. <span class="soft">So every task ships with some.</span></h2>
+  <div class="steps">
+    <article class="step reveal">
+      <span class="n">01</span><h3>A real ticket</h3>
+      <p>A runnable starter repo with the feature missing, and a ticket that states every rule: rounding mode, minor units, time zone, error codes.</p>
+      <div class="mock"><div class="card"><b>Make payment creation idempotent</b><div class="line" style="width:92%"></div><div class="line" style="width:78%"></div><div class="line" style="width:85%"></div></div></div>
+    </article>
+    <article class="step reveal">
+      <span class="n">02</span><h3>Five solutions</h3>
+      <p>A reference, a correct alternative written a different way, and three wrong answers a capable engineer could plausibly write.</p>
+      <div class="mock"><div class="chips"><span class="tag good">reference</span><span class="tag good">alt_valid</span><span class="tag bad">wrong_retry_race</span><span class="tag bad">wrong_key_scope</span><span class="tag bad">wrong_inmemory_cache</span></div></div>
+    </article>
+    <article class="step reveal">
+      <span class="n">03</span><h3>A naive grader</h3>
+      <p>Written first and committed first: the happy path, the ticket's own example and one obvious edge case. Then measured.</p>
+      <div class="mock"><div class="chips" id="mock-naive"></div></div>
+    </article>
+    <article class="step reveal">
+      <span class="n">04</span><h3>A hardened grader</h3>
+      <p>Targeted tests are added until every wrong answer fails for its declared reason, while both correct solutions keep passing.</p>
+      <div class="mock"><div class="chips" id="mock-final"></div></div>
+    </article>
+  </div>
+</div></section>
+
+<section class="example" id="example"><div class="wrap">
+  <p class="eyebrow">Worked example · task 01</p>
+  <h2 class="reveal">Two retries, one moment, two charges. <span class="soft">The quick grader never sees it.</span></h2>
+  <div class="exgrid">
+    <div class="exnotes">
+      <ol role="tablist" aria-label="Example steps" id="exsteps">
+        <li role="tab" data-pane="0" aria-selected="true" tabindex="0"><b>The rule</b><span>The ticket says concurrent duplicates must charge exactly once. It says nothing about how.</span></li>
+        <li role="tab" data-pane="1" aria-selected="false" tabindex="-1"><b>The plausible bug</b><span>Look up the key, charge the card, then save the key. It's what most people write first, and every sequential retry works.</span></li>
+        <li role="tab" data-pane="2" aria-selected="false" tabindex="-1"><b>Why the naive grader passes it</b><span>It retries one request after another. The first response is already saved, so the second is replayed and nothing looks wrong.</span></li>
+        <li role="tab" data-pane="3" aria-selected="false" tabindex="-1"><b>How the hardened grader catches it</b><span>Ten callers wait at a barrier and fire together against a live server, with a 150 ms card network so the race window is wide. 25 rounds, one charge each.</span></li>
+      </ol>
+    </div>
+    <div class="window" aria-live="polite">
+      <div class="bar"><i></i><i></i><i></i>
+        <div class="tabs" role="tablist" aria-label="Files" id="extabs">
+          <button class="tab" role="tab" data-pane="0" aria-selected="true">PROBLEM.md</button>
+          <button class="tab" role="tab" data-pane="1" aria-selected="false">wrong_retry_race/main.py</button>
+          <button class="tab" role="tab" data-pane="2" aria-selected="false">naive/test_hidden.py</button>
+          <button class="tab" role="tab" data-pane="3" aria-selected="false">final/test_hidden_payments.py</button>
+        </div>
+      </div>
+      <div class="pane on" data-pane="0"><div class="prose" id="ex-rule"></div></div>
+      <div class="pane" data-pane="1"><pre id="ex-wrong"></pre></div>
+      <div class="pane" data-pane="2"><pre id="ex-naive"></pre></div>
+      <div class="pane" data-pane="3"><pre id="ex-final"></pre></div>
+      <div class="verdict" id="ex-verdict"></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="night" id="matrix"><div class="wrap">
+  <p class="eyebrow">Results</p>
+  <h2 class="reveal">Every solution, both graders. <span class="soft">Select any cell for the tests behind it.</span></h2>
+  <div class="toolbar" role="group" aria-label="Filter the matrix" id="filters"></div>
+  <div class="mx"><div class="mx-scroll"><table id="mx" aria-describedby="mxnote"></table></div></div>
+  <div class="mx-foot"><span id="mxnote"></span><a href="../results/final/report.html">Open the full offline report →</a></div>
+</div></section>
+
+<section id="patterns"><div class="wrap">
+  <p class="eyebrow">What the misses have in common</p>
+  <h2 class="reveal">Bugs that pass ordinary tests <span class="soft">cluster into a few shapes.</span></h2>
+  <div class="bento" id="bento"></div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <p class="eyebrow">Reproducible and portable</p>
+  <h2 class="reveal">One command to rerun it. <span class="soft">One export to use it elsewhere.</span></h2>
+  <div class="ship">
+    <div class="panel reveal">
+      <h3>Rerun the whole matrix</h3>
+      <p>Each run gets a fresh workspace and a fresh database. Grader files live outside the candidate's code.</p>
+      <div class="term" id="term"></div>
+    </div>
+    <div class="panel reveal">
+      <h3>Exports to the Harbor task format</h3>
+      <p>Harbor is the format behind Datacurve's public DeepSWE benchmark. A local oracle check confirms each export: the reference scores 1, the untouched starter scores 0.</p>
+      <div class="tree">dist/harbor/01_idempotent_payments/
+├── instruction.md
+├── task.toml
+├── environment/   Dockerfile, compose, starter
+├── tests/         test.sh, hardened grader
+└── solution/      solve.sh, reference</div>
+    </div>
+  </div>
+</div></section>
+
+<section class="closing"><div class="wrap">
+  <h2 class="reveal">Read the hardening log. <span class="soft">Every miss is written down.</span></h2>
+  <div class="ctas">
+    <a class="btn primary" href="../analysis/findings.md">Findings and patterns <span class="arrow" aria-hidden="true">→</span></a>
+    <a class="btn ghost" href="../docs/SUMMARY.md">One-page summary</a>
+    <a class="btn ghost" id="repolink" hidden>View the repository</a>
+  </div>
+</div></section>
+
+<footer class="fine"><div class="wrap cols">
+  <div>
+    <h4>Fine print</h4>
+    <p id="fineprint"></p>
+    <p>All tasks, accounts, merchants and file formats are synthetic. No real bank, customer or system is represented. The solutions are an author-written sample, not observed model output, and the blind reviews so far are self-reviews. Same-host subprocess isolation is for reproducibility, not a security boundary.</p>
+  </div>
+  <div><h4>Evidence</h4><ul>
+    <li><a href="../results/final/report.html">Offline report</a></li>
+    <li><a href="../results/final/matrix.json">matrix.json</a></li>
+    <li><a href="../analysis/findings.md">Hardening log</a></li>
+  </ul></div>
+  <div><h4>Project</h4><ul>
+    <li><a href="../docs/SUMMARY.md">Summary</a></li>
+    <li><a href="../BLUEPRINT.md">Blueprint</a></li>
+    <li><a href="../README.md">README</a></li>
+  </ul></div>
+</div></footer>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-title" aria-hidden="true">
+  <button class="close" id="dr-close" aria-label="Close">×</button>
+  <header><code id="dr-task"></code><h3 id="dr-title"></h3><p id="dr-desc"></p></header>
+  <div class="body" id="dr-body"></div>
+</aside>
+
+<script>
+const DATA = /*__DATA__*/null;
+document.body.classList.remove('no-js');
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const runs = DATA.runs;
+const idx = new Map(runs.map(r => [`${r.task}|${r.variant}|${r.grader}`, r]));
+const get = (t, v, g) => idx.get(`${t}|${v}|${g}`);
+const taskIds = Object.keys(DATA.tasks).filter(t => runs.some(r => r.task === t)).sort();
+const final = runs.filter(r => r.grader === 'final'), naive = runs.filter(r => r.grader === 'naive');
+const count = (list, f) => list.filter(f).length;
+const caught = r => r.grader === 'final' && r.verdict === 'ok' && get(r.task, r.variant, 'naive')?.verdict === 'false_pass';
+const tone = v => v === 'ok' ? 'good' : v === 'ok_wrong_reason' ? 'warn' : 'bad';
+const outcomeWord = r => r.outcome === 'PASS' ? 'accepted' : r.outcome === 'FAIL' ? 'rejected' : 'error';
+const wrongs = t => Object.entries(DATA.tasks[t].variants).filter(([, v]) => v.kind === 'wrong').map(([n]) => n).filter(n => get(t, n, 'final') || get(t, n, 'naive')).sort();
+
+// numbers
+const W = k => final.filter(r => r.kind === k);
+const wrongN = naive.filter(r => r.kind === 'wrong'), wrongF = W('wrong');
+const validF = final.filter(r => r.kind === 'reference' || r.kind === 'alt_valid');
+const startN = naive.filter(r => r.kind === 'starter'), startF = W('starter');
+const naivePass = count(wrongN, r => r.verdict === 'false_pass'), finalPass = count(wrongF, r => r.verdict === 'false_pass');
+$('#stats').innerHTML = [
+  [`${taskIds.length}`, `tasks across payments, interest, FX, ledgers, statements, refunds, fees and batch files`],
+  [`<span class="bad">${naivePass}</span><span class="to">→</span><span class="good">${finalPass}</span>`, `of ${wrongF.length} wrong solutions accepted, naive grader → hardened grader`],
+  [`${count(validF, r => r.verdict === 'false_fail')}<span class="to">/</span>${validF.length}`, `correct solutions rejected by the hardened graders`],
+  [`${count(final, r => r.verdict === 'ok')}<span class="to">/</span>${final.length}`, `hardened-grader verdicts exactly as expected, starters included`],
+].map(([n, p]) => `<div class="stat reveal"><div class="num">${n}</div><p>${p}</p></div>`).join('');
+const m = DATA.meta;
+$('#proofline').innerHTML = `<span>commit <b>${esc(m.git_sha)}</b>${m.dirty ? ' (dirty)' : ''}</span><span><b>${runs.length}</b> runs in <b>${Math.round(m.wall_s || 0)} s</b></span><span>Python <b>${esc(m.env?.python)}</b> · PostgreSQL <b>${esc(m.env?.postgres)}</b></span>`;
+$('#fineprint').textContent = `Figures on this page are computed from results/final/matrix.json (commit ${m.git_sha}, generated ${String(m.generated_at).slice(0, 10)}) when the page loads. Verified natively on ${m.env?.platform || 'the author\'s machine'}; the Docker path is written but has not been timed.`;
+
+// step mockups use the task 01 runs
+const ex = DATA.example;
+const mini = (g) => ['reference', 'alt_valid', ...wrongs(ex.task)].map(v => { const r = get(ex.task, v, g); return r ? `<span class="tag ${tone(r.verdict)}">${r.verdict === 'ok' ? '✓' : '✗'} ${esc(v.replace('wrong_', ''))}</span>` : ''; }).join('');
+$('#mock-naive').innerHTML = mini('naive'); $('#mock-final').innerHTML = mini('final');
+
+// example: light syntax colouring
+const PY = /(#.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|\b(def|return|with|as|for|in|if|else|elif|assert|not|and|or|try|except|import|from|lambda|None|True|False)\b|\b([A-Za-z_]\w*)(?=\()/gm;
+const colour = (src, mark) => src.split('\n').map(line => {
+  const html = esc(line).replace(PY, (m0, c, s, k, f) => c ? `<span class="c">${c}</span>` : s ? `<span class="s">${s}</span>` : k ? `<span class="k">${k}</span>` : `<span class="f">${f}</span>`);
+  return mark && mark.some(x => line.includes(x)) ? `<span class="hl">${html}</span>` : html;
+}).join('\n');
+$('#ex-rule').innerHTML = `<p><b>From the ticket:</b> ${esc(ex.rule)}</p><p style="color:#8fa2bf;font-size:15px;margin-top:18px">The ticket states the observable behaviour only. Any design that meets it is accepted: the reference reserves a key row and returns 409 while a charge is in flight; the alternative takes an advisory lock and makes duplicates wait.</p>`;
+$('#ex-wrong').innerHTML = colour(ex.wrong, ['.fetchone()', 'gateway.charge(', 'INSERT INTO']);
+$('#ex-naive').innerHTML = colour(ex.naive, ['second = client.post']);
+$('#ex-final').innerHTML = colour(ex.final, ['barrier.wait()', 'assert len(calls) == 1']);
+const exN = get(ex.task, ex.variant, 'naive'), exF = get(ex.task, ex.variant, 'final');
+$('#ex-verdict').innerHTML = exN && exF ? `<span class="tag bad">naive: ${outcomeWord(exN)} ${exN.tests.passed}/${exN.tests.total}</span><span class="tag good">final: ${outcomeWord(exF)} ${exF.tests.passed}/${exF.tests.total}</span><span>fails: ${exF.failed_tests.map(t => esc(t.split('::').pop())).join(', ')}</span>` : '';
+const exSteps = [...document.querySelectorAll('#exsteps li')], exTabs = [...document.querySelectorAll('#extabs .tab')], panes = [...document.querySelectorAll('.pane')];
+function showPane(i) {
+  exSteps.forEach((el, j) => { el.setAttribute('aria-selected', i === j); el.tabIndex = i === j ? 0 : -1; });
+  exTabs.forEach((el, j) => el.setAttribute('aria-selected', i === j));
+  panes.forEach((el, j) => el.classList.toggle('on', i === j));
+}
+[...exSteps, ...exTabs].forEach(el => {
+  el.addEventListener('click', () => showPane(+el.dataset.pane));
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showPane(+el.dataset.pane); } });
+});
+
+// matrix explorer
+const FILTERS = [
+  ['all', 'All solutions', () => true],
+  ['caught', 'Caught by hardening', (n, f) => f && caught(f)],
+  ['naivewrong', 'Naive grader fooled', (n) => n && n.verdict === 'false_pass'],
+  ['naivecaught', 'Naive grader caught', (n) => n && n.kind !== 'reference' && n.kind !== 'alt_valid' && n.verdict !== 'false_pass'],
+  ['valid', 'Correct solutions', (n, f) => (f || n).kind === 'reference' || (f || n).kind === 'alt_valid'],
+];
+let active = 'all';
+const width = Math.max(...taskIds.map(t => wrongs(t).length));
+const cols = ['starter', 'reference', 'alt_valid'];
+function renderMatrix() {
+  const test = FILTERS.find(f => f[0] === active)[2];
+  let shown = 0;
+  const head = `<thead><tr><th>Task</th><th>Starter</th><th>Reference</th><th>Alternative</th><th colspan="${width}">Wrong solutions</th></tr></thead>`;
+  const body = taskIds.map(t => {
+    const cells = [...cols, ...wrongs(t)].map(v => {
+      const n = get(t, v, 'naive'), f = get(t, v, 'final');
+      if (!n && !f) return '<td></td>';
+      const on = test(n, f); shown += on;
+      const row = (label, r) => r ? `<span class="row"><i class="dot d-${tone(r.verdict)}"></i>${label} ${outcomeWord(r)}<em>${r.tests.passed}/${r.tests.total}</em></span>` : `<span class="row"><i class="dot d-none"></i>${label} not run</span>`;
+      const label = v.startsWith('wrong_') ? v.slice(6) : v === 'alt_valid' ? 'alt_valid' : v;
+      return `<td><button class="cell${on ? '' : ' dim'}" data-t="${t}" data-v="${v}" aria-label="${esc(t)} ${esc(v)}: naive ${n ? n.verdict : 'not run'}, final ${f ? f.verdict : 'not run'}"><span class="nm">${esc(label)}</span>${row('naive', n)}${row('final', f)}${f && caught(f) ? '<span class="flag">caught by hardening</span>' : ''}</button></td>`;
+    });
+    while (cells.length < cols.length + width) cells.push('<td></td>');
+    return `<tr><th scope="row"><code>${esc(t)}</code><b>${esc(DATA.tasks[t].title)}</b></th>${cells.join('')}</tr>`;
+  }).join('');
+  $('#mx').innerHTML = head + `<tbody>${body}</tbody>`;
+  $('#mxnote').textContent = `${shown} of ${count(final, () => true)} solutions match · green: as expected · red: the grader got it wrong · amber: rejected, but not by the test that was meant to catch it`;
+}
+$('#filters').innerHTML = FILTERS.map(([k, label, f]) => {
+  const n = taskIds.flatMap(t => [...cols, ...wrongs(t)].map(v => [get(t, v, 'naive'), get(t, v, 'final')])).filter(([a, b]) => (a || b) && f(a, b)).length;
+  return `<button class="chip" aria-pressed="${k === active}" data-k="${k}">${label}<span class="count">${n}</span></button>`;
+}).join('') + `<span class="legend"><span><i class="dot d-good"></i>as expected</span><span><i class="dot d-bad"></i>wrong verdict</span><span><i class="dot d-warn"></i>wrong reason</span></span>`;
+$('#filters').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; active = b.dataset.k; document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === b)); renderMatrix(); });
+renderMatrix();
+
+// drawer
+const drawer = $('#drawer'), scrim = $('#scrim');
+let opener = null;
+function openDrawer(t, v) {
+  const task = DATA.tasks[t], spec = task.variants[v] || { kind: v };
+  $('#dr-task').textContent = `${t} · ${spec.kind}`;
+  $('#dr-title').textContent = v;
+  $('#dr-desc').textContent = spec.bug || spec.structural_difference || (v === 'starter' ? 'The unmodified starter repo. Every hardened grader must reject it, so a task can never be solved by doing nothing.' : v === 'reference' ? 'The reference solution.' : '');
+  $('#dr-body').innerHTML = ['final', 'naive'].map(g => {
+    const r = get(t, v, g); if (!r) return '';
+    const hits = new Set(r.must_fail_hit || []);
+    const fails = r.failed_tests.length ? `<ul class="fails">${r.failed_tests.map(x => `<li>${esc(x)}${hits.has(x.split('::').pop()) ? '<span class="tag">declared must_fail</span>' : ''}</li>`).join('')}</ul>` : `<p class="allpass">All ${r.tests.total} tests passed.</p>`;
+    const meaning = { ok: 'as expected', false_pass: 'false pass: a wrong solution was accepted', false_fail: 'false fail: a correct solution was rejected', ok_wrong_reason: 'rejected, but not by its declared test', infra_error: 'infrastructure error' }[r.verdict] || r.verdict;
+    const pred = g === 'naive' && r.predicted_naive ? ` · predicted ${esc(r.predicted_naive)} (${r.predicted_naive === r.verdict ? 'matched' : 'missed'})` : '';
+    return `<div class="gr"><div class="head"><b>${g === 'final' ? 'Hardened' : 'Naive'} grader</b><span class="tag ${tone(r.verdict)}">${outcomeWord(r)} ${r.tests.passed}/${r.tests.total}</span>${g === 'final' && caught(r) ? '<span class="tag warn">caught by hardening</span>' : ''}</div>
+      <div class="meta">${meaning} · ${(r.duration_s || 0).toFixed(2)} s${pred}</div>
+      <h4>Failed tests</h4>${fails}
+      <details class="out"><summary>Pytest output (last 40 lines)</summary><pre>${esc(r.stderr_tail || 'No output captured.')}</pre></details></div>`;
+  }).join('');
+  drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  $('#dr-close').focus();
+}
+function closeDrawer() {
+  drawer.classList.remove('on'); scrim.classList.remove('on'); drawer.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  if (opener) opener.focus();
+}
+$('#mx').addEventListener('click', e => { const c = e.target.closest('.cell'); if (!c) return; opener = c; openDrawer(c.dataset.t, c.dataset.v); });
+$('#dr-close').addEventListener('click', closeDrawer); scrim.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && drawer.classList.contains('on')) closeDrawer(); });
+
+// patterns: examples are pulled from the matrix so the chips stay true
+const PATTERNS = [
+  ['State over time is invisible to one-shot tests', 'The bug only appears on a second request, after a restart, when the clock moves or when two callers collide. The fix: sequences, restarts, a fake clock and a barrier.', ['01_idempotent_payments|wrong_retry_race', '01_idempotent_payments|wrong_inmemory_cache', '05_double_entry|wrong_double_reverse', '06_available_balance|wrong_expired_holds_count'], ''],
+  ['Numeric bugs live on rare inputs', 'Half-up vs banker\'s rounding, float drift and off-by-one tier bounds agree with the right answer almost everywhere. The fix: searched ties and boundaries, checked with exact fractions.', ['02_interest_accrual|wrong_half_up', '02_interest_accrual|wrong_float', '03_fx_quotes|wrong_round_cross_leg', '09_tiered_fees|wrong_float_bps'], ''],
+  ['Totals hide identity bugs', 'Reusing a ledger entry, sharing keys across merchants, or netting across currencies all give plausible counts. The fix: assert the exact pairs and per-scope results.', ['04_ledger_reconciliation|wrong_no_consumption', '01_idempotent_payments|wrong_key_scope', '05_double_entry|wrong_cross_currency_sum'], ''],
+  ['Rejections need state checks, not just error checks', 'The right error, but half a transaction left behind, or the good lines of a bad batch accepted. Every hardened grader checks state after each rejected operation.', ['05_double_entry|wrong_non_atomic', '10_batch_parser|wrong_partial_accept'], 'wide'],
+  ['Hardening regresses too', 'A first hardened grader once dropped an earlier regression test, so the untouched starter passed. Running the starter and a second correct solution through every grader version is what caught it.', [], 'wide'],
+];
+$('#bento').innerHTML = PATTERNS.map(([h, p, keys, cls], i) => {
+  const chips = keys.map(k => { const [t, v] = k.split('|'); const n = get(t, v, 'naive'), f = get(t, v, 'final'); return n && f ? `<span class="tag ${n.verdict === 'false_pass' ? 'bad' : 'warn'}" title="naive ${n.verdict}, final ${f.verdict}">${t.slice(0, 2)} · ${v.replace('wrong_', '')}</span>` : ''; }).join('');
+  return `<article class="tile ${cls} reveal"><span class="ix">0${i + 1}</span><h3>${h}</h3><p>${p}</p><div class="ex">${chips}</div></article>`;
+}).join('');
+
+$('#term').innerHTML = `<span class="p">$</span> export PG_ADMIN_URL=postgresql://postgres@localhost:5432/postgres<br><span class="p">$</span> python -m harness.run_all --grader all<br><span class="p">runs=${runs.length} final_ok=${count(final, r => r.verdict === 'ok')}/${final.length} naive_false_pass=${count(naive, r => r.verdict === 'false_pass')} infra_errors=${count(runs, r => r.verdict === 'infra_error')}</span><br><span class="p">$</span> python -m harness.export_harbor --validate`;
+if (DATA.repo) { const a = $('#repolink'); a.href = DATA.repo; a.hidden = false; }
+
+// motion: reveal on scroll, nav hairline
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' }) : null;
+document.querySelectorAll('.reveal').forEach(el => io ? io.observe(el) : el.classList.add('in'));
+const nav = $('nav.top');
+addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8), { passive: true });
+</script>
+</body>
+</html>
