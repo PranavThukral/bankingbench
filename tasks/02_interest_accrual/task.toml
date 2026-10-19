@@ -22,9 +22,8 @@ kind = "wrong"
 bug = "Rounds ties away from zero instead of to even."
 must_fail = ["test_half_cent_ties_bankers"]
 predicted_naive = "false_pass"
-[variants.wrong_round_daily]
+[variants.wrong_actual_actual]
 kind = "wrong"
-bug = "Rounds daily accrual before the posting boundary."
-must_fail = ["test_small_balance_daily_accrues"]
-regression_rationale = "The float starter never rounds before posting, so it passes test_small_balance_daily_accrues; the Decimal rewrite that the ticket requires invites quantizing each day's accrual to cents to keep every money value at two decimals, which makes small balances accrue nothing."
+bug = "Uses Actual/Actual with a 366-day denominator in leap years instead of Actual/365 Fixed."
+must_fail = ["test_leap_and_partial", "test_large_principal_exact", "test_accrual_properties"]
 predicted_naive = "false_pass"

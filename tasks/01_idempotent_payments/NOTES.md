@@ -2,15 +2,18 @@
 
 The reservation implementation returns 409 during a charge; the advisory-lock implementation waits.
 Both are valid under the public contract. Wrong variants isolate a realistic persistence,
-namespace, or check-then-write defect; none change visible tests.
+decline-replay, or check-then-write defect; none change visible tests.
 
 v2 note (see analysis/findings.md F-108): the starter now also lacks the request fingerprint and the
 Idempotency-Key length validation (they moved into the reference), raising `ref_diff_lines` from 33 to 41.
 
-## Regression rationale
+## v3 wrong-variant replacement
 
-`wrong_key_scope` is regressive by `check_realism`: the starter has no idempotency keys, so it passes
-`test_same_key_different_merchants_independent` trivially. Rationale: The starter has no idempotency keys at all, so it is trivially merchant-independent; the natural first implementation uses the client-supplied key as the unique key, and scoping it by merchant is the extra step a hurried solver skips.
+After review, `wrong_uncached_decline` replaces the regressive `wrong_key_scope`.
+It extends the starter's PaymentStore with persistent, merchant-scoped successful-response replay
+under a transaction lock, but treats a declined charge as retryable and never reserves its key.
+The existing `test_decline_replayed` catches the extra gateway call; the starter also fails it.
+See analysis/findings.md F-301 for predictions and measured evidence; no regression rationale is needed.
 
 ## Blind review
 Author self-review, restricted to the ticket and starter (independent review still owed).

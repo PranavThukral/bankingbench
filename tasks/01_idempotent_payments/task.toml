@@ -17,11 +17,10 @@ kind = "wrong"
 bug = "Checks before charging; concurrent requests each charge before insertion."
 must_fail = ["test_concurrent_duplicates_charge_once"]
 predicted_naive = "false_pass"
-[variants.wrong_key_scope]
+[variants.wrong_uncached_decline]
 kind = "wrong"
-bug = "Shares a key across merchants."
-must_fail = ["test_same_key_different_merchants_independent"]
-regression_rationale = "The starter has no idempotency keys at all, so it is trivially merchant-independent; the natural first implementation uses the client-supplied key as the unique key, and scoping it by merchant is the extra step a hurried solver skips."
+bug = "Persists replay state only for successful charges, so retrying a declined payment calls the gateway again."
+must_fail = ["test_decline_replayed"]
 predicted_naive = "false_pass"
 [variants.wrong_inmemory_cache]
 kind = "wrong"

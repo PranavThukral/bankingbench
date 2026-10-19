@@ -6,7 +6,7 @@ All candidate data, accounts, merchants, and formats are synthetic.
 **Numbering.** `F-0xx` entries are the v1 audit (the original build). `F-1xx` entries are the v2 task
 redesigns required by review R1 (`docs/REVIEW-2026-10-17.md`), each with its own
 `run_all --tasks NN --grader all` block. `F-2xx` entries are the per-variant findings of the v2
-variants. Anchors: `#<task>-<variant>` is the current (v2) entry that the report links to; the v1
+variants. `F-3xx` entries record v3 follow-ups. Anchors: `#<task>-<variant>` identifies a variant entry; the v1
 entry of a redesigned variant has the suffix `-v1`. A v1 entry says which F-1xx entry supersedes it.
 
 ## v1 audit
@@ -828,6 +828,89 @@ runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=10.258
 - **Hardening:** final tests that fail this variant: `test_crlf`, `test_roundtrip_and_single_digit_corruption`.
 - **Lesson:** A fixture helper that cannot produce the awkward variant (CRLF) guarantees the awkward variant is never tested.
 
+
+### F-301 · v3 wrong-variant replacement
+
+Replacing all three regressive wrong variants was reviewed and approved. The v1/v2
+findings above remain historical evidence; this entry supersedes their acceptance rationales.
+No grader, starter, reference, alt_valid or ticket is changed.
+
+Before running any naive grader, the following new overlays and task.toml metadata (`bug`,
+`must_fail`, `predicted_naive`) were written:
+
+| Task | Replaced | New variant | Bug | must_fail | Predicted naive |
+|---|---|---|---|---|---|
+| 01 | `wrong_key_scope` | `wrong_uncached_decline` | Persists replay state only for successful charges, so retrying a declined payment calls the gateway again. | `test_decline_replayed` | `false_pass` |
+| 02 | `wrong_round_daily` | `wrong_actual_actual` | Uses Actual/Actual with a 366-day denominator in leap years instead of Actual/365 Fixed. | `test_leap_and_partial`, `test_large_principal_exact`, `test_accrual_properties` | `false_pass` |
+| 07 | `wrong_inclusive_2359` | `wrong_offset_sign` | Adds each local boundary's UTC offset instead of subtracting it when computing the UTC interval. | `test_local_midnight_boundaries`, `test_dst_months` | `ok_wrong_reason` |
+
+The payment implementation extends the starter's storage with successful-response replay under a
+transaction lock; declines still have payment receipts but no replay entry. The accrual implementation
+uses the starter's calendar segments with Decimal arithmetic and the wrong day-count convention.
+The statement implementation extends the starter's bounds with offset arithmetic in the wrong
+direction, preserving its exclusive end and UTC behavior. These are incomplete or mistaken ticket
+implementations, rather than changes that discard working starter behavior. The naive payment
+examples have no decline, the interest examples use 2026, and the Toronto January example should
+catch the statement sign error (its naive test name is outside `must_fail`).
+
+**Evidence sequence (no commits):** new overlays and predictions written above, then the naive run,
+then the final run. PowerShell first expanded unquoted `01,02,07` to `1,2,7`, causing task selection
+to fail before any grader executed; the successful commands quote the task list.
+
+1. `python -m harness.run_all --tasks '01,02,07' --variants 'wrong_uncached_decline,wrong_actual_actual,wrong_offset_sign' --grader naive`
+   → `runs=3 final_ok=0/0 naive_false_pass=2 infra_errors=0 flips=0 wall_s=2.340`
+   ([matrix](../results/20261019T073511866235Z/matrix.json)).
+2. `python -m harness.run_all --tasks '01,02,07' --variants 'starter,wrong_uncached_decline,wrong_actual_actual,wrong_offset_sign' --grader final`
+   → `runs=6 final_ok=6/6 naive_false_pass=0 infra_errors=0 flips=0 wall_s=11.554`
+   ([matrix](../results/20261019T073529253949Z/matrix.json)).
+3. `python -m harness.run_all --tasks '01,02,07' --grader all`
+   → first attempt: `runs=36 final_ok=17/18 naive_false_pass=8 infra_errors=0 flips=0 wall_s=79.500`
+   ([matrix](../results/20261019T073700151549Z/matrix.json)); the unchanged payment reference had an
+   `httpx.ReadTimeout` in `test_concurrent_duplicates_charge_once`. Repeating after other checks
+   finished, without any candidate or grader changes, passed:
+   `runs=36 final_ok=18/18 naive_false_pass=8 infra_errors=0 flips=0 wall_s=24.191`
+   ([matrix](../results/20261019T073811511362Z/matrix.json)). Both the focused runs and successful
+   combined matrix report stable source fingerprints (`source_changed_during_run=false`).
+
+| New variant | Observed naive (prediction matched) | Final outcome / verdict | All final failing tests |
+|---|---|---|---|
+| `wrong_uncached_decline` | PASS / `false_pass` | FAIL / `ok` | `test_decline_replayed` |
+| `wrong_actual_actual` | PASS / `false_pass` | FAIL / `ok` | `test_large_principal_exact[simple_monthly]`, `test_large_principal_exact[daily_compound]`, `test_leap_and_partial`, `test_accrual_properties` |
+| `wrong_offset_sign` | FAIL / `ok_wrong_reason` | FAIL / `ok` | `test_local_midnight_boundaries` (Toronto and Kolkata January cases), `test_dst_months` (Toronto March/November and Auckland April cases) |
+
+The statement variant's sole naive failure is `test_ticket_worked_example_toronto_january`.
+Every new variant's complete set of final failing test IDs is a subset of the corresponding
+starter's final failures, verified against both final matrices, beyond the `must_fail` check.
+Thus no working starter behavior exercised by the existing grader is regressed.
+
+All runs use `PG_ADMIN_URL=postgresql://postgres@localhost:54329/postgres`. The initial meta-test run
+had 54 passes and one failure because Git Bash could not create the default C: temp path for
+`test_export_harbor_toy`. Setting `TEMP` and `TMP` to workspace `.test-tmp/v3` and `BCP_TMP` to
+`.test-tmp/v3/bcp` resolved it without code changes (55 passed in 5.44s); the successful combined
+matrix also uses these temp settings. The first realism run passed all compile/overlay lint/visible
+checks and reported no regressive wrong variants, but its repository-wide lint found pre-existing
+F541 at `harness/report.py:102`. Removing the unused `f` prefix leaves the generated report text
+unchanged; it is the only harness code change and does not change any grader.
+
+Final verification:
+
+```text
+python -m harness.check_realism --tasks '01,02,07'
+01_idempotent_payments | hard | 41 | >= 40 | none | ok
+02_interest_accrual | medium | 38 | >= 25 | none | ok
+07_statement_periods | medium | 27 | >= 25 | none | ok
+ruff check --target-version py312 harness graderlib tasks tools: PASS
+
+python -m pytest harness/tests -q
+55 passed in 10.97s
+```
+
+All 18 realism rows pass (including all new variants' compile, lint and visible tests);
+all nine wrong variants across these tasks have empty `regressive_wrong` and no rationale.
+The final matrix and realism receipts match the current task fingerprints. `git diff --check`
+passes; the old overlay directories are absent, each task still has three wrong variants,
+and no protected path (`README.md`, `docs/`, `site/`, `results/final/`, any grader, starter,
+reference, alt_valid or PROBLEM.md) changed. The replacement was approved for v3.
 
 ## Patterns
 

@@ -99,7 +99,7 @@ def run_panel(run, grader, caught):
         match = "matched" if run["predicted_naive"] == run["verdict"] else "missed"
         facts.append(f'<dt>Prediction</dt><dd>{escape(run["predicted_naive"])} ({match})</dd>')
     if caught:
-        facts.append(f'<dt>Hardening</dt><dd><a href="../../analysis/findings.md">caught by hardening</a></dd>')
+        facts.append('<dt>Hardening</dt><dd><a href="../../analysis/findings.md">caught by hardening</a></dd>')
     transcript = run.get("stderr_tail") or "No transcript was captured for this run."
     summary = f'{escape(run["variant"])}: {escape(run["verdict"])} {tests["passed"]}/{tests["total"]}'
     return (f'<details class="run"><summary><span class="grader">{grader.title()} grader</span>'

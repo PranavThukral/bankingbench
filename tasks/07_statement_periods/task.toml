@@ -17,12 +17,11 @@ kind = "wrong"
 bug = "Uses UTC calendar months for every account."
 must_fail = ["test_local_midnight_boundaries"]
 predicted_naive = "ok_wrong_reason"
-[variants.wrong_inclusive_2359]
+[variants.wrong_offset_sign]
 kind = "wrong"
-bug = "Ends at 23:59:59, excluding fractional seconds before midnight."
-must_fail = ["test_microsecond_boundary"]
-regression_rationale = "The UTC starter already ends the period at the exclusive start of the next month, so test_microsecond_boundary passes on it; moving the period to local time invites rewriting the end as the last second of the local month (23:59:59), the way monthly statements are usually described in prose, which drops the final fractional second."
-predicted_naive = "false_pass"
+bug = "Adds each local boundary's UTC offset instead of subtracting it when computing the UTC interval."
+must_fail = ["test_local_midnight_boundaries", "test_dst_months"]
+predicted_naive = "ok_wrong_reason"
 [variants.wrong_fixed_offset]
 kind = "wrong"
 bug = "Keeps a standard-time offset throughout the year."
