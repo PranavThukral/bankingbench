@@ -1,6 +1,6 @@
 # Landing page audit — visual and copy pass (2026-10-18)
 
-Baseline: commit `390bf14`, `site/index.html`.
+Baseline: commit `0a73a71`, `site/index.html`.
 Measured full-page height: **7,363 px at 1440 wide** (about 8 screens) and **16,707 px at 390 wide** (about 20 phone screens).
 
 **Targets:** ≤ **4,200 px at 1440** and ≤ **9,000 px at 390**. Cut words before cutting design. Every number stays computed from the embedded data.

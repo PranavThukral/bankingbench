@@ -39,7 +39,7 @@ tests and naive predictions in task.toml. Commit the naive grader, measure and l
 write and commit the hardened grader. Run the full matrix, realism, leaks and distance checks.
 
 ## Results snapshot (results/final/)
-Matrix produced from a clean tree at commit `1f1fa3e` (v2 starters, review R1 to R6 applied).
+Matrix produced from a clean tree at commit `ce7d671` (v2 starters, review R1 to R6 applied).
 
 | Grader | Wrong solutions passed | Starters passed | Valid solutions rejected | Infra errors |
 |---|---|---|---|---|
