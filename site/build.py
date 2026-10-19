@@ -276,7 +276,35 @@ def build(matrix_path, repo_url):
     task_pages(data["tasks"], runs, content)
     out = SITE / "index.html"
     out.write_text(html, encoding="utf-8", newline="\n")
+    if repo_url:
+        for page in [out, *sorted((SITE / "tasks").glob("*.html"))]:
+            page.write_text(link_to_repo(page.read_text(encoding="utf-8"), page.parent, repo_url),
+                            encoding="utf-8", newline="\n")
     return out
+
+
+# Served as web pages wherever the site is hosted; every other repository path links to GitHub instead.
+HOSTED = ("site/", "results/final/report.html", "results/final/matrix.json")
+
+
+def link_to_repo(html, page_dir, repo_url):
+    """Point relative links that leave site/ (Markdown, source folders) at the repository on GitHub."""
+    base = repo_url.rstrip("/")
+
+    def swap(match):
+        href = match[1]
+        target = (page_dir / href.split("#")[0]).resolve()
+        try:
+            path = target.relative_to(ROOT).as_posix()
+        except ValueError:
+            return match[0]
+        if path.startswith(HOSTED):
+            return match[0]
+        kind = "tree" if href.split("#")[0].endswith("/") or target.is_dir() else "blob"
+        anchor = "#" + href.split("#", 1)[1] if "#" in href else ""
+        return f'href="{base}/{kind}/main/{path}{anchor}"'
+
+    return re.sub(r'href="((?:\.\./)+[^"]*)"', swap, html)
 
 
 def main(argv=None):

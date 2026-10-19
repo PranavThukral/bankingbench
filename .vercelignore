@@ -1,0 +1,12 @@
+# Only the static site, the committed report and the evidence it links to are deployed.
+.local/
+.git/
+.test-tmp/
+.pytest_cache/
+.hypothesis/
+.ruff_cache/
+**/__pycache__/
+dist/
+site/qa/
+results/*
+!results/final/
