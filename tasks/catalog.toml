@@ -1,8 +1,10 @@
 # Reader-facing description of each task, used by the HTML report and the landing page.
 # Not part of any grader or task fingerprint: editing this file does not invalidate results.
-# Keys: area (short label), stack, summary (one sentence), checks (what the hardened grader verifies).
+# Keys: reference (how the reference solution works), area (short label), stack, summary (one sentence),
+# checks (what the hardened grader verifies).
 
 [01_idempotent_payments]
+reference = "Reserves a persistent row per merchant and key, and returns 409 while that charge is in flight."
 area = "Payments API"
 stack = "FastAPI · PostgreSQL"
 summary = "A payment endpoint must charge a card once per Idempotency-Key, no matter how the client retries."
@@ -15,6 +17,7 @@ checks = [
 ]
 
 [02_interest_accrual]
+reference = "Accrues day by day in high-precision Decimal and rounds half-even only at each posting."
 area = "Interest"
 stack = "Python · Decimal"
 summary = "Accrue daily interest on a CAD balance and post it at month ends, using Actual/365 and banker's rounding."
@@ -27,6 +30,7 @@ checks = [
 ]
 
 [03_fx_quotes]
+reference = "Uses Decimal at full precision and rounds only the fee and the final destination amount."
 area = "FX transfers"
 stack = "Python · Decimal"
 summary = "Quote a currency transfer with the fee taken in the source currency and each currency's own decimal places."
@@ -39,6 +43,7 @@ checks = [
 ]
 
 [04_ledger_reconciliation]
+reference = "Applies the rules in order with repeated scans, tracking consumed statement and ledger ids in sets."
 area = "Reconciliation"
 stack = "Python"
 summary = "Match bank statement lines to ledger entries with exact, split, refund and duplicate rules, deterministically."
@@ -51,6 +56,7 @@ checks = [
 ]
 
 [05_double_entry]
+reference = "Validates lines in Python, then posts or reverses inside one PostgreSQL transaction with row locks."
 area = "Ledger"
 stack = "Python · PostgreSQL"
 summary = "Run a double-entry journal where every post balances per currency and is all-or-nothing."
@@ -63,6 +69,7 @@ checks = [
 ]
 
 [06_available_balance]
+reference = "Stores holds with timestamps and filters out expired ones whenever a balance is read."
 area = "Card holds"
 stack = "FastAPI · SQLite"
 summary = "Compute available balance as posted funds minus active card holds, with capture, void and expiry."
@@ -75,6 +82,7 @@ checks = [
 ]
 
 [07_statement_periods]
+reference = "Converts the local month boundaries to UTC instants and compares against them."
 area = "Statements"
 stack = "Python · zoneinfo"
 summary = "Select a month's transactions using midnight in the account's own time zone, converted to UTC."
@@ -87,6 +95,7 @@ checks = [
 ]
 
 [08_refund_limits]
+reference = "Keeps a per-payment refund budget and updates it atomically."
 area = "Refunds"
 stack = "Python · SQLite"
 summary = "Allow partial refunds up to the captured amount, which may be less than what was authorized."
@@ -99,6 +108,7 @@ checks = [
 ]
 
 [09_tiered_fees]
+reference = "Selects the first matching tier and rounds with integer numerator arithmetic."
 area = "Fees"
 stack = "Python"
 summary = "Price a payment at one tier selected by an inclusive upper bound, then round and clamp the fee."
@@ -111,6 +121,7 @@ checks = [
 ]
 
 [10_batch_parser]
+reference = "Slices fixed columns, then checks counts and totals in a second pass."
 area = "Batch files"
 stack = "Python"
 summary = "Validate an invented 80-character fixed-width payment file and reject the whole batch on any error."
