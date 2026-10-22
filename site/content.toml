@@ -8,6 +8,7 @@ banking_challenge_pack = "Banking Challenge Pack"
 description = "Synthetic finance coding tasks, each graded twice, showing which wrong solutions a naive grader lets through and how hardening catches them."
 
 [nav]
+tasks = "Tasks"
 skip_to_content = "Skip to content"
 primary = "Primary"
 banking_challenge = "Banking Challenge"
@@ -56,6 +57,15 @@ results = "Results"
 filter_the_matrix = "Filter the matrix"
 solution_verdicts_by_task_and_grader = "Solution verdicts by task and grader"
 results_by_task = "Results by task"
+
+[heldout]
+heading = "Independent check"
+summary = "The hardened graders reject {rejected} of {wrong_total} held-out wrong solutions and accept {accepted} of {correct_total} correct ones."
+baseline_note = "Before the gaps were closed, the hardened graders rejected 6 of 44 of these."
+task_heading = "Held-out solutions"
+expect_accept = "Expect: accept"
+expect_reject = "Expect: reject"
+observed = "Observed: {outcome}"
 
 [patterns]
 items = [["Bugs that need two events.", "Restarts, retries, clock changes and concurrent calls."], ["Rounding ties and boundaries.", "Wrong code agrees with right code almost everywhere else."], ["Right totals, wrong pairing.", "Count checks miss reused entries and currencies netted together."], ["Half-applied rejections.", "The right error, with state left behind."]]

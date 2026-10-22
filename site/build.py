@@ -1,7 +1,7 @@
 """Build the landing page and task pages from repository evidence and sectioned site copy.
 
-Usage: python site/build.py [--matrix results/final/matrix.json] [--repo-url https://github.com/...]
-Landing-page figures are computed in the browser; task-page grids are computed at build time.
+Usage: python site/build.py [--matrix results/final/matrix.json] [--heldout results/final/heldout.json] [--repo-url https://github.com/...]
+Matrix figures are computed in the browser; held-out counts and task-page grids at build time.
 Code excerpts, tickets, metadata and results are read from the repository.
 """
 import argparse
@@ -60,11 +60,22 @@ def inline_markdown(text):
 
 def markdown(text):
     """Dependency-free ticket renderer: blocks, lists, fences and escaped inline markup."""
-    out, paragraph, items = [], [], []
+    out, paragraph, items, table = [], [], [], []
     list_kind, fence, code = None, None, []
+
+    def cells(row):
+        return [c.strip() for c in row.strip().strip("|").split("|")]
 
     def flush():
         nonlocal list_kind
+        if table:
+            head, body = cells(table[0]), [cells(r) for r in table[1:]
+                                            if not re.match(r"^\s*\|?\s*:?-{3,}", r)]
+            out.append('<div class="md-table" tabindex="0"><table><thead><tr>'
+                       + "".join(f"<th>{inline_markdown(c)}</th>" for c in head) + "</tr></thead><tbody>"
+                       + "".join("<tr>" + "".join(f"<td>{inline_markdown(c)}</td>" for c in r) + "</tr>" for r in body)
+                       + "</tbody></table></div>")
+            table.clear()
         if paragraph:
             out.append(f'<p>{inline_markdown(" ".join(paragraph))}</p>')
             paragraph.clear()
@@ -88,6 +99,13 @@ def markdown(text):
             continue
         heading = re.match(r"^(#{1,6})\s+(.+?)\s*#*\s*$", line)
         item = re.match(r"^\s*(?:([-+*])|\d+[.)])\s+(.+)$", line)
+        if line.lstrip().startswith("|"):
+            if not table:
+                flush()
+            table.append(line)
+            continue
+        if table:
+            flush()
         if not line.strip():
             flush()
         elif heading:
@@ -164,7 +182,53 @@ def test_grid(task, grader, variants, index, content):
             f'<tbody>{"".join(rows)}</tbody></table></div>')
 
 
-def task_pages(task_data, runs, content):
+def heldout_runs(path):
+    """Read the receipt's final-grader runs; descriptions belong to the probe catalog."""
+    if not path.exists():
+        return []
+    receipt = json.loads(path.read_text(encoding="utf-8"))
+    catalog = tomllib.loads((ROOT / "heldout/catalog.toml").read_text(encoding="utf-8"))
+    probes = {(p["task"], p["name"]): p for p in catalog["probe"]}
+    return [{**run, "description": probes[(run["task"], run["variant"])]["description"]}
+            for run in receipt["runs"] if run["grader"] == "final" and run.get("repeat", 0) == 0]
+
+
+def heldout_summary(runs, content):
+    if not runs:
+        return ""
+    labels = content["heldout"]
+    wrong = [r for r in runs if r["expect"] == "reject"]
+    correct = [r for r in runs if r["expect"] == "accept"]
+    summary = labels["summary"].format(
+        rejected=sum(r["outcome"] == "FAIL" for r in wrong), wrong_total=len(wrong),
+        accepted=sum(r["outcome"] == "PASS" for r in correct), correct_total=len(correct))
+    # Schema v1 records the current final grader only, with no pre-hardening baseline.
+    return (f'<section class="heldout-summary" id="heldout"><div class="wrap">'
+            f'<h2>{escape(labels["heading"])}</h2><p>{escape(summary)}</p>'
+            f'<p class="heldout-baseline">{escape(labels["baseline_note"])}</p></div></section>')
+
+
+def heldout_list(task, runs, content):
+    labels = content["heldout"]
+    items = []
+    for run in runs:
+        if run["task"] != task:
+            continue
+        state = {"PASS": "accepted", "FAIL": "rejected"}.get(run["outcome"], "error")
+        expectation = labels["expect_" + run["expect"]]
+        observed = labels["observed"].format(outcome=content["common"][state])
+        tone = "good" if run["outcome"] == run["expected"] else "bad"
+        items.append(f'<li><div class="heldout-probe"><code>{escape(run["variant"])}</code>'
+                     f'<span class="tag">{escape(expectation)}</span>'
+                     f'<span class="tag {tone}">{escape(observed)}</span></div>'
+                     f'<p>{escape(run["description"])}</p></li>')
+    if not items:
+        return ""
+    return (f'<section class="heldout-solutions"><h2>{escape(labels["task_heading"])}</h2>'
+            f'<ul>{"".join(items)}</ul></section>')
+
+
+def task_pages(task_data, runs, content, heldout=()):
     index = {(r["task"], r["variant"], r["grader"]): r for r in runs}
     template = inject_copy((SITE / "task-template.html").read_text(encoding="utf-8"), content)
     labels = content["task_page"]
@@ -186,8 +250,10 @@ def task_pages(task_data, runs, content):
                         if run else labels["not_run"].format(grader=labels[grader]))
                 result.append(f'<span class="tag {"good" if state == "accepted" else "bad"}">{escape(text)}</span>')
             name = labels.get(variant, variant.removeprefix("wrong_").replace("_", " ").capitalize())
-            note = spec.get("bug") or spec.get("structural_difference") or labels["reference_note"]
-            solutions.append(f'<article class="solution"><h3>{escape(name)}</h3><code>{escape(variant)}</code>'
+            note = meta["reference"] if variant == "reference" else spec.get("bug") or spec.get("structural_difference") or labels["reference_note"]
+            heading = (f'<h3><code>{escape(variant)}</code></h3>' if variant.startswith("wrong_")
+                       else f'<h3>{escape(name)}</h3><code>{escape(variant)}</code>')
+            solutions.append(f'<article class="solution">{heading}'
                              f'<p>{escape(note)}</p><div class="tags">{"".join(result)}</div></article>')
         neighbours = []
         for offset, key in ((-1, "previous"), (1, "next")):
@@ -201,6 +267,7 @@ def task_pages(task_data, runs, content):
                       difficulty=escape(meta["difficulty"]), summary=escape(meta["summary"]),
                       checks="".join(f'<li>{escape(check)}</li>' for check in meta["checks"]),
                       solutions="".join(solutions), navigation="".join(neighbours),
+                      heldout=heldout_list(task, heldout, content),
                       final_grid=test_grid(task, "final", variants, index, content),
                       naive_grid=test_grid(task, "naive", variants, index, content),
                       ticket=markdown((ROOT / "tasks" / task / "PROBLEM.md").read_text(encoding="utf-8")),
@@ -247,9 +314,10 @@ def tasks():
     return rows
 
 
-def build(matrix_path, repo_url):
+def build(matrix_path, repo_url, heldout_path=ROOT / "results/final/heldout.json"):
     content = tomllib.loads((SITE / "content.toml").read_text(encoding="utf-8"))
     matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    heldout = heldout_runs(heldout_path)
     runs = [{k: r.get(k) for k in RUN_FIELDS} for r in matrix["runs"] if r.get("repeat", 0) == 0]
     data = dict(
         meta={k: matrix.get(k) for k in ("git_sha", "dirty", "generated_at", "wall_s", "env")},
@@ -272,8 +340,9 @@ def build(matrix_path, repo_url):
                      f'<p>{escape(meta["summary"])}</p><div class="tags"><span class="tag">{escape(meta["stack"])}</span>'
                      f'<span class="tag">{escape(meta["difficulty"])}</span></div></div></a></li>')
     html = html.replace("<!--__TASK_LIST__-->", "".join(items))
+    html = html.replace("<!--__HELDOUT__-->", heldout_summary(heldout, content))
     html = html.replace("/*__DATA__*/null", script_json(data)).replace("/*__COPY__*/null", script_json(content))
-    task_pages(data["tasks"], runs, content)
+    task_pages(data["tasks"], runs, content, heldout)
     out = SITE / "index.html"
     out.write_text(html, encoding="utf-8", newline="\n")
     if repo_url:
@@ -310,9 +379,10 @@ def link_to_repo(html, page_dir, repo_url):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--matrix", type=Path, default=ROOT / "results/final/matrix.json")
+    parser.add_argument("--heldout", type=Path, default=ROOT / "results/final/heldout.json")
     parser.add_argument("--repo-url", default="")
     args = parser.parse_args(argv)
-    print(build(args.matrix, args.repo_url))
+    print(build(args.matrix, args.repo_url, args.heldout))
 
 
 if __name__ == "__main__":
