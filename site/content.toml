@@ -79,7 +79,7 @@ summary = "Summary"
 matrix_json = "matrix.json"
 repository = "Repository"
 rerun_command = "python -m harness.run_all --grader all"
-fine_print = "Synthetic tasks and author-written solutions; results describe this sample, not model performance. Verified natively on Windows; the Docker path is untimed. Blind reviews are self-reviews so far."
+fine_print = "Synthetic tasks and solutions; results describe this sample, not model performance. Before the held-out solutions were used, the hardened graders rejected 6 of 44 of them. Verified on Windows under Python 3.14 and 3.12; the Docker path is untimed. Ticket reviews are self-reviews so far."
 
 [drawer]
 close = "Close"
