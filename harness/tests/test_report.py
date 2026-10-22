@@ -67,3 +67,49 @@ def test_catalog_descriptions_and_checks(tmp_path):
     assert '<li>A retry does not charge twice</li>' in panel
     assert 'Reject &lt;script&gt; markup' in panel
     assert '<script' not in html
+
+
+def test_counts_are_labelled_and_runtest_is_hidden():
+    from harness.tests.test_core import TOY
+    data = fixture()
+    data["runs"][2]["failed_tests"] = ["test_hidden.TestJournal::runTest", "test_hidden::test_other"]
+    html = render(data, TOY.parent, findings="missing.md")
+    assert 'title="passed 1 of 2 tests"' in html
+    assert "hidden tests passed / total" in html
+    visible = re.sub(r"base64,[A-Za-z0-9+/=]+", "", html)
+    assert "runTest" not in re.sub(r"<pre>.*?</pre>", "", visible, flags=re.S)
+    data["runs"][2]["failed_tests"] = ["test_hidden.TestJournal::runTest"]
+    assert "stateful property test" in render(data, TOY.parent, findings="missing.md")
+
+
+def test_caught_links_use_findings_anchors(tmp_path):
+    from harness.tests.test_core import TOY
+    findings = tmp_path / "findings.md"
+    findings.write_text('<a id="toy_task-wrong_constant"></a>\n## entry\n', encoding="utf-8")
+    html = render(fixture(), TOY.parent, findings=findings)
+    assert '../../analysis/findings.md#toy_task-wrong_constant"' in html
+    plain = render(fixture(), TOY.parent, findings=tmp_path / "absent.md")
+    assert "findings.md#toy_task" not in plain and '../../analysis/findings.md"' in plain
+
+
+def test_matrix_stacks_on_narrow_screens():
+    from harness.tests.test_core import TOY
+    html = render(fixture(), TOY.parent, findings="missing.md")
+    assert "@media (max-width:700px)" in html and 'data-label="Reference"' in html
+
+
+def test_heldout_section(tmp_path):
+    import json
+    from harness.tests.test_core import TOY
+    runs = [dict(task="01_toy", expect="reject", outcome="FAIL"), dict(task="01_toy", expect="reject", outcome="PASS"),
+            dict(task="01_toy", expect="accept", outcome="PASS")]
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(json.dumps(dict(runs=[dict(task="01_toy", expect="reject", outcome="PASS")] * 4)))
+    assert 'id="heldout"' not in render(fixture(), TOY.parent, findings="missing.md")
+    assert 'id="heldout"' not in render(fixture(), TOY.parent, heldout={}, findings="missing.md")
+    html = render(fixture(), TOY.parent, heldout=dict(runs=runs, baseline_receipt=str(baseline)), findings="missing.md")
+    section = html.split('<section id="heldout">', 1)[1].split("</section>", 1)[0]
+    assert "1 of 2" in section and "1 of 1" in section
+    assert "1/2 (50.0%)" in section and "0/4 (0.0%)" in section
+    broken = render(fixture(), TOY.parent, heldout=dict(runs=runs, baseline_receipt="nope.json"), findings="missing.md")
+    assert "could not be read" in broken

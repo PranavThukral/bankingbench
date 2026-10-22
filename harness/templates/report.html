@@ -126,6 +126,18 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);color:v
 footer p{margin:6px 0}
 
 @media (max-width:900px){.hero{grid-template-columns:1fr}.runbox{max-width:520px}}
+/* narrow screens: stack the matrix per task instead of scrolling a 1180px table */
+@media (max-width:700px){
+  table.matrix{min-width:0;table-layout:auto}
+  table.matrix thead{position:absolute;left:-9999px}
+  table.matrix,table.matrix tbody,table.matrix tr,table.matrix th,table.matrix td{display:block;width:100%}
+  table.matrix tr{border-bottom:2px solid var(--rule);padding-bottom:6px}
+  table.matrix tbody th{border-bottom:1px solid var(--rule)}
+  table.matrix td{border-bottom:1px solid var(--rule)}
+  table.matrix td.empty{display:none}
+  table.matrix td[data-label]::before{content:attr(data-label);display:block;font:600 11px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:2px}
+  table.matrix .cell .variant{font-size:13px;color:var(--ink)}
+}
 @media (max-width:560px){main{padding:24px 16px 48px}h2{font-size:21px;margin-top:36px}.kpi .num{font-size:24px}
   details.task{padding:6px 10px}.db{padding-left:12px}.grader{min-width:0}}
 </style></head>

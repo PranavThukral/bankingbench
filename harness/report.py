@@ -4,6 +4,7 @@ import base64
 import difflib
 from html import escape
 import json
+import re
 from pathlib import Path
 from string import Template
 import tomllib
@@ -17,6 +18,7 @@ COLUMNS = ("starter", "reference", "alt_valid")
 TONES = {"ok": ("good", "✓", "as expected"), "ok_wrong_reason": ("warn", "~", "rejected for an undeclared reason"),
          "false_pass": ("bad", "✗", "false pass"), "false_fail": ("bad", "✗", "false fail"),
          "infra_error": ("bad", "!", "infrastructure error")}
+FINDINGS_HREF = "../../analysis/findings.md"
 OUTCOME = {"PASS": "accepted", "FAIL": "rejected", "ERROR": "error"}
 
 
@@ -66,13 +68,35 @@ def anchor(task, variant):
     return f"run-{task}-{variant}"
 
 
+def hidden_pseudo(test):
+    """Hypothesis stateful tests surface as a unittest `runTest` method, which names no real test."""
+    return test.split("::")[-1] == "runTest"
+
+
+def findings_anchors(path):
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except OSError:
+        return set()
+    return set(re.findall(r'<a id="([^"]+)"', text))
+
+
+def findings_link(task, variant, anchors):
+    target = f"{task}-{variant}"
+    return FINDINGS_HREF + (f"#{target}" if target in anchors else "")
+
+
+def count_text(tests):
+    return f'passed {tests["passed"]} of {tests["total"]} tests'
+
+
 def badge(run, label):
     if run is None:
         return f'<span class="badge none"><b>{label}</b> not run</span>'
     tone, icon, _ = TONES.get(run["verdict"], TONES["infra_error"])
     tests = run["tests"]
     return (f'<span class="badge {tone}"><b>{label}</b><i aria-hidden="true">{icon}</i>'
-            f'{OUTCOME.get(outcome(run), "error")}<small>{tests["passed"]}/{tests["total"]}</small></span>')
+            f'{OUTCOME.get(outcome(run), "error")}<small title="{count_text(tests)}">{tests["passed"]}/{tests["total"]}</small></span>')
 
 
 def failed_list(run):
@@ -83,13 +107,17 @@ def failed_list(run):
     hits = set(run.get("must_fail_hit") or [])
     items = []
     for test in failed:
+        if hidden_pseudo(test):
+            continue
         name = test.split("::")[-1]
         flag = ' <em class="tag">declared must_fail</em>' if name in hits else ""
         items.append(f"<li><code>{escape(test)}</code>{flag}</li>")
+    if not items:
+        items.append("<li>A stateful property test failed (see the pytest output below).</li>")
     return f'<ul class="failed">{"".join(items)}</ul>'
 
 
-def run_panel(run, grader, caught):
+def run_panel(run, grader, caught, anchors=frozenset()):
     tone, icon, meaning = TONES.get(run["verdict"], TONES["infra_error"])
     tests = run["tests"]
     facts = [f'<dt>Verdict</dt><dd><span class="pill {tone}">{icon} {escape(run["verdict"])}</span> {meaning}</dd>',
@@ -99,9 +127,10 @@ def run_panel(run, grader, caught):
         match = "matched" if run["predicted_naive"] == run["verdict"] else "missed"
         facts.append(f'<dt>Prediction</dt><dd>{escape(run["predicted_naive"])} ({match})</dd>')
     if caught:
-        facts.append('<dt>Hardening</dt><dd><a href="../../analysis/findings.md">caught by hardening</a></dd>')
+        facts.append(f'<dt>Hardening</dt><dd><a href="{findings_link(run["task"], run["variant"], anchors)}">'
+                     'caught by hardening</a></dd>')
     transcript = run.get("stderr_tail") or "No transcript was captured for this run."
-    summary = f'{escape(run["variant"])}: {escape(run["verdict"])} {tests["passed"]}/{tests["total"]}'
+    summary = f'{escape(run["variant"])}: {escape(run["verdict"])} {tests["passed"]}/{tests["total"]} tests passed'
     return (f'<details class="run"><summary><span class="grader">{grader.title()} grader</span>'
             f'<span class="pill {tone}">{icon} {summary}</span></summary><div class="db">'
             f'<h5>Failed tests</h5>{failed_list(run)}<dl class="facts">{"".join(facts)}</dl>'
@@ -109,7 +138,47 @@ def run_panel(run, grader, caught):
             f'<pre>{escape(transcript)}</pre></div></details></div></details>')
 
 
-def render(matrix, tasks_root=config.TASKS):
+def rate(count, total):
+    return f"{count}/{total} ({100 * count / total:.1f}%)" if total else "n/a"
+
+
+def heldout_section(receipt):
+    """Held-out solutions: per-task wrong rejected / correct accepted, plus the baseline catch rate if recorded."""
+    if not receipt or not receipt.get("runs"):
+        return ""
+    runs = receipt["runs"]
+    rows = []
+    for task in sorted({r["task"] for r in runs}):
+        wrong = [r for r in runs if r["task"] == task and r["expect"] == "reject"]
+        right = [r for r in runs if r["task"] == task and r["expect"] == "accept"]
+        rows.append(f'<tr><th scope="row"><code>{escape(task)}</code></th>'
+                    f'<td>{sum(r["outcome"] == "FAIL" for r in wrong)} of {len(wrong)}</td>'
+                    f'<td>{sum(r["outcome"] == "PASS" for r in right)} of {len(right)}</td></tr>')
+    wrong = [r for r in runs if r["expect"] == "reject"]
+    right = [r for r in runs if r["expect"] == "accept"]
+    caught = sum(r["outcome"] == "FAIL" for r in wrong)
+    accepted = sum(r["outcome"] == "PASS" for r in right)
+    notes = [f"Wrong solutions rejected: {rate(caught, len(wrong))}. Correct solutions accepted: "
+             f"{rate(accepted, len(right))}."]
+    baseline = receipt.get("baseline_receipt")
+    if baseline:
+        path = Path(baseline) if Path(baseline).is_absolute() else config.ROOT / baseline
+        try:
+            old = json.loads(path.read_text(encoding="utf-8"))["runs"]
+            old_wrong = [r for r in old if r["expect"] == "reject"]
+            old_caught = sum(r["outcome"] == "FAIL" for r in old_wrong)
+            notes.append(f"Baseline before hardening ({escape(str(baseline))}): wrong rejected "
+                         f"{rate(old_caught, len(old_wrong))}.")
+        except (OSError, ValueError, KeyError):
+            notes.append(f"Baseline receipt {escape(str(baseline))} could not be read.")
+    return ('<section id="heldout"><h2>Held-out solutions</h2><p class="lede">Independently written solutions the '
+            'graders were not designed against. Counts are solutions, not tests. ' + " ".join(notes) +
+            '</p><div class="scroll"><table class="heldout"><thead><tr><th>Task</th><th>Wrong rejected</th>'
+            '<th>Correct accepted</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div></section>")
+
+
+def render(matrix, tasks_root=config.TASKS, heldout=None, findings=None):
+    anchors = findings_anchors(findings if findings is not None else config.ROOT / "analysis/findings.md")
     catalog_path = Path(tasks_root) / "catalog.toml"
     catalog = tomllib.loads(catalog_path.read_text(encoding="utf-8")) if catalog_path.exists() else {}
     runs = [r for r in matrix["runs"] if r.get("repeat", 0) == 0] or matrix["runs"]
@@ -162,14 +231,17 @@ def render(matrix, tasks_root=config.TASKS):
         rows = []
         for r in caught:
             prior = index[(r["task"], r["variant"], "naive")]
-            tests = "".join(f"<li><code>{escape(t.split('::')[-1])}</code></li>" for t in r["failed_tests"])
+            tests = ("".join(f"<li><code>{escape(t.split('::')[-1])}</code></li>" for t in r["failed_tests"]
+                             if not hidden_pseudo(t)) or "<li>stateful property test</li>")
             rows.append(f'<tr><td><a href="#{anchor(r["task"], r["variant"])}"><code>{escape(r["task"])}</code><br>'
-                        f'<code class="variant">{escape(r["variant"])}</code></a></td>'
+                        f'<code class="variant">{escape(r["variant"])}</code></a><br>'
+                        f'<a class="finding" href="{findings_link(r["task"], r["variant"], anchors)}">finding</a></td>'
                         f'<td>{badge(prior, "Naive")}</td><td>{badge(r, "Final")}</td><td><ul class="failed">{tests}</ul></td></tr>')
         caught_html = ('<section id="caught"><h2>What hardening caught</h2><p class="lede">Each row is a wrong solution (or an '
                     'unmodified starter) that the naive grader accepted, alongside the final-grader tests that '
                     'reject it. Each one is caught by hardening and logged in <a href="../../analysis/findings.md">'
-                    'findings.md</a>.</p><div class="scroll"><table class="caught"><thead><tr><th>Task · solution</th>'
+                    'findings.md</a> (the finding link in each row goes to its entry). Badge counts are hidden tests '
+                    'passed / total, so 11/12 means 11 of 12 tests passed.</p><div class="scroll"><table class="caught"><thead><tr><th>Task · solution</th>'
                     '<th>Naive</th><th>Final</th><th>Final tests that fail</th></tr></thead><tbody>'
                     + "".join(rows) + "</tbody></table></div></section>")
 
@@ -189,7 +261,8 @@ def render(matrix, tasks_root=config.TASKS):
                              for g, r in (("naive", n), ("final", f)) if r)
             label = f'<code class="variant">{escape(variant.removeprefix("wrong_"))}</code>' if variant.startswith("wrong_") else ""
             mark = '<span class="caught-tag">caught by hardening</span>' if f and is_caught(f) else ""
-            cells.append(f'<td><a class="cell" href="#{anchor(task, variant)}" title="{escape(tip)}">{label}'
+            column = f' data-label="{escape(variant.replace("_", " ").capitalize())}"' if variant in COLUMNS else ""
+            cells.append(f'<td{column}><a class="cell" href="#{anchor(task, variant)}" title="{escape(tip)}">{label}'
                          f'{badge(n, "Naive") if naive else ""}{badge(f, "Final")}{mark}</a></td>')
         cells.extend('<td class="empty"></td>' for _ in range(width - len(wrong_by_task[task])))
         grid.append(f'<tr id="matrix-{escape(task)}"><th scope="row"><code>{escape(task)}</code>'
@@ -199,11 +272,13 @@ def render(matrix, tasks_root=config.TASKS):
                 'tests and pytest output.</p>'
                 '<ul class="legend"><li><span class="pill good">✓</span> as expected</li>'
                 '<li><span class="pill bad">✗</span> false pass, false fail or error</li>'
-                '<li><span class="pill warn">~</span> rejected, but not by a declared test</li></ul>'
+                '<li><span class="pill warn">~</span> rejected, but not by a declared test</li>'
+                '<li>Badge numbers: hidden tests passed / total (1/12 means 1 of 12 tests passed)</li></ul>'
                 f'<div class="scroll"><table class="matrix"><thead><tr><th>Task</th>{head}</tr></thead>'
                 f'<tbody>{"".join(grid)}</tbody></table></div></section>')
 
     body.append(caught_html)
+    body.append(heldout_section(heldout))
 
     panels = []
     for task in tasks:
@@ -221,7 +296,7 @@ def render(matrix, tasks_root=config.TASKS):
         variants = [*COLUMNS, *wrong_by_task[task]]
         for variant in [v for v in variants if any((task, v, g) in index for g in ("naive", "final"))]:
             sample = index.get((task, variant, "final")) or index.get((task, variant, "naive"))
-            graders = "".join(run_panel(index[(task, variant, g)], g, g == "final" and is_caught(index[(task, variant, g)]))
+            graders = "".join(run_panel(index[(task, variant, g)], g, g == "final" and is_caught(index[(task, variant, g)]), anchors)
                               for g in ("final", "naive") if (task, variant, g) in index)
             diff = ""
             if variant != "starter":
@@ -250,15 +325,22 @@ def render(matrix, tasks_root=config.TASKS):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--latest", action="store_true")
-    parser.add_argument("--in", dest="source", type=Path)
-    parser.add_argument("--out", type=Path)
+    parser = argparse.ArgumentParser(description="Render a matrix.json as one offline HTML report.")
+    parser.add_argument("--latest", action="store_true", help="use the newest results/ run (the default)")
+    parser.add_argument("--in", dest="source", type=Path, help="matrix.json to render (default: the newest run)")
+    parser.add_argument("--out", type=Path, help="output HTML file (default: report.html next to the matrix)")
+    parser.add_argument("--heldout", type=Path,
+                        help="held-out receipt (default: results/final/heldout.json if present)")
     args = parser.parse_args(argv)
     source = args.source or latest()
     output = args.out or source.with_name("report.html")
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(render(json.loads(source.read_text(encoding="utf-8"))), encoding="utf-8")
+    held = args.heldout or config.RESULTS / "final/heldout.json"
+    try:
+        receipt = json.loads(held.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        receipt = None
+    output.write_text(render(json.loads(source.read_text(encoding="utf-8")), heldout=receipt), encoding="utf-8")
     print(output)
     return 0
 

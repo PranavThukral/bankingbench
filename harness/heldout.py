@@ -83,6 +83,8 @@ def main(argv=None):
     parser.add_argument("--tasks", help="comma-separated task ids or two-digit prefixes, e.g. 01,05 (default: all)")
     parser.add_argument("--jobs", type=int, default=config.JOBS, help="parallel worker processes (default: %(default)s)")
     parser.add_argument("--out", type=Path, default=config.RESULTS, help="results directory (default: results/)")
+    parser.add_argument("--baseline", help="path (relative to the repository) of an earlier held-out receipt to "
+                                           "record as the pre-hardening baseline; the report shows its catch rate")
     args = parser.parse_args(argv)
     if args.jobs < 1:
         parser.error("jobs must be positive")
@@ -115,7 +117,7 @@ def main(argv=None):
     receipt = dict(schema_version=1, generated_at=datetime.now(timezone.utc).isoformat(),
                    git_sha=sha, dirty=dirty, task_digests=task_digests, overlay_digests=overlays,
                    catalog_digest=catalog_digest, source_changed_during_run=changed,
-                   invocation=dict(tasks=args.tasks, jobs=args.jobs), runs=runs, table=table(runs))
+                   invocation=dict(tasks=args.tasks, jobs=args.jobs), baseline_receipt=args.baseline, runs=runs, table=table(runs))
     output.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     print(receipt["table"])
     print(output)
