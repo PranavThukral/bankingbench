@@ -261,11 +261,17 @@ def validate_task(task, exported):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--out", type=Path, default=config.ROOT / "dist/harbor")
-    parser.add_argument("--validate", action="store_true")
+    parser = argparse.ArgumentParser(description="Export every task as a Harbor task directory.")
+    parser.add_argument("--out", type=Path, default=config.ROOT / "dist/harbor",
+                        help="export directory (default: dist/harbor)")
+    parser.add_argument("--validate", action="store_true",
+                        help="also run the generated solve.sh and test.sh natively: reference must score 1, starter 0")
     args = parser.parse_args(argv)
     tasks = discover()
+    problem = db.preflight(args.validate and any("postgres" in t.requires for t in tasks))
+    if problem:
+        print(f"Preflight failed: {problem}", file=sys.stderr)
+        return 2
     rows = []
     source = fingerprints(tasks)
     try:

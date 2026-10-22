@@ -6,9 +6,10 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
 import tomllib
 
-from harness import config
+from harness import config, db
 from harness.discover import discover
 from harness.evidence import fingerprints
 from harness.execute import run_one
@@ -79,13 +80,17 @@ def table(runs):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tasks", help="comma-separated task ids or two-digit prefixes")
-    parser.add_argument("--jobs", type=int, default=config.JOBS)
-    parser.add_argument("--out", type=Path, default=config.RESULTS)
+    parser.add_argument("--tasks", help="comma-separated task ids or two-digit prefixes, e.g. 01,05 (default: all)")
+    parser.add_argument("--jobs", type=int, default=config.JOBS, help="parallel worker processes (default: %(default)s)")
+    parser.add_argument("--out", type=Path, default=config.RESULTS, help="results directory (default: results/)")
     args = parser.parse_args(argv)
     if args.jobs < 1:
         parser.error("jobs must be positive")
     tasks = discover(selected=args.tasks)
+    problem = db.preflight(any("postgres" in t.requires for t in tasks))
+    if problem:
+        print(f"Preflight failed: {problem}", file=sys.stderr)
+        return 2
     by_id = {t.id: t for t in tasks}
     root = config.ROOT / "heldout"
     catalog = root / "catalog.toml"

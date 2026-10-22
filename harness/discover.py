@@ -67,5 +67,7 @@ def discover(root=TASKS, selected=None):
         found = [t for t in found if t.id in wanted or t.id[:2] in wanted]
         matched = {v for v in wanted if any(t.id == v or t.id[:2] == v for t in found)}
         if wanted - matched:
-            raise ValueError(f"unknown tasks: {wanted - matched}")
+            valid = ", ".join(sorted(t.id for t in (load_task(q.parent) for q in sorted(Path(root).glob("*/task.toml")))))
+            raise ValueError(f"unknown task id(s) {sorted(wanted - matched)}; valid ids (or their two-digit "
+                             f"prefixes): {valid}")
     return found
