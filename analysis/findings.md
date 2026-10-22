@@ -832,6 +832,8 @@ runs=12 final_ok=6/6 naive_false_pass=2 infra_errors=0 flips=0 wall_s=10.258
 - **Lesson:** A fixture helper that cannot produce the awkward variant (CRLF) guarantees the awkward variant is never tested.
 
 
+<a id="01_idempotent_payments-wrong_uncached_decline"></a>
+<a id="02_interest_accrual-wrong_actual_actual"></a>
 ### F-301 · v3 wrong-variant replacement
 
 Replacing all three regressive wrong variants was reviewed and approved. The v1/v2
@@ -1022,6 +1024,43 @@ runs=120 final_ok=60/60 naive_false_pass=21 infra_errors=0 flips=0 wall_s=344.80
 - **Other checks:** `python -m pytest harness/tests -q` ? 58 passed; `python -m harness.check_realism` ? all 60 visible-test rows and all 10 design rows pass, no regressive variants, Python 3.12 lint passes (`results/realism.json`, current task digests); `python -m harness.lint_leaks` ? 10/10 pass; `git diff --check` passes.
 - **Harness portability fix:** the required toy export meta-test initially failed when Git Bash mkdir interpreted a native Windows BCP_APP_DIR path incorrectly. Generated solve.sh now normalizes that destination with cygpath when available; the existing toy solve/test oracle and the full harness suite pass.
 - **Scope:** no starters, references, alt_valid, existing wrong variants, README.md, docs/, site/ or results/final/ changed. Review F22's answer-adjacent starter helpers remain unchanged under this phase's no-starter-edits constraint.
+
+### F-501 · Grader runtime budget (S4) · concurrency and Hypothesis tuning
+
+- **Problem:** `python -m harness.run_all --grader all` (120 runs, 4 workers, native Windows) took about 345 s originally,
+  and 202.1 s when re-measured at the start of this work on the same machine (the machine's speed varies between sessions
+  by roughly 1.7x, so every figure below is paired with a same-session baseline). Most of the time was in the final graders
+  of 05, 08, 06 and 01. PostgreSQL connections cost about 42 ms each on this machine (backend spawn), and every service
+  call in 05 opens one, so connection count is the cost model.
+- **Changes (no assertion removed; every rule, invariant and expectation is still checked):**
+
+| Task | Test | Before | After | Why it is still sufficient |
+|---|---|---|---|---|
+| 05 | `TestJournal` (stateful) | 20 examples x 12 steps | 5 examples x 12 steps | no known wrong or held-out variant is caught only by this test; the example tests catch every declared bug |
+| 05 | `test_concurrent_reversals_once` | 10 rounds x 1 race | 3 rounds x 8 races (each round posts 8 transactions and 8 callers reverse all of them) | a missing row lock is caught in about 37% of single races (measured: 22 of 60); 24 races leave a miss probability near 1.5e-5, versus 0.58^6 = 4% for the 6 single-race rounds this change first tried, which flipped in the 20-repeat check |
+| 06 | `test_random_operation_model` | `max_examples=100` | `max_examples=40` | the explicit examples run first and are unchanged |
+| 08 | `test_refund_sequence_matches_greedy_oracle` | 200 (profile default) | `max_examples=40` | derandomized; every wrong variant is caught by named tests |
+| 01 | `test_concurrent_duplicates_charge_once` | 25 rounds | 12 rounds | each round races 10 callers against a 150 ms gateway |
+| 01 | `test_concurrent_duplicates_across_app_instances` | 10 rounds | 6 rounds | same latency, 8 callers, two servers |
+| all | `graderlib/hypothesis_profiles.py` | shrinking enabled | `phases=[explicit, reuse, generate]` | a failing property already rejects the solution; shrinking a failure took up to 36 s (08 `wrong_checks_single_refund`, 06 `wrong_partial_capture_keeps_remainder` 50 s) without changing the verdict |
+
+  The harness also submits runs longest-first (durations from the previous matrix in the output directory), which
+  shortens the tail of the 4-worker pool.
+- **Timings (same machine, full `--grader all`, 120 runs, 4 workers, `final_ok` 60/60, 0 infra errors, 0 flips):**
+  202.1 s before (HEAD 466b159 plus this phase's isolation changes) -> 79.2 s after (sum of run durations 796 s -> 313 s).
+  Intermediate measurements while tuning, in a slower session: 147 s, 142 s, 117 s.
+- **Determinism checks (20 repeats unless noted, 0 flips):**
+  - `--tasks 01 --variants reference,wrong_retry_race --repeat 20`: 40/40 ok, 0 flips.
+  - held-out `01/process_local_lock` (rejected only by the cross-app test), 40 repeats: 40 FAIL, 1 distinct outcome.
+  - `--tasks 05 --variants reference,wrong_double_reverse --repeat 20`: 40/40 ok, 0 flips.
+  - held-out `05/reverse_without_row_lock` (rejected only by the concurrency test), 40 repeats: 40 FAIL, 1 distinct outcome.
+    The first attempt (6 single-race rounds) produced a flip in 20 repeats (one false pass); that is why the test now
+    races 8 transactions per round.
+  - `--tasks 06,08 --repeat 5`: 60/60 ok, 0 flips (not concurrency tests; derandomized Hypothesis).
+- **Held-out set after the tuning:** `python -m harness.heldout` rejects 46/46 wrong and accepts 6/6 correct
+  (baseline recorded in the receipt: `results/20261022T190223289624Z/heldout.json`, 6/44).
+- **Caveat:** the 5-example stateful test and the probabilistic concurrency tests are now cheaper regression coverage, not
+  exhaustive evidence; a race bug with a lower per-race trigger rate than about 1/3 could slip through.
 
 ## Patterns
 
