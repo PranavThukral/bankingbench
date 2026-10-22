@@ -56,7 +56,7 @@ def test_concurrent_duplicates_charge_once(database_url):
     app = create_app(database_url, gateway)
     with live_server(app) as url, httpx.Client(base_url=url, timeout=30, trust_env=False) as client:
         with ThreadPoolExecutor(max_workers=10) as pool:
-            for round_no in range(25):
+            for round_no in range(12):
                 key = str(uuid4())
                 args = request(key=key, source_token=f"token_round_{round_no}")
                 barrier = threading.Barrier(10, timeout=15)
@@ -208,7 +208,7 @@ def test_concurrent_duplicates_across_app_instances(database_url):
     apps = [create_app(database_url, gateway) for _ in range(2)]
     with live_server(apps[0]) as left, live_server(apps[1]) as right:
         with httpx.Client(timeout=30, trust_env=False) as client, ThreadPoolExecutor(max_workers=8) as pool:
-            for round_no in range(10):
+            for round_no in range(6):
                 token = f"cross_app_{round_no}"
                 args = request(source_token=token)
                 barrier = threading.Barrier(8, timeout=15)

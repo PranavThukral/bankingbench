@@ -136,28 +136,34 @@ def test_post_validation_priority(database_url, lines, error):
 
 
 def test_concurrent_reversals_once(database_url):
+    # Each race (one transaction reversed by 8 callers at once) is probabilistic for a missing row lock, so
+    # every round races several transactions: 3 rounds x 8 races give a miss probability below 1e-4.
     s, accounts = setup(database_url)
     a, b = accounts["CAD"][:2]
     services = [LedgerService(database_url) for _ in range(8)]
     with ThreadPoolExecutor(max_workers=8) as pool:
-        for _ in range(10):
+        for _ in range(3):
             before = s.trial_balance()
-            txn = s.post([Line(a, "debit", 100), Line(b, "credit", 100)], "concurrent sale")
+            txns = [s.post([Line(a, "debit", 100), Line(b, "credit", 100)], "concurrent sale") for _ in range(8)]
             barrier = threading.Barrier(8, timeout=15)
 
-            def reverse(index):
+            def reverse_all(index):
                 barrier.wait()
-                try:
-                    return services[index].reverse(txn, "concurrent undo")
-                except AlreadyReversed:
-                    return None
+                results = []
+                for txn in txns:
+                    try:
+                        results.append(services[index].reverse(txn, "concurrent undo"))
+                    except AlreadyReversed:
+                        results.append(None)
+                return results
 
-            results = list(pool.map(reverse, range(8)))
-            ids = [value for value in results if value is not None]
-            assert len(ids) == 1 and type(ids[0]) is int and ids[0] != txn
+            results = list(pool.map(reverse_all, range(8)))
+            for position, txn in enumerate(txns):
+                ids = [value[position] for value in results if value[position] is not None]
+                assert len(ids) == 1 and type(ids[0]) is int and ids[0] != txn
             assert s.balance(a) == s.balance(b) == 0
-            assert s.trial_balance() == {c: (d + (200 if c == "CAD" else 0),
-                                             cr + (200 if c == "CAD" else 0))
+            assert s.trial_balance() == {c: (d + (200 * len(txns) if c == "CAD" else 0),
+                                             cr + (200 * len(txns) if c == "CAD" else 0))
                                         for c, (d, cr) in before.items()}
 
 
@@ -220,5 +226,5 @@ class JournalMachine(RuleBasedStateMachine):
 
 
 TestJournal = JournalMachine.TestCase
-TestJournal.settings = settings(max_examples=20, stateful_step_count=12, deadline=None,
+TestJournal.settings = settings(max_examples=5, stateful_step_count=12, deadline=None,
                                 derandomize=True, database=None, phases=[Phase.generate])

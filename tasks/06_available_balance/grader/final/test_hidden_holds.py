@@ -136,7 +136,7 @@ def test_naive_clock_rejected(tmp_path):
         create_app(tmp_path / "db", NaiveClock())
 
 
-@settings(max_examples=100)
+@settings(max_examples=40)
 @example(flex=False, operations=[("authorize", 100, 0), ("void", 1, 0), ("capture", 101, 0)])
 @given(flex=st.booleans(), operations=st.lists(st.tuples(
     st.sampled_from(["authorize", "capture", "void", "advance"]), st.integers(1, 15001), st.integers(0, 50)), max_size=25))

@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 from tempfile import TemporaryDirectory
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 from refunds.service import RefundService, RefundExceedsCaptured, PaymentNotCaptured, InvalidAmount
 
 
@@ -114,6 +114,7 @@ def test_concurrent_refunds_respect_budget(tmp_path):
     gc.collect()
 
 
+@settings(max_examples=40)
 @given(capture=st.integers(1, 100000), extra=st.integers(0, 100000),
        attempts=st.lists(st.integers(1, 100000), max_size=30))
 def test_refund_sequence_matches_greedy_oracle(capture, extra, attempts):

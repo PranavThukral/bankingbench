@@ -56,6 +56,31 @@ def latest(base=config.RESULTS):
     return path
 
 
+def expected_durations(base):
+    """Mean duration per (task, variant, grader) from the previous run, used only to schedule longest-first."""
+    try:
+        runs = json.loads(latest(base).read_text(encoding="utf-8"))["runs"]
+    except (OSError, ValueError, KeyError):
+        return {}
+    seen = {}
+    for run in runs:
+        seen.setdefault((run["task"], run["variant"], run["grader"]), []).append(run["duration_s"])
+    return {key: sum(v) / len(v) for key, v in seen.items()}
+
+
+def run_longest_first(specs, base, jobs):
+    """Run specs in a process pool, submitting the slowest known ones first; results keep plan order."""
+    known = expected_durations(base)
+    order = sorted(range(len(specs)), key=lambda i: -known.get(
+        (specs[i].task.id, specs[i].variant.name, specs[i].grader), 0))
+    with ProcessPoolExecutor(max_workers=jobs) as pool:
+        done = list(pool.map(run_one, [specs[i] for i in order]))
+    results = [None] * len(specs)
+    for position, result in zip(order, done):
+        results[position] = result
+    return results
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Run every solution of every task against the graders.")
     parser.add_argument("--tasks", help="comma-separated task ids or two-digit prefixes, e.g. 01,05 (default: all)")
@@ -92,8 +117,7 @@ def main(argv=None):
             raise ValueError("empty run plan")
         sha, dirty = git_info()
         source_digests = fingerprints(tasks)
-        with ProcessPoolExecutor(max_workers=args.jobs) as pool:
-            runs = list(pool.map(run_one, specs))
+        runs = run_longest_first(specs, args.out, args.jobs)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
         output = args.out / stamp
         output.mkdir(parents=True)

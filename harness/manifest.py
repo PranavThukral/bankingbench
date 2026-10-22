@@ -104,5 +104,8 @@ def cached(grader_dir, starter_dir, graderlib_dir=None):
     result = build(grader_dir, starter_dir, graderlib_dir)
     scratch = path.with_suffix(f".{os.getpid()}.tmp")
     scratch.write_text(json.dumps(result), encoding="utf-8")
-    os.replace(scratch, path)
+    try:
+        os.replace(scratch, path)
+    except OSError:  # another worker won the race (Windows refuses to replace an open file); ours is identical
+        scratch.unlink(missing_ok=True)
     return result
