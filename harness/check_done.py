@@ -1,6 +1,7 @@
 import argparse
 import json
 from pathlib import Path
+import re
 import shutil
 
 from harness import config
@@ -40,15 +41,70 @@ def repeat_ok(matrix, tasks, names, repeats):
 
 
 def evaluate(metrics):
-    """Pure criterion table; missing evidence is always a failure, never inferred success."""
+    """Pure criterion table; missing evidence is always a failure, never inferred success.
+
+    A metric may also be the string "SELF-REVIEW": the evidence exists but was produced by the
+    author, so it is reported as such (neither PASS nor FAIL, and not counted as a failure).
+    """
     rows = []
-    for criterion in range(1, 11):
+    for criterion in range(1, 12):
         name = f"S{criterion}"
+        value = metrics.get(name, False)
         if name == "S4" and not metrics.get("docker_available"):
             rows.append((name, "SKIP (no docker)"))
+        elif value == "SELF-REVIEW":
+            rows.append((name, "SELF-REVIEW"))
         else:
-            rows.append((name, "PASS" if metrics.get(name, False) else "FAIL"))
+            rows.append((name, "PASS" if value else "FAIL"))
     return rows
+
+
+def review_receipt(task, root=None):
+    """True when reviews/<task>.md names a reviewer who is not the author (an independent review)."""
+    path = (root or config.ROOT) / "reviews" / f"{task.id}.md"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    field = lambda key: (re.search(rf"^\W*{key}\W*:\s*(.+?)\s*$", text, re.I | re.M) or [None, ""])[1].strip(" *_`")  # noqa: E731
+    reviewer, author = field("reviewer"), field("author")
+    return bool(reviewer) and reviewer.lower() != author.lower() and reviewer.lower() not in {"tbd", "none", "n/a", "self"}
+
+
+def notes_claim_review(task):
+    text = (task.path / "NOTES.md").read_text(encoding="utf-8")
+    return "## Blind review" in text and "No unresolved graded ambiguity" in text
+
+
+def s5_status(tasks, root=None):
+    """FAIL without the NOTES claim; PASS only with an independent receipt per task; else SELF-REVIEW."""
+    if not tasks or not all(notes_claim_review(t) for t in tasks):
+        return False
+    return True if all(review_receipt(t, root) for t in tasks) else "SELF-REVIEW"
+
+
+def heldout_ok(receipt, tasks):
+    """S11: the held-out receipt covers the catalog, matches current sources, and every expectation holds."""
+    if not receipt or receipt.get("source_changed_during_run") or not matches(receipt, tasks):
+        return False
+    root = config.ROOT / "heldout"
+    try:
+        catalog = (root / "catalog.toml")
+        from harness.heldout import load_catalog, overlay_digests
+        import hashlib
+        rows = load_catalog(catalog)
+        if receipt.get("catalog_digest") != hashlib.sha256(catalog.read_bytes()).hexdigest():
+            return False
+        if receipt.get("overlay_digests") != overlay_digests(rows, root):
+            return False
+    except (OSError, ValueError, KeyError):
+        return False
+    runs = receipt.get("runs", [])
+    seen = {(r.get("task"), r.get("variant")) for r in runs}
+    if seen != {(r["task"], r["name"]) for r in rows}:
+        return False
+    return all(r.get("verdict") == "ok" and
+               r.get("outcome") == ("FAIL" if r.get("expect") == "reject" else "PASS") for r in runs)
 
 
 def collect(tasks, matrix, evidence, docker_available):
@@ -73,8 +129,7 @@ def collect(tasks, matrix, evidence, docker_available):
             all(r["verdict"] == "ok" for r in final.values()),
         S3=corrected >= 3,
         S4=evidence.get("docker_wall_s", float("inf")) < 300,
-        S5=bool(tasks) and all("## Blind review" in (t.path / "NOTES.md").read_text(encoding="utf-8") and
-            "No unresolved graded ambiguity" in (t.path / "NOTES.md").read_text(encoding="utf-8") for t in tasks),
+        S5=s5_status(tasks),
         S6=bool(wrong) and all(k in final and final[k]["outcome"] == "FAIL" and final[k]["must_fail_hit"] for k in wrong),
         S7=matches(realism, tasks) and expected <= {(r["task"], r["variant"]) for r in realism_rows} and
             all(r["ok"] for r in realism_rows) and design_ok(realism, tasks) and
@@ -85,15 +140,17 @@ def collect(tasks, matrix, evidence, docker_available):
         S9=bool(tasks) and all(not scan(t) for t in tasks),
         S10=matches(oracle, tasks) and {t.id for t in tasks} <= {r["task"] for r in oracle_rows} and
              all(r["reference_reward"] == 1 and r["starter_reward"] == 0 for r in oracle_rows),
+        S11=heldout_ok(evidence.get("heldout"), tasks),
         docker_available=docker_available,
     )
     return metrics
 
 
-def gather(tasks):
+def gather(tasks, heldout_path=None):
     evidence = load(config.RESULTS / "final/verification.json", {})
     evidence["realism"] = load(config.RESULTS / "realism.json", evidence.get("realism", {}))
     evidence["oracle"] = load(config.RESULTS / "oracle.json", evidence.get("oracle", {}))
+    evidence["heldout"] = load(heldout_path or config.RESULTS / "final/heldout.json", {})
     for path in sorted(config.RESULTS.rglob("matrix.json")):
         matrix = load(path, {})
         invocation = matrix.get("invocation", {})
@@ -107,19 +164,23 @@ def gather(tasks):
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--in", dest="source", type=Path)
-    parser.add_argument("--save-evidence", action="store_true")
+    parser.add_argument("--in", dest="source", type=Path,
+                        help="matrix.json to evaluate (default: results/final/matrix.json, else the latest run)")
+    parser.add_argument("--heldout", type=Path,
+                        help="held-out receipt for S11 (default: results/final/heldout.json)")
+    parser.add_argument("--save-evidence", action="store_true",
+                        help="write the gathered evidence to results/final/verification.json")
     args = parser.parse_args(argv)
     tasks = discover()
     source = args.source or (config.RESULTS / "final/matrix.json")
     if not source.exists():
         source = latest()
     matrix = load(source, {})
-    evidence = gather(tasks)
+    evidence = gather(tasks, args.heldout)
     if args.save_evidence:
         out = config.RESULTS / "final/verification.json"
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
+        out.write_text(json.dumps({k: v for k, v in evidence.items() if k != "heldout"}, indent=2) + "\n", encoding="utf-8")
     rows = evaluate(collect(tasks, matrix, evidence, shutil.which("docker") is not None))
     print("Criterion | Status\n----------|-----------------")
     for name, status in rows:

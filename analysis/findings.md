@@ -328,8 +328,10 @@ its own measured block in its F-1xx entry.
 
 Each F-1xx entry explains why the v1 starter was redesigned (citing the review and the measured
 starter-to-reference diff), what the v2 starter lacks, the new wrong variants, the naive results with
-the commit they were measured at, and the hardened commit. Predictions in task.toml were recorded
-before each naive run; mismatches are called out.
+the commit they were measured at, and the hardened commit. The v2 naive graders and the `predicted_naive` values in task.toml were revised after the final graders
+existed: the naive graders were calibrated against the ticket's worked example, and the predictions were adjusted
+during that calibration, so they are retrospective (review F16). Only the v3 replacements (F-301) had their
+predictions recorded before any naive run. Mismatches are called out.
 
 <a id="04_ledger_reconciliation-v2"></a>
 ### F-101 · 04_ledger_reconciliation · v2 redesign
