@@ -93,3 +93,54 @@ def test_timeout_is_error(tmp_path):
     result = run_one(RunSpec(task, task.variants[1], "final"))
     assert result["verdict"] == "infra_error"
     assert "timeout" in result["stderr_tail"]
+
+
+def test_forged_junit_is_not_a_pass():
+    """Review F17: candidate code that rewrites junit.xml and exits 0 must not be accepted."""
+    task = load_task(TOY)
+    forge = Variant("wrong_forge_junit", "wrong", ("test_other",), "rewrites junit.xml", "infra_error")
+    overlay = TOY / "solutions/wrong_forge_junit"
+    for grader in ("naive", "final"):
+        result = run_one(RunSpec(task, forge, grader), overlay)
+        assert result["outcome"] != "PASS", result
+        assert result["verdict"] == "infra_error", result
+        assert "verdict integrity" in result["stderr_tail"]
+
+
+def test_candidate_env_is_allow_listed(monkeypatch, tmp_path):
+    from harness.manifest import allowed_env
+    monkeypatch.setenv("PG_ADMIN_URL", "postgresql://postgres:secret@h/db")
+    monkeypatch.setenv("SOME_API_TOKEN", "x")
+    env = allowed_env(DATABASE_URL="u")
+    assert "PG_ADMIN_URL" not in env and "SOME_API_TOKEN" not in env
+    assert env["DATABASE_URL"] == "u" and env["PYTHONHASHSEED"] == "0"
+
+
+@pytest.mark.parametrize("mode,found,want", [
+    ("collected", [("m", "test_a"), ("m", "test_b")], "PASS"),
+    ("collected", [("m", "test_a")], "ERROR"),                               # missing
+    ("collected", [("m", "test_a"), ("m", "test_b"), ("m", "test_c")], "ERROR"),  # extra
+    ("collected", [("m", "test_a"), ("m", "test_x")], "ERROR"),              # renamed
+    ("ast", [("m", "test_a[1]"), ("m", "test_a[2]"), ("m", "test_b")], "PASS"),
+    ("ast", [("m", "test_a")], "ERROR"),
+])
+def test_manifest_enforced(tmp_path, mode, found, want):
+    from harness.junit import parse_checked
+    cases = "".join(f'<testcase classname="{c}" name="{n}"/>' for c, n in found)
+    path = tmp_path / "junit.xml"
+    path.write_text(f"<testsuites><testsuite>{cases}</testsuite></testsuites>")
+    manifest = {"mode": mode, "ids": [["m", "test_a"], ["m", "test_b"]]}
+    out = f"{len(found)} passed in 0.1s"
+    assert parse_checked(path, 0, manifest, out)[0] == want
+
+
+def test_exit_code_and_summary_cross_checks(tmp_path):
+    from harness.junit import parse_checked
+    path = tmp_path / "junit.xml"
+    path.write_text('<testsuites><testsuite><testcase classname="m" name="a"><failure/></testcase></testsuite></testsuites>')
+    assert parse_checked(path, 1, None, "1 failed in 0.1s")[0] == "FAIL"
+    assert parse_checked(path, 0, None, "1 failed in 0.1s")[0] == "ERROR"      # exit 0 but a failure
+    assert parse_checked(path, 1, None, "1 passed in 0.1s")[0] == "ERROR"      # summary disagrees
+    assert parse_checked(path, 1, None, "")[0] == "ERROR"                      # no summary at all
+    path.write_text('<testsuites><testsuite><testcase classname="m" name="a"/></testsuite></testsuites>')
+    assert parse_checked(path, 1, None, "1 passed in 0.1s")[0] == "ERROR"      # exit 1 but nothing failed

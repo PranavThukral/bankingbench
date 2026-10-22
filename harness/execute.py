@@ -8,7 +8,7 @@ import tempfile
 import time
 import uuid
 
-from harness import config, db, junit, verdict, workspace
+from harness import config, db, junit, manifest as manifests, verdict, workspace
 from harness.model import RunResult
 
 
@@ -18,7 +18,7 @@ def run_one(spec, overlay=None, pytest_args=()):
     run_id = f"{task.id}__{variant.name}__{spec.grader}__r{spec.repeat}__{uuid.uuid4().hex[:8]}"
     config.TMP.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run_", dir=config.TMP))
-    name, database_created = db.db_name(run_id), False
+    handle, cleanup_notes = None, []
     outcome, counts, failures, tail = "ERROR", dict(total=0, passed=0, failed=0, errors=0, skipped=0), [], ""
     try:
         if overlay is None and variant.name != "starter":
@@ -26,11 +26,13 @@ def run_one(spec, overlay=None, pytest_args=()):
         work = workspace.materialize(task.path / "starter", overlay, run_dir / "work")
         workspace.copy_tree(task.path / "grader" / spec.grader, run_dir / "grader")
         workspace.copy_tree(config.ROOT / "graderlib", run_dir / "graderlib")
-        env = {**os.environ, **config.DETERMINISM,
-               "PYTHONPATH": os.pathsep.join([str(work), str(run_dir)])}
+        expected = manifests.cached(task.path / "grader" / spec.grader, task.path / "starter")
+        # Allow-listed environment: no PG_ADMIN_URL, no copy of os.environ.
+        env = manifests.allowed_env(PYTHONPATH=os.pathsep.join([str(work), str(run_dir)]))
         if "postgres" in task.requires:
-            env["DATABASE_URL"] = db.create_db(name)
-            database_created = True
+            name, role, url = db.create_run_db(run_id)
+            handle = (name, role)
+            env["DATABASE_URL"] = url
         command = [sys.executable, "-m", "pytest", str(run_dir / "grader"), "-q", "-p", "no:cacheprovider",
                    f"--rootdir={run_dir / 'grader'}", f"--confcutdir={run_dir / 'grader'}",
                    f"--basetemp={run_dir / 'pytest-tmp'}",
@@ -38,19 +40,29 @@ def run_one(spec, overlay=None, pytest_args=()):
         proc = subprocess.run(command, cwd=work, env=env, capture_output=True,
                               text=True, encoding="utf-8", errors="replace", timeout=task.timeout_seconds)
         tail = "\n".join((proc.stdout + proc.stderr).splitlines()[-40:])
-        outcome, counts, failures = junit.parse(run_dir / "junit.xml", proc.returncode)
+        outcome, counts, failures, reason = junit.parse_checked(
+            run_dir / "junit.xml", proc.returncode, expected, proc.stdout)
+        if reason and outcome == "ERROR":
+            tail = "verdict integrity: " + reason + chr(10) + tail
     except subprocess.TimeoutExpired:
         tail = f"timeout after {task.timeout_seconds}s"
     except Exception as exc:
         tail = f"{type(exc).__name__}: {exc}"
     finally:
-        if database_created:
+        if handle:
             try:
-                db.drop_db(name)
+                db.drop_run_db(*handle)
             except Exception as exc:
-                outcome, tail = "ERROR", tail + f"\nDB cleanup failed: {exc}"
+                outcome = "ERROR"
+                cleanup_notes.append(f"DB/role cleanup failed for {handle[0]}: {exc}")
         if not spec.keep_workspaces:
-            shutil.rmtree(run_dir, ignore_errors=True)
+            failures_rm = []
+            shutil.rmtree(run_dir, onexc=lambda f, p, e: failures_rm.append(f"{p}: {e}"))
+            if failures_rm:
+                cleanup_notes.append(f"workspace cleanup failed ({len(failures_rm)} paths), e.g. {failures_rm[0]}")
+        for note in cleanup_notes:
+            print(f"[harness] {run_id}: {note}", file=sys.stderr, flush=True)
+            tail += chr(10) + note
     result = RunResult(task.id, variant.name, variant.kind, spec.grader, spec.repeat,
                        variant.expected, outcome,
                        verdict.decide(variant.expected, outcome, variant.must_fail, failures),

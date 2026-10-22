@@ -25,3 +25,22 @@ def test_export_rejects_undocumented_keys(tmp_path):
     path.write_text(path.read_text() + '\ncompose_path = "guessed.yml"\n')
     with pytest.raises(ValueError, match="undocumented"):
         validate_config(path)
+
+
+def test_harbor_verifier_rejects_forged_junit(tmp_path):
+    """The exported verifier carries the same manifest check as the native executor (review F17)."""
+    import os
+    import shutil
+    import subprocess
+    import sys
+    from harness.workspace import materialize
+    output = export_task(load_task(TOY), tmp_path / "export")
+    assert (output / "tests/manifest.json").is_file()
+    work = materialize(output / "environment/starter", TOY / "solutions/wrong_forge_junit", tmp_path / "work")
+    logs = tmp_path / "logs"
+    env = {**os.environ, "BCP_APP_DIR": str(work), "BCP_LOG_DIR": str(logs)}
+    run = subprocess.run([sys.executable, str(output / "tests/verify.py")], cwd=work, env=env,
+                         capture_output=True, text=True)
+    assert (logs / "verifier/reward.txt").read_text().strip() == "0"
+    assert run.returncode == 2 and "verdict integrity" in run.stderr
+    shutil.rmtree(work)

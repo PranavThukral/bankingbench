@@ -12,9 +12,8 @@ import subprocess
 import sys
 import tempfile
 import tomllib
-import uuid
 
-from harness import config, db
+from harness import config, db, manifest as manifests
 from harness.discover import discover
 from harness.evidence import fingerprints
 from harness.workspace import copy_tree, materialize, safe_path
@@ -45,38 +44,69 @@ def validate_config(path):
     return parsed
 
 
-VERIFIER = '''"""Generated offline verifier; all paths can be redirected for a native oracle run."""
+VERIFIER = '''"""Generated offline verifier; all paths can be redirected for a native oracle run.
+
+Mirrors harness/execute.py: expected-test manifest (tests/manifest.json, built at export time from the
+trusted starter), JUnit + exit code + summary cross-check, allow-listed candidate environment, and a
+per-run non-superuser database role. Tests are mounted only at verification time under Harbor.
+"""
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
-import xml.etree.ElementTree as ET
 
 here = Path(__file__).resolve().parent
+sys.path.insert(0, str(here))
+import bcp_db  # noqa: E402
+import bcp_junit  # noqa: E402
+
 work = Path(os.environ.get("BCP_APP_DIR", "/app"))
 logs = Path(os.environ.get("BCP_LOG_DIR", "/logs"))
 output = logs / "verifier"
 output.mkdir(parents=True, exist_ok=True)
-env = dict(os.environ)
+manifest = json.loads((here / "manifest.json").read_text(encoding="utf-8"))
+ALLOW = ("PATH", "SYSTEMROOT", "SYSTEMDRIVE", "TEMP", "TMP", "TMPDIR", "HOME", "USERPROFILE", "LOCALAPPDATA",
+         "APPDATA", "PATHEXT", "COMSPEC", "LANG", "LC_ALL")
+env = {k: os.environ[k] for k in ALLOW if k in os.environ}
 env.update(PYTHONPATH=os.pathsep.join([str(work), str(here)]), PYTHONHASHSEED="0", TZ="UTC",
            PYTHONDONTWRITEBYTECODE="1", HYPOTHESIS_PROFILE="ci", PYTEST_DISABLE_PLUGIN_AUTOLOAD="1")
-command = [sys.executable, "-m", "pytest", str(here / "grader"), "-q", "-p", "no:cacheprovider",
-           "--rootdir=" + str(here / "grader"), "--confcutdir=" + str(here / "grader"),
-           "--basetemp=" + str(logs / "pytest-tmp"), "--junitxml=" + str(output / "junit.xml"),
-           "-o", "junit_family=xunit2"]
-code = subprocess.call(command, cwd=work, env=env)
-passed, total = 0, 0
+admin = os.environ.get("PG_ADMIN_URL") or os.environ.get("DATABASE_URL")
+handle = None
+code, outcome, reason, counts = 2, "ERROR", "", {"passed": 0, "total": 0}
 try:
-    for test in ET.parse(output / "junit.xml").getroot().iter("testcase"):
-        total += 1
-        passed += int(not any(test.find(tag) is not None for tag in ("failure", "error", "skipped")))
-except (OSError, ET.ParseError):
-    code = 2
-reward = int(code == 0 and total > 0 and passed == total)
+    if manifest.get("requires_postgres"):
+        if not admin:
+            raise RuntimeError("PG_ADMIN_URL or DATABASE_URL must point at the PostgreSQL service")
+        name, role, url = bcp_db.create_run_db("verify_" + os.urandom(6).hex(), admin)
+        handle = (name, role)
+        env["DATABASE_URL"] = url  # the candidate never sees the admin URL
+    command = [sys.executable, "-m", "pytest", str(here / "grader"), "-q", "-p", "no:cacheprovider",
+               "--rootdir=" + str(here / "grader"), "--confcutdir=" + str(here / "grader"),
+               "--basetemp=" + str(logs / "pytest-tmp"), "--junitxml=" + str(output / "junit.xml"),
+               "-o", "junit_family=xunit2"]
+    proc = subprocess.run(command, cwd=work, env=env, capture_output=True, text=True, encoding="utf-8",
+                          errors="replace")
+    sys.stdout.write(proc.stdout)
+    sys.stderr.write(proc.stderr)
+    code = proc.returncode
+    outcome, counts, _, reason = bcp_junit.parse_checked(output / "junit.xml", code, manifest, proc.stdout)
+except Exception as exc:  # any infrastructure failure is a zero reward
+    reason = f"{type(exc).__name__}: {exc}"
+finally:
+    if handle:
+        try:
+            bcp_db.drop_run_db(*handle, admin)
+        except Exception as exc:
+            print(f"cleanup failed: {exc}", file=sys.stderr)
+if reason:
+    print(f"verdict integrity: {reason}", file=sys.stderr)
+passed, total = counts["passed"], counts["total"]
+reward = int(outcome == "PASS" and total > 0 and passed == total)
 (output / "reward.txt").write_text(str(reward) + "\\n", encoding="utf-8")
-(output / "reward.json").write_text(json.dumps({"passed": passed, "total": total}) + "\\n", encoding="utf-8")
-raise SystemExit(code)
+(output / "reward.json").write_text(json.dumps({"passed": passed, "total": total, "reason": reason}) + "\\n",
+                                    encoding="utf-8")
+raise SystemExit(0 if outcome == "PASS" else 1 if outcome == "FAIL" else 2)
 '''
 
 
@@ -145,6 +175,12 @@ networks:
     copy_tree(task.path / "grader/final", tests / "grader")
     copy_tree(config.ROOT / "graderlib", tests / "graderlib")
     (tests / "verify.py").write_text(VERIFIER, encoding="utf-8")
+    # Trusted helpers and the expected-test manifest ship with the tests, never with the candidate.
+    shutil.copyfile(config.ROOT / "harness/junit.py", tests / "bcp_junit.py")
+    shutil.copyfile(config.ROOT / "harness/db.py", tests / "bcp_db.py")
+    built = manifests.build(task.path / "grader/final", task.path / "starter")
+    built["requires_postgres"] = "postgres" in task.requires
+    (tests / "manifest.json").write_text(json.dumps(built, indent=1) + chr(10), encoding="utf-8")
     (tests / "test.sh").write_text('''#!/bin/sh
 set -u
 # No tests mount path is assumed: locate this script's own directory.
@@ -203,28 +239,24 @@ def validate_task(task, exported):
             env = {**os.environ, **config.DETERMINISM,
                    "BCP_APP_DIR": work.as_posix(), "BCP_LOG_DIR": logs.as_posix(),
                    "BCP_PYTHON": Path(sys.executable).as_posix()}
-            name, created = db.db_name("oracle_" + uuid.uuid4().hex), False
-            try:
-                if "postgres" in task.requires:
-                    env["DATABASE_URL"] = db.create_db(name)
-                    created = True
-                if solved:
-                    apply = subprocess.run([bash(), (exported / "solution/solve.sh").as_posix()], env=env,
-                                           capture_output=True, text=True, timeout=30)
-                    if apply.returncode:
-                        raise RuntimeError(f"solve.sh failed: {apply.stdout} {apply.stderr}")
-                run = subprocess.run([bash(), (exported / "tests/test.sh").as_posix()], cwd=work,
-                                     env=env, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                                     timeout=task.timeout_seconds + 20)
-                reward = int((logs / "verifier/reward.txt").read_text().strip())
-                label = "reference" if solved else "starter"
-                rewards[label + "_reward"] = reward
-                details[label] = json.loads((logs / "verifier/reward.json").read_text())
-                if reward != int(solved) or run.returncode not in {0, 1}:
-                    raise AssertionError(f"{label}: reward={reward}, exit={run.returncode}\n{run.stdout}\n{run.stderr}")
-            finally:
-                if created:
-                    db.drop_db(name)
+            if "postgres" in task.requires:
+                # As in Harbor's compose file, the verifier sees the service URL and makes its own
+                # per-run role and database; the candidate-facing URL is created inside verify.py.
+                env["DATABASE_URL"] = db.admin_url()
+            if solved:
+                apply = subprocess.run([bash(), (exported / "solution/solve.sh").as_posix()], env=env,
+                                       capture_output=True, text=True, timeout=30)
+                if apply.returncode:
+                    raise RuntimeError(f"solve.sh failed: {apply.stdout} {apply.stderr}")
+            run = subprocess.run([bash(), (exported / "tests/test.sh").as_posix()], cwd=work,
+                                 env=env, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                 timeout=task.timeout_seconds + 20)
+            reward = int((logs / "verifier/reward.txt").read_text().strip())
+            label = "reference" if solved else "starter"
+            rewards[label + "_reward"] = reward
+            details[label] = json.loads((logs / "verifier/reward.json").read_text())
+            if reward != int(solved) or run.returncode not in {0, 1}:
+                raise AssertionError(f"{label}: reward={reward}, exit={run.returncode}\n{run.stdout}\n{run.stderr}")
     return dict(task=task.id, **rewards, tests=details, validation="native generated solve.sh + test.sh")
 
 
