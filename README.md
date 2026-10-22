@@ -12,7 +12,7 @@ Ten synthetic banking coding tasks, each graded twice: by a first-draft ("naive"
 | Unmodified starters accepted | 1 / 10 | 0 / 10 |
 | Correct solutions rejected | 0 / 20 | 0 / 20 |
 
-Repeated 3 times with no flips; the task 01 concurrency test ran 60 times with no flips. Every task exports to the [Harbor](https://docs.harborframework.com/tasks/overview) task format, and a local oracle check scores the reference 1 and the untouched starter 0.
+**Independent check:** before tightening, the hardened graders rejected only 6 of 44 wrong solutions written by an independent review; after closing the gaps they exposed, 46 of 46 (see [heldout/](heldout/catalog.toml)). Identical on Python 3.14 and 3.12, repeated 3 times with no flips; the task 01 concurrency test ran 60 times with no flips. Every task exports to the [Harbor](https://docs.harborframework.com/tasks/overview) task format, and a local oracle check scores the reference 1 and the untouched starter 0.
 
 ## The tasks
 
@@ -44,9 +44,9 @@ python -m harness.report --latest          # offline HTML report next to it
 python -m harness.check_done               # the completion criteria in BLUEPRINT.md §1.1
 ```
 
-Or with Docker: `docker compose up -d && make matrix` (written to spec but not yet timed). Each run gets a fresh temporary workspace and a fresh database; graders live outside the solver's code.
+Or with Docker: `docker compose up -d && make matrix` (written to spec but not yet timed). Each run gets a fresh workspace, a fresh database with its own unprivileged role, and an allow-listed environment; verdicts are checked against the grader's expected test list ([docs/ISOLATION.md](docs/ISOLATION.md)).
 
-Other checks: `python -m harness.check_realism` (wrong solutions compile, lint clean and pass the visible tests), `python -m harness.lint_leaks` (no answer hints in starters), `python -m harness.export_harbor --validate` (Harbor export plus oracle check), `python site/build.py` (rebuild the website).
+Other checks: `python -m harness.heldout` (the 52 independent solutions), `python -m harness.check_realism` (wrong solutions compile, lint clean and pass the visible tests), `python -m harness.lint_leaks` (no answer hints in starters), `python -m harness.export_harbor --validate` (Harbor export plus oracle check), `python site/build.py` (rebuild the website).
 
 ## How it was built
 
@@ -55,8 +55,8 @@ Other checks: `python -m harness.check_realism` (wrong solutions compile, lint c
 ## Limitations
 
 - All tasks and solutions are author-written and synthetic. No real bank, customer or system is represented, and no model has been run on the tasks yet.
-- "0 wrong accepted" is measured against the wrong solutions the graders were hardened on. An independent adversarial pass wrote 44 further wrong solutions and 38 of them passed the hardened graders, mostly by breaking stated ticket rules that no test checks yet. Closing those gaps is the next round of work.
-- Solver code runs in the same process as the grader, which is fine for reproducibility but is not a sandbox against reward hacking.
-- Verified on Windows with Python 3.14 and PostgreSQL 16.13. The Docker path and Python 3.12 have not been run.
+- "0 of 30" and "46 of 46" are measured against solutions the graders were hardened on. The independent figure is the baseline: 6 of 44 before the held-out set was used.
+- Solver code runs as the same OS user as the grader. Forged or incomplete results that the harness can cross-check are rejected, but a complete forgery from inside the test process needs container isolation to stop ([docs/ISOLATION.md](docs/ISOLATION.md)).
+- Ticket blind reviews are self-reviews so far. Verified on Windows with PostgreSQL 16.13 under Python 3.14 and 3.12; the Docker path has not been timed.
 
 MIT licensed.

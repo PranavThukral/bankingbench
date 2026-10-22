@@ -1,0 +1,1555 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T22:00:07.926757+00:00",
+  "git_sha": "0ab4d5a",
+  "dirty": false,
+  "task_digests": {
+    "01_idempotent_payments": "bc570e1115344c64cd6a1de0ce4616fa22e84ab4cf61bc0e48afa46c3ddc78c2",
+    "02_interest_accrual": "f06ba6a249e0c2ce0b0ae5df440d80cde5d0007f3d786e1f0a90823443968e4d",
+    "03_fx_quotes": "1ae2cbb37f3fc13f523bf888bb502f58d4ec8dd4c4204c95b7fe16955874cb92",
+    "04_ledger_reconciliation": "e316660e7769579eb2a07f050f8720e95d72b4b01441498f5fc9c7f0eb89db1f",
+    "05_double_entry": "f1256163484760b46683fbed0e800d8c85f6cc75a0c396b165e6ce8fa8e29d49",
+    "06_available_balance": "210302c6ed9d02a0f2f7138282a5d90873af89a209a706a2b4c0fb44d826ea1a",
+    "07_statement_periods": "425c4b96041c0bf8beb3d1242ab87bcc5704a022ec91f7f7afc0c80816827afc",
+    "08_refund_limits": "3f9dacc9ccf574c7c063f176366b963e740b2d534900dae1f6e9cc6687c5fe1e",
+    "09_tiered_fees": "dceeb23108a82f1303728e3003d064d8f0ab3f8ac4c7ab18024ce98c74e9898a",
+    "10_batch_parser": "a93ace5a0129abe58e8112333ac3405ae9d9253a5a31ffbf237f64f0cc3c93e1"
+  },
+  "overlay_digests": {
+    "01_idempotent_payments/rawbody_fingerprint": "e7b797a86eaecc947cac6c505fe68dd2a9005b822a4483a021e10694d030cc4a",
+    "01_idempotent_payments/key_limit_64": "7be3e8afd0352508ec51c6528550ab0d9ea59059e7c5cf100f1c4eae56b76091",
+    "01_idempotent_payments/key_limit_254": "eeaaf004d718131b244ac0d92d5e19b366da7662d506a1d546ef7549d9289675",
+    "01_idempotent_payments/process_local_lock": "84af35c5e3412c7d349f876c3ea1b42b2643503c5af7ad70d465f08a8aa036fe",
+    "01_idempotent_payments/alt_poll_replay": "c4be0d795d8aa21314461c6140e55ec820316411da6a8978ec9dadf7c5653ac4",
+    "01_idempotent_payments/alt_schema_in_lifespan": "b2e755a7302753461f930523c65c122934ee965197bb19f1d815cd503102fa56",
+    "02_interest_accrual/no_validate": "f3ac6f33d0a5aaf8d1159737750d33c4a57ed82d090ab5839891d1c2616f158a",
+    "02_interest_accrual/daily_rate_first_prec28": "1d905c2925541b39fcc4f0cd717e93db3837a60117685c7dc53cd5a487fa7b72",
+    "02_interest_accrual/carry_residual": "f4ec2b343044ca83ad86ccc98810664ca2f916793e8895a743dbfe85a8b4a6bb",
+    "02_interest_accrual/simple_noncompounding": "b0134c4f28448a976c9d42c2fee28ee44c392508a92c8607b453056c07bd98c3",
+    "02_interest_accrual/naive_end_posting_only_month_end": "55ed24830b97f59154dcdd18148a4222887be70c0e0f364223140c6fd86d3228",
+    "03_fx_quotes/weak_validation": "9ad47ea5b62a8c24de70bf9a55171b5108e16c0f7ba77a430b995a570de21f28",
+    "03_fx_quotes/infers_inverse": "15ed2735b03cb210495b5e15ed20ce920ca1062145eecf4f08563233ca937932",
+    "03_fx_quotes/cross_rate_6dp": "492dd55096697495c66ef88cdfb704394bd39b58a7f7c2a4fade4d07f8c91b77",
+    "03_fx_quotes/default_context_prec28": "a2a714895e19b9ef24d21e0c9ed86bd600e58a5d393868d5a82235e80aa1c4a8",
+    "04_ledger_reconciliation/r3_latest_booking": "e36a833040d09862f4fa3b52aeb61b9eda5285cffd058699088273cc8244ce5c",
+    "04_ledger_reconciliation/r1_no_booking_tiebreak": "b90264d1260feae7287604a4794535ec0a68fd37b96a7fe4746a5b7cbf93eeed",
+    "04_ledger_reconciliation/statements_by_id_only": "c522112d3e4b807cc7368d350ddc1d461a0fa331accafb29fddb3f7cba97c7ef",
+    "04_ledger_reconciliation/r1_matches_refunds": "fe8fc6a5c47ca56bcb659ade97c46dd20f89ddaf868f83c8b9f6ef638e363ab1",
+    "04_ledger_reconciliation/r2_ledger_order_by_id": "58e30b353494d18700a62ada52a29ed54e54b2933398b869db2613bac17263e0",
+    "04_ledger_reconciliation/dup_ignores_date": "5f1db6238aa1e435a2e8d83122b28c5d8e4dd1f52ec9da11384425dca7205473",
+    "04_ledger_reconciliation/r2_excludes_negative": "23e5f2af6737533e6e6ee41d0a944bb0f79569db4980790eace3d466628c7aa2",
+    "04_ledger_reconciliation/alt_cleanroom": "02cb567ea36d3e08febc02f5f9808cbfff4a2f9d0b328e050111620bf2640ad1",
+    "05_double_entry/trial_excludes_reversals": "632a1b524cf38575110c5d29c8be58e44efc23d01aa24ab3f7fafc5c1d2fb445",
+    "05_double_entry/reverse_without_row_lock": "67e1e8f59649b3eb77973f2fd3c8ab1b6028d8d803411ead24fce6925e51a9bd",
+    "05_double_entry/account_currency_overwrite": "6c731ed7a97e1b68a6180f0f96526118d84dd2c2962b0a546b6ef97a6b65daf6",
+    "05_double_entry/account_unvalidated": "0351cdeaf9c72a8cece29f883533f218b26e5d9e84b66d5dd578d1f76587cec2",
+    "05_double_entry/accounts_before_amounts": "4529e1371bfeede57b9336ed264dcec0bdff92288cf36a5b73df1548f262514c",
+    "05_double_entry/trial_inner_join": "158c6d003018b6ef49594f7f5eff217b74f7967e7739a9229607f3a0cfbac9a4",
+    "05_double_entry/alt_running_totals": "dcb3e74ce3a799ef5999cb613df5d7d615384dbf9d8962ac41037ad419cb9659",
+    "06_available_balance/closed_before_amount_validation": "f85d036a8aacdca52605cf1ae660d04e9e3b08a482d199bed1eec0dbd8cc39aa",
+    "06_available_balance/bool_amount_accepted": "180fd56b059354fd75c83d5a9d605ca4fd71efd734ff870184ba8f0d35dd5ce0",
+    "06_available_balance/unknown_auth_is_409": "353bdca6b4ef78d252709cffe1065864b7280dfaf7448246f6db407268e0f518",
+    "06_available_balance/alt_iso_text": "3d30b05b60309f34932dcadac7543c40cc3a3483bf256e69a8d621af9ccc08fc",
+    "06_available_balance/exceeds_before_closed": "1b20b15d160dc822a47ff405a194553ebe842be7512ed48ce0c304948cf76518",
+    "07_statement_periods/no_id_tiebreak": "1f7ded0e4902d723649c8cd4de448f7446a2bd7d9b3e23ff18de8c4a7f977042",
+    "07_statement_periods/validates_only_selected": "e0bf34242650a7222ebd943a8844ef3794776a85c0493d17a0c659a10158b09f",
+    "07_statement_periods/tzinfo_only_aware_check": "db5141c006a08d0f255760221ea999312d77f70a43f784dbc991aa8d76dbf716",
+    "08_refund_limits/refund_check_then_write": "edef65447e5ca1031131d0eff1fa3f6d291fdc37fe42c4aeaf191490b4a754d9",
+    "08_refund_limits/alt_conditional_update": "79b1982b24ffe0268bdd197c317fbe9b6025beb20f1fcff5a75e64ff37590e53",
+    "09_tiered_fees/schedule_unvalidated": "440da9e087019995ee65fd6d83bf7a69dc6bdd2a186444a496cf1fad60642494",
+    "09_tiered_fees/amount_type_unchecked": "42735c472f8362a8de606e0365b6f68436bcb8f05573d9c1f1d16f5228efec48",
+    "10_batch_parser/zero_amount_accepted": "fe0f9a0ebe3cf3b4df7fc6cd5321566b86b3fb42dfda0ef61257b04164361cff",
+    "10_batch_parser/blank_reference_accepted": "5df3393c35c9c875fb4c3060ab0d02f0eed9ff0fa89968ce2b16bc226743d77b",
+    "10_batch_parser/header_currency_any_alpha": "fb63dcad6bd9b4c2bcec5b12963cae6d04e40493ef18f499e833814428fb9bf8",
+    "10_batch_parser/lowercase_batch_id": "05b3c4ccc20ca2602e28338adaa4aea624fa926798548345d02f849fb6812ad4",
+    "10_batch_parser/bare_cr_is_terminator": "60449ef363ef7dfb1edee6d4d63feade420d4a8acc23910527d90562e4656861",
+    "10_batch_parser/blank_lines_skipped": "78b9c6b6372d40e4bd79dc412fe83ca7724a58e059d8f9b4bfa3ad89086771b8",
+    "10_batch_parser/missing_trailer_after_last": "45364cec0db5fa22637bb75038f7e72e41259d47d6782ec67cb27f41b9dd3d11",
+    "10_batch_parser/reference_strip_both": "c302bfedb5a273493266fde871640a04369ef5ab49153026fdfa1400755c2eb2",
+    "10_batch_parser/crlf_all_or_nothing": "b825e0e636d528d267d42ec66a9d15a04a005c624e6738a81803a8057ace66b8",
+    "10_batch_parser/alt_cleanroom": "e864d295c9788fca49109ccb9a0db3738234bdcc0ea39194a76259da0028bf28"
+  },
+  "catalog_digest": "4417da951d3cb01ef3db4ac8dd18d68f7a97ba6f856fea2b4af3b92eab4f8019",
+  "source_changed_during_run": false,
+  "invocation": {
+    "tasks": null,
+    "jobs": 4
+  },
+  "baseline_receipt": "results/final/heldout-baseline.json",
+  "runs": [
+    {
+      "task": "01_idempotent_payments",
+      "variant": "rawbody_fingerprint",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 17,
+        "passed": 14,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_payments::test_valid_key_lengths_and_reordered_body[1]",
+        "test_hidden_payments::test_valid_key_lengths_and_reordered_body[100]",
+        "test_hidden_payments::test_valid_key_lengths_and_reordered_body[255]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 9.995,
+      "stderr_tail": "_______________ test_valid_key_lengths_and_reordered_body[255] ________________\n\ndatabase_url = 'user=bcp_01_idempotent_payments__rawbody_fingerprin_427_u dbname=bcp_01_idempotent_payments__rawbody_fingerprin_42756184d4bb host=localhost port=54329 password=cvkWch2dAgH0yy5gbFqL-Ev0'\nlength = 255\n\n    @pytest.mark.parametrize(\"length\", [1, 100, 255])\n    def test_valid_key_lengths_and_reordered_body(database_url, length):\n        gateway = Gateway()\n        # No lifespan event is needed: the ticket requires readiness on factory return.\n        client = TestClient(create_app(database_url, gateway))\n        args = request(key=\"k\" * length, merchant=str(uuid4()))\n        first = client.post(\"/v1/payments\", **args)\n        assert first.status_code == 201\n        args[\"json\"] = dict(reversed(list(args[\"json\"].items())))\n>       same(first, client.post(\"/v1/payments\", **args))\n\n..\\grader\\test_hidden_payments.py:172: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nfirst = <Response [201 Created]>, second = <Response [422 Unprocessable Entity]>\n\n    def same(first, second):\n>       assert first.status_code == second.status_code\nE       assert 201 == 422\nE        +  where 201 = <Response [201 Created]>.status_code\nE        +  and   422 = <Response [422 Unprocessable Entity]>.status_code\n\n..\\grader\\test_hidden_payments.py:34: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_abg2d6n0\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_payments.py::test_valid_key_lengths_and_reordered_body[1]\nFAILED ..\\grader\\test_hidden_payments.py::test_valid_key_lengths_and_reordered_body[100]\nFAILED ..\\grader\\test_hidden_payments.py::test_valid_key_lengths_and_reordered_body[255]\n3 failed, 14 passed, 1 warning in 8.97s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Hashes raw JSON bytes, violating equality of the three validated fields regardless of JSON member ordering."
+    },
+    {
+      "task": "01_idempotent_payments",
+      "variant": "key_limit_64",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 17,
+        "passed": 15,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_payments::test_valid_key_lengths_and_reordered_body[100]",
+        "test_hidden_payments::test_valid_key_lengths_and_reordered_body[255]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 9.943,
+      "stderr_tail": "    @pytest.mark.parametrize(\"length\", [1, 100, 255])\n    def test_valid_key_lengths_and_reordered_body(database_url, length):\n        gateway = Gateway()\n        # No lifespan event is needed: the ticket requires readiness on factory return.\n        client = TestClient(create_app(database_url, gateway))\n        args = request(key=\"k\" * length, merchant=str(uuid4()))\n        first = client.post(\"/v1/payments\", **args)\n>       assert first.status_code == 201\nE       assert 400 == 201\nE        +  where 400 = <Response [400 Bad Request]>.status_code\n\n..\\grader\\test_hidden_payments.py:170: AssertionError\n_______________ test_valid_key_lengths_and_reordered_body[255] ________________\n\ndatabase_url = 'user=bcp_01_idempotent_payments__key_limit_64__fina_d7f_u dbname=bcp_01_idempotent_payments__key_limit_64__fina_d7f32aa31e97 host=localhost port=54329 password=yyCxxmVOr_Yu-aHyWaH-ZzA-'\nlength = 255\n\n    @pytest.mark.parametrize(\"length\", [1, 100, 255])\n    def test_valid_key_lengths_and_reordered_body(database_url, length):\n        gateway = Gateway()\n        # No lifespan event is needed: the ticket requires readiness on factory return.\n        client = TestClient(create_app(database_url, gateway))\n        args = request(key=\"k\" * length, merchant=str(uuid4()))\n        first = client.post(\"/v1/payments\", **args)\n>       assert first.status_code == 201\nE       assert 400 == 201\nE        +  where 400 = <Response [400 Bad Request]>.status_code\n\n..\\grader\\test_hidden_payments.py:170: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_d5x1t4j6\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_payments.py::test_valid_key_lengths_and_reordered_body[100]\nFAILED ..\\grader\\test_hidden_payments.py::test_valid_key_lengths_and_reordered_body[255]\n2 failed, 15 passed, 1 warning in 8.95s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Rejects keys longer than 64 characters, violating the inclusive 1-255 key length rule."
+    },
+    {
+      "task": "01_idempotent_payments",
+      "variant": "key_limit_254",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 17,
+        "passed": 16,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_payments::test_valid_key_lengths_and_reordered_body[255]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 10.321,
+      "stderr_tail": "..............F..                                                        [100%]\n================================== FAILURES ===================================\n_______________ test_valid_key_lengths_and_reordered_body[255] ________________\n\ndatabase_url = 'user=bcp_01_idempotent_payments__key_limit_254__fin_b2f_u dbname=bcp_01_idempotent_payments__key_limit_254__fin_b2f418e62810 host=localhost port=54329 password=c2j3-P2cWw1hrqij0NKPwdnq'\nlength = 255\n\n    @pytest.mark.parametrize(\"length\", [1, 100, 255])\n    def test_valid_key_lengths_and_reordered_body(database_url, length):\n        gateway = Gateway()\n        # No lifespan event is needed: the ticket requires readiness on factory return.\n        client = TestClient(create_app(database_url, gateway))\n        args = request(key=\"k\" * length, merchant=str(uuid4()))\n        first = client.post(\"/v1/payments\", **args)\n>       assert first.status_code == 201\nE       assert 400 == 201\nE        +  where 400 = <Response [400 Bad Request]>.status_code\n\n..\\grader\\test_hidden_payments.py:170: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_dzt3m65v\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_payments.py::test_valid_key_lengths_and_reordered_body[255]\n1 failed, 16 passed, 1 warning in 9.39s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Rejects a 255-character key, violating the inclusive 1-255 key length rule."
+    },
+    {
+      "task": "01_idempotent_payments",
+      "variant": "process_local_lock",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 17,
+        "passed": 16,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_payments::test_concurrent_duplicates_across_app_instances"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 12.754,
+      "stderr_tail": "                    token = f\"cross_app_{round_no}\"\n                    args = request(source_token=token)\n                    barrier = threading.Barrier(8, timeout=15)\n    \n                    def call(index):\n                        barrier.wait()\n                        return client.post([left, right][index % 2] + \"/v1/payments\", **args)\n    \n                    responses = list(pool.map(call, range(8)))\n                    successes = [r for r in responses if r.status_code == 201]\n                    assert successes, [r.status_code for r in responses]\n                    for response in responses:\n                        if response.status_code == 409:\n                            assert response.json()[\"error\"][\"code\"] == \"idempotency_request_in_progress\"\n                        else:\n>                           same(successes[0], response)\n\n..\\grader\\test_hidden_payments.py:227: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nfirst = <Response [201 Created]>\nsecond = <Response [500 Internal Server Error]>\n\n    def same(first, second):\n>       assert first.status_code == second.status_code\nE       assert 201 == 500\nE        +  where 201 = <Response [201 Created]>.status_code\nE        +  and   500 = <Response [500 Internal Server Error]>.status_code\n\n..\\grader\\test_hidden_payments.py:34: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_g_rmo1z1\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_payments.py::test_concurrent_duplicates_across_app_instances\n1 failed, 16 passed, 1 warning in 11.84s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Serializes keys only within one app, violating single-charge concurrency across app instances."
+    },
+    {
+      "task": "01_idempotent_payments",
+      "variant": "alt_poll_replay",
+      "kind": "alt_valid",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "PASS",
+      "outcome": "PASS",
+      "verdict": "ok",
+      "tests": {
+        "total": 17,
+        "passed": 17,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "must_fail_hit": [],
+      "duration_s": 10.612,
+      "stderr_tail": ".................                                                        [100%]\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_rhyxv01l\\junit.xml -\n17 passed, 1 warning in 9.39s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "accept",
+      "description": "Polls reserved rows until completion and replays the receipt instead of returning an in-progress response."
+    },
+    {
+      "task": "01_idempotent_payments",
+      "variant": "alt_schema_in_lifespan",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 17,
+        "passed": 9,
+        "failed": 8,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_payments::test_sequential_retry",
+        "test_hidden_payments::test_concurrent_duplicates_charge_once",
+        "test_hidden_payments::test_same_key_different_merchants_independent",
+        "test_hidden_payments::test_body_mismatch[change0]",
+        "test_hidden_payments::test_body_mismatch[change1]",
+        "test_hidden_payments::test_body_mismatch[change2]",
+        "test_hidden_payments::test_decline_replayed",
+        "test_hidden_payments::test_body_mismatch_while_in_flight"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 18.329,
+      "stderr_tail": "\ndatabase_url = 'user=bcp_01_idempotent_payments__alt_schema_in_life_54b_u dbname=bcp_01_idempotent_payments__alt_schema_in_life_54b8b6e4ed18 host=localhost port=54329 password=9YVcHZsshGn2BWlJ3zLQFkHq'\n\n    def test_body_mismatch_while_in_flight(database_url):\n        entered = threading.Event()\n        gateway = Gateway(latency=.3)\n        original_charge = gateway.charge\n    \n        def signal(*args):\n            entered.set()\n            return original_charge(*args)\n    \n        gateway.charge = signal\n        with live_server(create_app(database_url, gateway)) as url, httpx.Client(base_url=url, timeout=30, trust_env=False) as client:\n            key = str(uuid4())\n            with ThreadPoolExecutor(max_workers=2) as pool:\n                future = pool.submit(client.post, \"/v1/payments\", **request(key))\n>               assert entered.wait(10)\nE               assert False\nE                +  where False = wait(10)\nE                +    where wait = <threading.Event at 0x27fe03f50d0: unset>.wait\n\n..\\grader\\test_hidden_payments.py:130: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_vp_qe1dm\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_payments.py::test_sequential_retry - psycopg.err...\nFAILED ..\\grader\\test_hidden_payments.py::test_concurrent_duplicates_charge_once\nFAILED ..\\grader\\test_hidden_payments.py::test_same_key_different_merchants_independent\nFAILED ..\\grader\\test_hidden_payments.py::test_body_mismatch[change0] - psyco...\nFAILED ..\\grader\\test_hidden_payments.py::test_body_mismatch[change1] - psyco...\nFAILED ..\\grader\\test_hidden_payments.py::test_body_mismatch[change2] - psyco...\nFAILED ..\\grader\\test_hidden_payments.py::test_decline_replayed - psycopg.err...\nFAILED ..\\grader\\test_hidden_payments.py::test_body_mismatch_while_in_flight\n8 failed, 9 passed, 1 warning in 16.96s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Creates its schema only in a lifespan handler, violating PROBLEM.md lines 34-35 requiring schema readiness when create_app returns (original review label: correct; F-402 false_fail clarification)."
+    },
+    {
+      "task": "02_interest_accrual",
+      "variant": "no_validate",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 33,
+        "passed": 11,
+        "failed": 22,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal0-rate0]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal1-rate1]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal2-rate2]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal3-rate3]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal4-rate4]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal5-rate5]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal6-rate6]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-1-rate7]",
+        "test_hidden_interest::test_invalid_money_raises[simple_monthly-principal8-0.1]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal0-rate0]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal1-rate1]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal2-rate2]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal3-rate3]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal4-rate4]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal5-rate5]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal6-rate6]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-1-rate7]",
+        "test_hidden_interest::test_invalid_money_raises[daily_compound-principal8-0.1]",
+        "test_hidden_interest::test_invalid_dates_and_method_raise[start0-end0-simple_monthly]",
+        "test_hidden_interest::test_invalid_dates_and_method_raise[start1-end1-simple_monthly]",
+        "test_hidden_interest::test_invalid_dates_and_method_raise[start2-end2-daily_compound]",
+        "test_hidden_interest::test_invalid_dates_and_method_raise[start3-end3-unknown]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.347,
+      "stderr_tail": "start = datetime.date(2026, 1, 1), end = datetime.date(2026, 1, 1)\nmethod = 'unknown'\n\n    @pytest.mark.parametrize(\"start,end,method\", [\n        (date(2026, 2, 1), date(2026, 1, 1), \"simple_monthly\"),\n        (datetime(2026, 1, 1, tzinfo=timezone.utc), date(2026, 2, 1), \"simple_monthly\"),\n        (date(2026, 1, 1), datetime(2026, 2, 1), \"daily_compound\"),\n        (date(2026, 1, 1), date(2026, 1, 1), \"unknown\"),\n    ])\n    def test_invalid_dates_and_method_raise(start, end, method):\n>       with pytest.raises(ValueError):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'ValueError'>\n\n..\\grader\\test_hidden_interest.py:67: Failed\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_cvugdb51\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal0-rate0]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal1-rate1]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal2-rate2]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal3-rate3]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal4-rate4]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal5-rate5]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal6-rate6]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-1-rate7]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[simple_monthly-principal8-0.1]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal0-rate0]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal1-rate1]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal2-rate2]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal3-rate3]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal4-rate4]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal5-rate5]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal6-rate6]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-1-rate7]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_money_raises[daily_compound-principal8-0.1]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_dates_and_method_raise[start0-end0-simple_monthly]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_dates_and_method_raise[start1-end1-simple_monthly]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_dates_and_method_raise[start2-end2-daily_compound]\nFAILED ..\\grader\\test_hidden_interest.py::test_invalid_dates_and_method_raise[start3-end3-unknown]\n22 failed, 11 passed in 0.61s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Omits input validation, violating the finite Decimal, whole-cent, date and method validation rules."
+    },
+    {
+      "task": "02_interest_accrual",
+      "variant": "daily_rate_first_prec28",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 33,
+        "passed": 32,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_interest::test_half_cent_ties_bankers[237250.00-0.0001-1]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.261,
+      "stderr_tail": "...F.............................                                        [100%]\n================================== FAILURES ===================================\n_______________ test_half_cent_ties_bankers[237250.00-0.0001-1] _______________\n\nprincipal = '237250.00', rate = '0.0001', days = 1\n\n    @pytest.mark.parametrize(\"principal,rate,days\", [\n        (\"50\", \"0.0365\", 1), (\"73\", \"0.025\", 1), (\"25\", \"0.0365\", 2),\n        (\"237250.00\", \"0.0001\", 1), (\"237250.00\", \"0.0001\", 29),\n        (\"237250.00\", \"0.0001\", 31),\n    ])\n    def test_half_cent_ties_bankers(principal, rate, days):\n        # Search output from tools/find_ties.py, independently cross-checked with Fraction.\n>       check(D(principal), D(rate), date(2026, 1, 1), date(2026, 1, 1) + timedelta(days=days), \"simple_monthly\")\n\n..\\grader\\test_hidden_interest.py:46: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nprincipal = Decimal('237250.00'), rate = Decimal('0.0001')\nstart = datetime.date(2026, 1, 1), end = datetime.date(2026, 1, 2)\nmethod = 'simple_monthly'\n\n    def check(principal, rate, start, end, method):\n        rows = accrue(principal, rate, start, end, method)\n        for row in rows:\n            assert_money(row.interest)\n            assert_money(row.balance)\n>       assert [(r.posting_date, r.interest, r.balance) for r in rows] == oracle(principal, rate, start, end, method)\nE       AssertionError: assert [(datetime.da...'237250.07'))] == [(datetime.da...'237250.06'))]\nE         \nE         At index 0 diff: (datetime.date(2026, 1, 1), Decimal('0.07'), Decimal('237250.07')) != (datetime.date(2026, 1, 1), Decimal('0.06'), Decimal('237250.06'))\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_interest.py:34: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_z_g011ob\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_interest.py::test_half_cent_ties_bankers[237250.00-0.0001-1]\n1 failed, 32 passed in 0.54s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Divides the rate first at precision 28, violating the clarified PROBLEM.md lines 20-23 requiring at least 34 digits or exact arithmetic with exact half-even ties (original ticket permitted precision 28; F-403)."
+    },
+    {
+      "task": "02_interest_accrual",
+      "variant": "carry_residual",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 33,
+        "passed": 32,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_interest::test_accrual_properties"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.051,
+      "stderr_tail": "\n    @given(cents=st.integers(0, 100000000), rate=st.integers(0, 1500),\n>          offset=st.integers(0, 100), days=st.integers(0, 90),\n                   ^^^\n           method=st.sampled_from([\"simple_monthly\", \"daily_compound\"]))\n\n..\\grader\\test_hidden_interest.py:89: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n..\\grader\\test_hidden_interest.py:95: in test_accrual_properties\n    rows = check(principal, annual_rate, start, end, method)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nprincipal = Decimal('1.39'), rate = Decimal('0.0386')\nstart = datetime.date(2024, 3, 10), end = datetime.date(2024, 6, 2)\nmethod = 'daily_compound'\n\n    def check(principal, rate, start, end, method):\n        rows = accrue(principal, rate, start, end, method)\n        for row in rows:\n            assert_money(row.interest)\n            assert_money(row.balance)\n>       assert [(r.posting_date, r.interest, r.balance) for r in rows] == oracle(principal, rate, start, end, method)\nE       AssertionError: assert [(datetime.da...imal('1.40'))] == [(datetime.da...imal('1.39'))]\nE         \nE         At index 1 diff: (datetime.date(2024, 4, 30), Decimal('0.01'), Decimal('1.40')) != (datetime.date(2024, 4, 30), Decimal('0.00'), Decimal('1.39'))\nE         Use -v to get more diff\nE       Failing test case: test_accrual_properties(\nE           cents=139,\nE           rate=386,\nE           offset=69,\nE           days=84,\nE           method='daily_compound',\nE       )\n\n..\\grader\\test_hidden_interest.py:34: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_f77osjva\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_interest.py::test_accrual_properties - Assertion...\n1 failed, 32 passed in 0.36s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Carries rounding residual into later segments, violating the rule to discard residual after each posting."
+    },
+    {
+      "task": "02_interest_accrual",
+      "variant": "simple_noncompounding",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 33,
+        "passed": 31,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_interest::test_large_principal_exact[simple_monthly]",
+        "test_hidden_interest::test_accrual_properties"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 0.877,
+      "stderr_tail": "    @given(cents=st.integers(0, 100000000), rate=st.integers(0, 1500),\n>          offset=st.integers(0, 100), days=st.integers(0, 90),\n                   ^^^\n           method=st.sampled_from([\"simple_monthly\", \"daily_compound\"]))\n\n..\\grader\\test_hidden_interest.py:89: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n..\\grader\\test_hidden_interest.py:95: in test_accrual_properties\n    rows = check(principal, annual_rate, start, end, method)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nprincipal = Decimal('5573.85'), rate = Decimal('0.1500')\nstart = datetime.date(2024, 1, 13), end = datetime.date(2024, 2, 17)\nmethod = 'simple_monthly'\n\n    def check(principal, rate, start, end, method):\n        rows = accrue(principal, rate, start, end, method)\n        for row in rows:\n            assert_money(row.interest)\n            assert_money(row.balance)\n>       assert [(r.posting_date, r.interest, r.balance) for r in rows] == oracle(principal, rate, start, end, method)\nE       AssertionError: assert [(datetime.da...l('5654.02'))] == [(datetime.da...l('5654.31'))]\nE         \nE         At index 1 diff: (datetime.date(2024, 2, 16), Decimal('36.65'), Decimal('5654.02')) != (datetime.date(2024, 2, 16), Decimal('36.94'), Decimal('5654.31'))\nE         Use -v to get more diff\nE       Failing test case: test_accrual_properties(\nE           cents=557385,\nE           rate=1500,\nE           offset=12,\nE           days=35,\nE           method='simple_monthly',\nE       )\n\n..\\grader\\test_hidden_interest.py:34: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_kn2tqaq4\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_interest.py::test_large_principal_exact[simple_monthly]\nFAILED ..\\grader\\test_hidden_interest.py::test_accrual_properties - Assertion...\n2 failed, 31 passed in 0.18s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Uses the original principal for every segment, violating compounding at posting boundaries."
+    },
+    {
+      "task": "02_interest_accrual",
+      "variant": "naive_end_posting_only_month_end",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 33,
+        "passed": 24,
+        "failed": 9,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_interest::test_half_cent_ties_bankers[50-0.0365-1]",
+        "test_hidden_interest::test_half_cent_ties_bankers[73-0.025-1]",
+        "test_hidden_interest::test_half_cent_ties_bankers[25-0.0365-2]",
+        "test_hidden_interest::test_half_cent_ties_bankers[237250.00-0.0001-1]",
+        "test_hidden_interest::test_half_cent_ties_bankers[237250.00-0.0001-29]",
+        "test_hidden_interest::test_large_principal_exact[simple_monthly]",
+        "test_hidden_interest::test_large_principal_exact[daily_compound]",
+        "test_hidden_interest::test_leap_and_partial",
+        "test_hidden_interest::test_accrual_properties"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 0.89,
+      "stderr_tail": "..\\grader\\test_hidden_interest.py:95: in test_accrual_properties\n    rows = check(principal, annual_rate, start, end, method)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nprincipal = Decimal('5573.85'), rate = Decimal('0.1500')\nstart = datetime.date(2024, 1, 13), end = datetime.date(2024, 2, 17)\nmethod = 'simple_monthly'\n\n    def check(principal, rate, start, end, method):\n        rows = accrue(principal, rate, start, end, method)\n        for row in rows:\n            assert_money(row.interest)\n            assert_money(row.balance)\n>       assert [(r.posting_date, r.interest, r.balance) for r in rows] == oracle(principal, rate, start, end, method)\nE       AssertionError: assert [(datetime.da...l('5617.37'))] == [(datetime.da...l('5654.31'))]\nE         \nE         Right contains one more item: (datetime.date(2024, 2, 16), Decimal('36.94'), Decimal('5654.31'))\nE         Use -v to get more diff\nE       Failing test case: test_accrual_properties(\nE           cents=557385,\nE           rate=1500,\nE           offset=12,\nE           days=35,\nE           method='simple_monthly',\nE       )\n\n..\\grader\\test_hidden_interest.py:34: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_impl_kvh\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_interest.py::test_half_cent_ties_bankers[50-0.0365-1]\nFAILED ..\\grader\\test_hidden_interest.py::test_half_cent_ties_bankers[73-0.025-1]\nFAILED ..\\grader\\test_hidden_interest.py::test_half_cent_ties_bankers[25-0.0365-2]\nFAILED ..\\grader\\test_hidden_interest.py::test_half_cent_ties_bankers[237250.00-0.0001-1]\nFAILED ..\\grader\\test_hidden_interest.py::test_half_cent_ties_bankers[237250.00-0.0001-29]\nFAILED ..\\grader\\test_hidden_interest.py::test_large_principal_exact[simple_monthly]\nFAILED ..\\grader\\test_hidden_interest.py::test_large_principal_exact[daily_compound]\nFAILED ..\\grader\\test_hidden_interest.py::test_leap_and_partial - AssertionEr...\nFAILED ..\\grader\\test_hidden_interest.py::test_accrual_properties - Assertion...\n9 failed, 24 passed in 0.23s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Posts only on month ends, violating the additional end-minus-one-day posting rule."
+    },
+    {
+      "task": "03_fx_quotes",
+      "variant": "weak_validation",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 22,
+        "passed": 15,
+        "failed": 7,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_fx::test_invalid_amount_and_fee[True-0]",
+        "test_hidden_fx::test_invalid_amount_and_fee[1.5-0]",
+        "test_hidden_fx::test_invalid_amount_and_fee[1-0]",
+        "test_hidden_fx::test_invalid_amount_and_fee[1-True]",
+        "test_hidden_fx::test_invalid_amount_and_fee[1-10001]",
+        "test_hidden_fx::test_invalid_amount_and_fee[1-1.5]",
+        "test_hidden_fx::test_invalid_amount_and_fee[1-5]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.334,
+      "stderr_tail": "\nfx\\quote.py:19: TypeError\n______________________ test_invalid_amount_and_fee[1-5] _______________________\n\namount = 1, bps = '5'\n\n    @pytest.mark.parametrize(\"amount,bps\", [\n        (True, 0), (-1, 0), (1.5, 0), (\"1\", 0), (1, True), (1, -1),\n        (1, 10001), (1, 1.5), (1, \"5\"),\n    ])\n    def test_invalid_amount_and_fee(amount, bps):\n        with pytest.raises(ValueError):\n>           quote_transfer(amount, \"CAD\", \"USD\", {(\"CAD\", \"USD\"): D(\".5\")}, bps)\n\n..\\grader\\test_hidden_fx.py:86: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nfx\\quote.py:8: in quote_transfer\n    validate(amount_minor, src, dst, fee_bps)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\namount_minor = 1, src = 'CAD', dst = 'USD', fee_bps = '5'\n\n    def validate(amount_minor, src, dst, fee_bps):\n        if amount_minor < 0:\n            raise ValueError(\"nonnegative integer amount required\")\n>       if fee_bps < 0:\n           ^^^^^^^^^^^\nE       TypeError: '<' not supported between instances of 'str' and 'int'\n\nfx\\models.py:59: TypeError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_51o3vuv7\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_fx.py::test_invalid_amount_and_fee[True-0] - Fai...\nFAILED ..\\grader\\test_hidden_fx.py::test_invalid_amount_and_fee[1.5-0] - Fail...\nFAILED ..\\grader\\test_hidden_fx.py::test_invalid_amount_and_fee[1-0] - TypeEr...\nFAILED ..\\grader\\test_hidden_fx.py::test_invalid_amount_and_fee[1-True] - Fai...\nFAILED ..\\grader\\test_hidden_fx.py::test_invalid_amount_and_fee[1-10001] - Fa...\nFAILED ..\\grader\\test_hidden_fx.py::test_invalid_amount_and_fee[1-1.5] - Type...\nFAILED ..\\grader\\test_hidden_fx.py::test_invalid_amount_and_fee[1-5] - TypeEr...\n7 failed, 15 passed in 0.63s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Accepts bool amounts and fees over 10000 bps, violating the stated integer and fee range rules."
+    },
+    {
+      "task": "03_fx_quotes",
+      "variant": "infers_inverse",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 22,
+        "passed": 20,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_fx::test_inverse_only_is_unavailable[0]",
+        "test_hidden_fx::test_inverse_only_is_unavailable[100]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.284,
+      "stderr_tail": ".......FF.............                                                   [100%]\n================================== FAILURES ===================================\n_____________________ test_inverse_only_is_unavailable[0] _____________________\n\namount = 0\n\n    @pytest.mark.parametrize(\"amount\", [0, 100])\n    def test_inverse_only_is_unavailable(amount):\n>       with pytest.raises(RateUnavailable):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'fx.models.RateUnavailable'>\n\n..\\grader\\test_hidden_fx.py:68: Failed\n____________________ test_inverse_only_is_unavailable[100] ____________________\n\namount = 100\n\n    @pytest.mark.parametrize(\"amount\", [0, 100])\n    def test_inverse_only_is_unavailable(amount):\n>       with pytest.raises(RateUnavailable):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'fx.models.RateUnavailable'>\n\n..\\grader\\test_hidden_fx.py:68: Failed\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_s1867iux\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_fx.py::test_inverse_only_is_unavailable[0] - Fai...\nFAILED ..\\grader\\test_hidden_fx.py::test_inverse_only_is_unavailable[100] - F...\n2 failed, 20 passed in 0.62s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Infers inverse rates, violating the direct-or-USD-only routing rule."
+    },
+    {
+      "task": "03_fx_quotes",
+      "variant": "cross_rate_6dp",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 22,
+        "passed": 20,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_fx::test_full_precision_cross_rate[1.23456789-1.34567891]",
+        "test_hidden_fx::test_full_precision_cross_rate[1.12345678901234567890123456789-1.98765432109876543210987654321]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.343,
+      "stderr_tail": "_ test_full_precision_cross_rate[1.12345678901234567890123456789-1.98765432109876543210987654321] _\n\nleft = '1.12345678901234567890123456789'\nright = '1.98765432109876543210987654321'\n\n    @pytest.mark.parametrize(\"left,right\", [\n        (\"1.23456789\", \"1.34567891\"),\n        (\"1.12345678901234567890123456789\", \"1.98765432109876543210987654321\"),\n    ])\n    def test_full_precision_cross_rate(left, right):\n>       check(10**9, \"GBP\", \"CAD\", {(\"GBP\", \"USD\"): D(left), (\"USD\", \"CAD\"): D(right)}, 17)\n\n..\\grader\\test_hidden_fx.py:77: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\namount = 1000000000, src = 'GBP', dst = 'CAD'\nrates = {('GBP', 'USD'): Decimal('1.12345678901234567890123456789'), ('USD', 'CAD'): Decimal('1.98765432109876543210987654321')}\nbps = 17\n\n    def check(amount, src, dst, rates, bps):\n        before = dict(rates)\n        result = quote_transfer(amount, src, dst, rates, bps)\n        path = (src, dst) if (src, dst) in rates else (src, \"USD\", dst)\n        rate = Fraction(1)\n        for pair in zip(path, path[1:]):\n            rate *= Fraction(rates[pair])\n        fee = nearest(Fraction(amount * bps, 10000))\n        converted = nearest(Fraction(amount - fee, 10**UNITS[src]) * rate * 10**UNITS[dst])\n        assert type(result.fee_minor) is type(result.converted_minor) is int\n        assert result.fee_minor == fee\n>       assert result.converted_minor == converted\nE       AssertionError: assert 2229247825 == 2229247567\nE        +  where 2229247825 = Quote(fee_minor=1700000, converted_minor=2229247825, rate_used=Decimal('2.233044'), path=('GBP', 'USD', 'CAD')).converted_minor\n\n..\\grader\\test_hidden_fx.py:26: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_zzv5hy3x\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_fx.py::test_full_precision_cross_rate[1.23456789-1.34567891]\nFAILED ..\\grader\\test_hidden_fx.py::test_full_precision_cross_rate[1.12345678901234567890123456789-1.98765432109876543210987654321]\n2 failed, 20 passed in 0.59s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Rounds the cross product to six decimals, violating full precision with no intermediate rounding."
+    },
+    {
+      "task": "03_fx_quotes",
+      "variant": "default_context_prec28",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 22,
+        "passed": 21,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_fx::test_full_precision_cross_rate[1.12345678901234567890123456789-1.98765432109876543210987654321]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.294,
+      "stderr_tail": "right = '1.98765432109876543210987654321'\n\n    @pytest.mark.parametrize(\"left,right\", [\n        (\"1.23456789\", \"1.34567891\"),\n        (\"1.12345678901234567890123456789\", \"1.98765432109876543210987654321\"),\n    ])\n    def test_full_precision_cross_rate(left, right):\n>       check(10**9, \"GBP\", \"CAD\", {(\"GBP\", \"USD\"): D(left), (\"USD\", \"CAD\"): D(right)}, 17)\n\n..\\grader\\test_hidden_fx.py:77: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\namount = 1000000000, src = 'GBP', dst = 'CAD'\nrates = {('GBP', 'USD'): Decimal('1.12345678901234567890123456789'), ('USD', 'CAD'): Decimal('1.98765432109876543210987654321')}\nbps = 17\n\n    def check(amount, src, dst, rates, bps):\n        before = dict(rates)\n        result = quote_transfer(amount, src, dst, rates, bps)\n        path = (src, dst) if (src, dst) in rates else (src, \"USD\", dst)\n        rate = Fraction(1)\n        for pair in zip(path, path[1:]):\n            rate *= Fraction(rates[pair])\n        fee = nearest(Fraction(amount * bps, 10000))\n        converted = nearest(Fraction(amount - fee, 10**UNITS[src]) * rate * 10**UNITS[dst])\n        assert type(result.fee_minor) is type(result.converted_minor) is int\n        assert result.fee_minor == fee\n        assert result.converted_minor == converted\n>       assert isinstance(result.rate_used, D) and Fraction(result.rate_used) == rate\nE       AssertionError: assert (True and Fraction(139565233828008306639831009, 62500000000000000000000000) == Fraction(22330437412481329062372961438336229233322374638011112635269, 10000000000000000000000000000000000000000000000000000000000))\nE        +  where True = isinstance(Decimal('2.233043741248132906237296144'), D)\nE        +    where Decimal('2.233043741248132906237296144') = Quote(fee_minor=1700000, converted_minor=2229247567, rate_used=Decimal('2.233043741248132906237296144'), path=('GBP', 'USD', 'CAD')).rate_used\nE        +  and   Fraction(139565233828008306639831009, 62500000000000000000000000) = Fraction(Decimal('2.233043741248132906237296144'))\nE        +    where Decimal('2.233043741248132906237296144') = Quote(fee_minor=1700000, converted_minor=2229247567, rate_used=Decimal('2.233043741248132906237296144'), path=('GBP', 'USD', 'CAD')).rate_used\n\n..\\grader\\test_hidden_fx.py:27: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_n9cbja1b\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_fx.py::test_full_precision_cross_rate[1.12345678901234567890123456789-1.98765432109876543210987654321]\n1 failed, 21 passed in 0.57s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Truncates the cross rate at the default Decimal precision, violating the full product rate_used rule."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "r3_latest_booking",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 16,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_recon::test_ordering_and_candidate_rules[r3-booking-date]",
+        "test_hidden_recon::test_ordering_and_candidate_rules[r3-id]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.399,
+      "stderr_tail": "         [L(\"l\", DAY, 100, \"r\")], [\"z\"], \"l\", \"R1\", {\"a\": \"no_match\"}),\n        ([S(\"s\", DAY, 100, \"r\")],\n         [L(\"a\", DAY, 100, \"r\", \"refund\", \"r\"), L(\"z\", DAY + timedelta(days=1), 100, \"r\")],\n         [\"s\"], \"z\", \"R1\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"a\", DAY + timedelta(days=1), 100, \"r\"), L(\"z\", DAY, 100, \"r\")],\n         [\"x\", \"y\"], \"z\", \"R2\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"z\", DAY, 100, \"r\"), L(\"a\", DAY, 100, \"r\")], [\"x\", \"y\"], \"a\", \"R2\", {}),\n        ([S(\"x\", DAY, 140, \"r\"), S(\"y\", DAY, -40, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"x\", \"y\"], \"l\", \"R2\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"a\", DAY + timedelta(days=20), 100, \"own\", \"refund\", \"r\"),\n          L(\"z\", DAY - timedelta(days=20), 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"z\", \"R3\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"z\", DAY, 100, \"own\", \"refund\", \"r\"), L(\"a\", DAY, 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"a\", \"R3\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), -100, \"r\"), S(\"z\", DAY, -100, \"r\")],\n         [L(\"l\", DAY, 100, \"own\", \"refund\", \"r\")], [\"z\"], \"l\", \"R3\", {\"a\": \"no_match\"}),\n    ], ids=[\"r1-booking-date\", \"r1-id\", \"r1-distance\", \"r1-statement-order\", \"r1-payments-only\",\n            \"r2-booking-date\", \"r2-id\", \"r2-signed-lines\", \"r3-booking-date\", \"r3-id\", \"r3-statement-order\"])\n    def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):\n        before = list(statement), list(ledger)\n        result = reconcile(statement, ledger)\n>       assert pairs(result) == {match(ss, [lid], rule)}\nE       AssertionError: assert {(frozenset({...{'z'}), 'R3')} == {(frozenset({...{'a'}), 'R3')}\nE         \nE         Extra items in the left set:\nE         (frozenset({'s'}), frozenset({'z'}), 'R3')\nE         Extra items in the right set:\nE         (frozenset({'s'}), frozenset({'a'}), 'R3')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:114: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_0rb9pzxd\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r3-booking-date]\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r3-id]\n2 failed, 16 passed in 0.60s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Selects the latest refund booking, violating the R3 earliest booking date tie-break."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "r1_no_booking_tiebreak",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 17,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_recon::test_ordering_and_candidate_rules[r1-booking-date]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.378,
+      "stderr_tail": "        ([S(\"a\", DAY + timedelta(days=1), 100, \"r\"), S(\"z\", DAY, 100, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"z\"], \"l\", \"R1\", {\"a\": \"no_match\"}),\n        ([S(\"s\", DAY, 100, \"r\")],\n         [L(\"a\", DAY, 100, \"r\", \"refund\", \"r\"), L(\"z\", DAY + timedelta(days=1), 100, \"r\")],\n         [\"s\"], \"z\", \"R1\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"a\", DAY + timedelta(days=1), 100, \"r\"), L(\"z\", DAY, 100, \"r\")],\n         [\"x\", \"y\"], \"z\", \"R2\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"z\", DAY, 100, \"r\"), L(\"a\", DAY, 100, \"r\")], [\"x\", \"y\"], \"a\", \"R2\", {}),\n        ([S(\"x\", DAY, 140, \"r\"), S(\"y\", DAY, -40, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"x\", \"y\"], \"l\", \"R2\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"a\", DAY + timedelta(days=20), 100, \"own\", \"refund\", \"r\"),\n          L(\"z\", DAY - timedelta(days=20), 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"z\", \"R3\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"z\", DAY, 100, \"own\", \"refund\", \"r\"), L(\"a\", DAY, 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"a\", \"R3\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), -100, \"r\"), S(\"z\", DAY, -100, \"r\")],\n         [L(\"l\", DAY, 100, \"own\", \"refund\", \"r\")], [\"z\"], \"l\", \"R3\", {\"a\": \"no_match\"}),\n    ], ids=[\"r1-booking-date\", \"r1-id\", \"r1-distance\", \"r1-statement-order\", \"r1-payments-only\",\n            \"r2-booking-date\", \"r2-id\", \"r2-signed-lines\", \"r3-booking-date\", \"r3-id\", \"r3-statement-order\"])\n    def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):\n        before = list(statement), list(ledger)\n        result = reconcile(statement, ledger)\n>       assert pairs(result) == {match(ss, [lid], rule)}\nE       AssertionError: assert {(frozenset({...{'a'}), 'R1')} == {(frozenset({...{'z'}), 'R1')}\nE         \nE         Extra items in the left set:\nE         (frozenset({'s'}), frozenset({'a'}), 'R1')\nE         Extra items in the right set:\nE         (frozenset({'s'}), frozenset({'z'}), 'R1')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:114: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_unfbzxt8\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r1-booking-date]\n1 failed, 17 passed in 0.61s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Breaks equal distance by id before date, violating the R1 earliest booking date tie-break."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "statements_by_id_only",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 16,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_recon::test_ordering_and_candidate_rules[r1-statement-order]",
+        "test_hidden_recon::test_ordering_and_candidate_rules[r3-statement-order]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.427,
+      "stderr_tail": "         [L(\"l\", DAY, 100, \"r\")], [\"z\"], \"l\", \"R1\", {\"a\": \"no_match\"}),\n        ([S(\"s\", DAY, 100, \"r\")],\n         [L(\"a\", DAY, 100, \"r\", \"refund\", \"r\"), L(\"z\", DAY + timedelta(days=1), 100, \"r\")],\n         [\"s\"], \"z\", \"R1\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"a\", DAY + timedelta(days=1), 100, \"r\"), L(\"z\", DAY, 100, \"r\")],\n         [\"x\", \"y\"], \"z\", \"R2\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"z\", DAY, 100, \"r\"), L(\"a\", DAY, 100, \"r\")], [\"x\", \"y\"], \"a\", \"R2\", {}),\n        ([S(\"x\", DAY, 140, \"r\"), S(\"y\", DAY, -40, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"x\", \"y\"], \"l\", \"R2\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"a\", DAY + timedelta(days=20), 100, \"own\", \"refund\", \"r\"),\n          L(\"z\", DAY - timedelta(days=20), 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"z\", \"R3\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"z\", DAY, 100, \"own\", \"refund\", \"r\"), L(\"a\", DAY, 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"a\", \"R3\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), -100, \"r\"), S(\"z\", DAY, -100, \"r\")],\n         [L(\"l\", DAY, 100, \"own\", \"refund\", \"r\")], [\"z\"], \"l\", \"R3\", {\"a\": \"no_match\"}),\n    ], ids=[\"r1-booking-date\", \"r1-id\", \"r1-distance\", \"r1-statement-order\", \"r1-payments-only\",\n            \"r2-booking-date\", \"r2-id\", \"r2-signed-lines\", \"r3-booking-date\", \"r3-id\", \"r3-statement-order\"])\n    def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):\n        before = list(statement), list(ledger)\n        result = reconcile(statement, ledger)\n>       assert pairs(result) == {match(ss, [lid], rule)}\nE       AssertionError: assert {(frozenset({...{'l'}), 'R3')} == {(frozenset({...{'l'}), 'R3')}\nE         \nE         Extra items in the left set:\nE         (frozenset({'a'}), frozenset({'l'}), 'R3')\nE         Extra items in the right set:\nE         (frozenset({'z'}), frozenset({'l'}), 'R3')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:114: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_jvzmro1c\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r1-statement-order]\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r3-statement-order]\n2 failed, 16 passed in 0.68s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Processes statements by id alone, violating the (value_date,id) order."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "r1_matches_refunds",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 17,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_recon::test_ordering_and_candidate_rules[r1-payments-only]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.398,
+      "stderr_tail": "        ([S(\"a\", DAY + timedelta(days=1), 100, \"r\"), S(\"z\", DAY, 100, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"z\"], \"l\", \"R1\", {\"a\": \"no_match\"}),\n        ([S(\"s\", DAY, 100, \"r\")],\n         [L(\"a\", DAY, 100, \"r\", \"refund\", \"r\"), L(\"z\", DAY + timedelta(days=1), 100, \"r\")],\n         [\"s\"], \"z\", \"R1\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"a\", DAY + timedelta(days=1), 100, \"r\"), L(\"z\", DAY, 100, \"r\")],\n         [\"x\", \"y\"], \"z\", \"R2\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"z\", DAY, 100, \"r\"), L(\"a\", DAY, 100, \"r\")], [\"x\", \"y\"], \"a\", \"R2\", {}),\n        ([S(\"x\", DAY, 140, \"r\"), S(\"y\", DAY, -40, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"x\", \"y\"], \"l\", \"R2\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"a\", DAY + timedelta(days=20), 100, \"own\", \"refund\", \"r\"),\n          L(\"z\", DAY - timedelta(days=20), 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"z\", \"R3\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"z\", DAY, 100, \"own\", \"refund\", \"r\"), L(\"a\", DAY, 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"a\", \"R3\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), -100, \"r\"), S(\"z\", DAY, -100, \"r\")],\n         [L(\"l\", DAY, 100, \"own\", \"refund\", \"r\")], [\"z\"], \"l\", \"R3\", {\"a\": \"no_match\"}),\n    ], ids=[\"r1-booking-date\", \"r1-id\", \"r1-distance\", \"r1-statement-order\", \"r1-payments-only\",\n            \"r2-booking-date\", \"r2-id\", \"r2-signed-lines\", \"r3-booking-date\", \"r3-id\", \"r3-statement-order\"])\n    def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):\n        before = list(statement), list(ledger)\n        result = reconcile(statement, ledger)\n>       assert pairs(result) == {match(ss, [lid], rule)}\nE       AssertionError: assert {(frozenset({...{'a'}), 'R1')} == {(frozenset({...{'z'}), 'R1')}\nE         \nE         Extra items in the left set:\nE         (frozenset({'s'}), frozenset({'a'}), 'R1')\nE         Extra items in the right set:\nE         (frozenset({'s'}), frozenset({'z'}), 'R1')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:114: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_4gwmafij\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r1-payments-only]\n1 failed, 17 passed in 0.62s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Allows refunds as exact matches, violating the R1 payment-only rule."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "r2_ledger_order_by_id",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 17,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_recon::test_ordering_and_candidate_rules[r2-booking-date]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.476,
+      "stderr_tail": "        ([S(\"a\", DAY + timedelta(days=1), 100, \"r\"), S(\"z\", DAY, 100, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"z\"], \"l\", \"R1\", {\"a\": \"no_match\"}),\n        ([S(\"s\", DAY, 100, \"r\")],\n         [L(\"a\", DAY, 100, \"r\", \"refund\", \"r\"), L(\"z\", DAY + timedelta(days=1), 100, \"r\")],\n         [\"s\"], \"z\", \"R1\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"a\", DAY + timedelta(days=1), 100, \"r\"), L(\"z\", DAY, 100, \"r\")],\n         [\"x\", \"y\"], \"z\", \"R2\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"z\", DAY, 100, \"r\"), L(\"a\", DAY, 100, \"r\")], [\"x\", \"y\"], \"a\", \"R2\", {}),\n        ([S(\"x\", DAY, 140, \"r\"), S(\"y\", DAY, -40, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"x\", \"y\"], \"l\", \"R2\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"a\", DAY + timedelta(days=20), 100, \"own\", \"refund\", \"r\"),\n          L(\"z\", DAY - timedelta(days=20), 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"z\", \"R3\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"z\", DAY, 100, \"own\", \"refund\", \"r\"), L(\"a\", DAY, 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"a\", \"R3\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), -100, \"r\"), S(\"z\", DAY, -100, \"r\")],\n         [L(\"l\", DAY, 100, \"own\", \"refund\", \"r\")], [\"z\"], \"l\", \"R3\", {\"a\": \"no_match\"}),\n    ], ids=[\"r1-booking-date\", \"r1-id\", \"r1-distance\", \"r1-statement-order\", \"r1-payments-only\",\n            \"r2-booking-date\", \"r2-id\", \"r2-signed-lines\", \"r3-booking-date\", \"r3-id\", \"r3-statement-order\"])\n    def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):\n        before = list(statement), list(ledger)\n        result = reconcile(statement, ledger)\n>       assert pairs(result) == {match(ss, [lid], rule)}\nE       AssertionError: assert {(frozenset({...{'a'}), 'R2')} == {(frozenset({...{'z'}), 'R2')}\nE         \nE         Extra items in the left set:\nE         (frozenset({'x', 'y'}), frozenset({'a'}), 'R2')\nE         Extra items in the right set:\nE         (frozenset({'x', 'y'}), frozenset({'z'}), 'R2')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:114: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_2t1aiiul\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r2-booking-date]\n1 failed, 17 passed in 0.64s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Processes split payments by id alone, violating R2 (reference,booking_date,id) order."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "dup_ignores_date",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 15,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_recon::test_ordering_and_candidate_rules[r1-statement-order]",
+        "test_hidden_recon::test_ordering_and_candidate_rules[r3-statement-order]",
+        "test_hidden_recon::test_duplicate_signature_includes_date"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.389,
+      "stderr_tail": "         [\"s\"], \"z\", \"R3\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"z\", DAY, 100, \"own\", \"refund\", \"r\"), L(\"a\", DAY, 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"a\", \"R3\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), -100, \"r\"), S(\"z\", DAY, -100, \"r\")],\n         [L(\"l\", DAY, 100, \"own\", \"refund\", \"r\")], [\"z\"], \"l\", \"R3\", {\"a\": \"no_match\"}),\n    ], ids=[\"r1-booking-date\", \"r1-id\", \"r1-distance\", \"r1-statement-order\", \"r1-payments-only\",\n            \"r2-booking-date\", \"r2-id\", \"r2-signed-lines\", \"r3-booking-date\", \"r3-id\", \"r3-statement-order\"])\n    def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):\n        before = list(statement), list(ledger)\n        result = reconcile(statement, ledger)\n        assert pairs(result) == {match(ss, [lid], rule)}\n>       assert result.unmatched_statement == reasons\nE       AssertionError: assert {'a': 'duplicate'} == {'a': 'no_match'}\nE         \nE         Differing items:\nE         {'a': 'duplicate'} != {'a': 'no_match'}\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:115: AssertionError\n___________________ test_duplicate_signature_includes_date ____________________\n\n    def test_duplicate_signature_includes_date():\n        statement = [S(\"a\", DAY, 100, \"r\"), S(\"b\", DAY + timedelta(days=1), 100, \"r\")]\n        result = reconcile(statement, [L(\"l\", DAY, 100, \"r\")])\n        assert pairs(result) == {match([\"a\"], [\"l\"], \"R1\")}\n>       assert result.unmatched_statement == {\"b\": \"no_match\"}\nE       AssertionError: assert {'b': 'duplicate'} == {'b': 'no_match'}\nE         \nE         Differing items:\nE         {'b': 'duplicate'} != {'b': 'no_match'}\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:125: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_aas7868v\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r1-statement-order]\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r3-statement-order]\nFAILED ..\\grader\\test_hidden_recon.py::test_duplicate_signature_includes_date\n3 failed, 15 passed in 0.61s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Marks different-date statements duplicate, violating the R4 signature including value_date."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "r2_excludes_negative",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 17,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_recon::test_ordering_and_candidate_rules[r2-signed-lines]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.568,
+      "stderr_tail": "        ([S(\"s\", DAY, 100, \"r\")], [L(\"a\", DAY - timedelta(days=3), 100, \"r\"), L(\"z\", DAY, 100, \"r\")],\n         [\"s\"], \"z\", \"R1\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), 100, \"r\"), S(\"z\", DAY, 100, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"z\"], \"l\", \"R1\", {\"a\": \"no_match\"}),\n        ([S(\"s\", DAY, 100, \"r\")],\n         [L(\"a\", DAY, 100, \"r\", \"refund\", \"r\"), L(\"z\", DAY + timedelta(days=1), 100, \"r\")],\n         [\"s\"], \"z\", \"R1\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"a\", DAY + timedelta(days=1), 100, \"r\"), L(\"z\", DAY, 100, \"r\")],\n         [\"x\", \"y\"], \"z\", \"R2\", {}),\n        ([S(\"x\", DAY, 40, \"r\"), S(\"y\", DAY, 60, \"r\")],\n         [L(\"z\", DAY, 100, \"r\"), L(\"a\", DAY, 100, \"r\")], [\"x\", \"y\"], \"a\", \"R2\", {}),\n        ([S(\"x\", DAY, 140, \"r\"), S(\"y\", DAY, -40, \"r\")],\n         [L(\"l\", DAY, 100, \"r\")], [\"x\", \"y\"], \"l\", \"R2\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"a\", DAY + timedelta(days=20), 100, \"own\", \"refund\", \"r\"),\n          L(\"z\", DAY - timedelta(days=20), 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"z\", \"R3\", {}),\n        ([S(\"s\", DAY, -100, \"r\")],\n         [L(\"z\", DAY, 100, \"own\", \"refund\", \"r\"), L(\"a\", DAY, 100, \"other\", \"refund\", \"r\")],\n         [\"s\"], \"a\", \"R3\", {}),\n        ([S(\"a\", DAY + timedelta(days=1), -100, \"r\"), S(\"z\", DAY, -100, \"r\")],\n         [L(\"l\", DAY, 100, \"own\", \"refund\", \"r\")], [\"z\"], \"l\", \"R3\", {\"a\": \"no_match\"}),\n    ], ids=[\"r1-booking-date\", \"r1-id\", \"r1-distance\", \"r1-statement-order\", \"r1-payments-only\",\n            \"r2-booking-date\", \"r2-id\", \"r2-signed-lines\", \"r3-booking-date\", \"r3-id\", \"r3-statement-order\"])\n    def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):\n        before = list(statement), list(ledger)\n        result = reconcile(statement, ledger)\n>       assert pairs(result) == {match(ss, [lid], rule)}\nE       AssertionError: assert set() == {(frozenset({...{'l'}), 'R2')}\nE         \nE         Extra items in the right set:\nE         (frozenset({'x', 'y'}), frozenset({'l'}), 'R2')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_recon.py:114: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_enaj4vxw\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_recon.py::test_ordering_and_candidate_rules[r2-signed-lines]\n1 failed, 17 passed in 0.68s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Drops negative split lines, violating the R2 signed sum of all eligible lines rule."
+    },
+    {
+      "task": "04_ledger_reconciliation",
+      "variant": "alt_cleanroom",
+      "kind": "alt_valid",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "PASS",
+      "outcome": "PASS",
+      "verdict": "ok",
+      "tests": {
+        "total": 18,
+        "passed": 18,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "must_fail_hit": [],
+      "duration_s": 1.315,
+      "stderr_tail": "..................                                                       [100%]\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_ve9syd69\\junit.xml -\n18 passed in 0.57s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "accept",
+      "description": "Uses independent pools and complete passes derived from the ticket."
+    },
+    {
+      "task": "05_double_entry",
+      "variant": "trial_excludes_reversals",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 17,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_ledger::test_reverse_once",
+        "test_hidden_ledger::test_concurrent_reversals_once"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 22.656,
+      "stderr_tail": "        s, accounts = setup(database_url)\n        a, b = accounts[\"CAD\"][:2]\n        services = [LedgerService(database_url) for _ in range(8)]\n        with ThreadPoolExecutor(max_workers=8) as pool:\n            for _ in range(3):\n                before = s.trial_balance()\n                txns = [s.post([Line(a, \"debit\", 100), Line(b, \"credit\", 100)], \"concurrent sale\") for _ in range(8)]\n                barrier = threading.Barrier(8, timeout=15)\n    \n                def reverse_all(index):\n                    barrier.wait()\n                    results = []\n                    for txn in txns:\n                        try:\n                            results.append(services[index].reverse(txn, \"concurrent undo\"))\n                        except AlreadyReversed:\n                            results.append(None)\n                    return results\n    \n                results = list(pool.map(reverse_all, range(8)))\n                for position, txn in enumerate(txns):\n                    ids = [value[position] for value in results if value[position] is not None]\n                    assert len(ids) == 1 and type(ids[0]) is int and ids[0] != txn\n                assert s.balance(a) == s.balance(b) == 0\n>               assert s.trial_balance() == {c: (d + (200 * len(txns) if c == \"CAD\" else 0),\n                                                 cr + (200 * len(txns) if c == \"CAD\" else 0))\n                                            for c, (d, cr) in before.items()}\nE               AssertionError: assert {'CAD': (1133...': (123, 123)} == {'CAD': (1933...': (123, 123)}\nE                 \nE                 Omitting 1 identical items, use -vv to show\nE                 Differing items:\nE                 {'CAD': (1133, 1133)} != {'CAD': (1933, 1933)}\nE                 Use -v to get more diff\n\n..\\grader\\test_hidden_ledger.py:165: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_tok269pj\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_ledger.py::test_reverse_once - AssertionError: a...\nFAILED ..\\grader\\test_hidden_ledger.py::test_concurrent_reversals_once - Asse...\n2 failed, 17 passed in 21.54s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Excludes reversal lines from turnover, violating trial_balance totals including reversals."
+    },
+    {
+      "task": "05_double_entry",
+      "variant": "reverse_without_row_lock",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 18,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_ledger::test_concurrent_reversals_once"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 22.19,
+      "stderr_tail": ".................F.                                                      [100%]\n================================== FAILURES ===================================\n_______________________ test_concurrent_reversals_once ________________________\n\ndatabase_url = 'user=bcp_05_double_entry__reverse_without_row_lock__860_u dbname=bcp_05_double_entry__reverse_without_row_lock__860144e0bbcd host=localhost port=54329 password=2dQ7DDMbcPZAQpO7gt8yuI_E'\n\n    def test_concurrent_reversals_once(database_url):\n        # Each race (one transaction reversed by 8 callers at once) is probabilistic for a missing row lock, so\n        # every round races several transactions: 3 rounds x 8 races give a miss probability below 1e-4.\n        s, accounts = setup(database_url)\n        a, b = accounts[\"CAD\"][:2]\n        services = [LedgerService(database_url) for _ in range(8)]\n        with ThreadPoolExecutor(max_workers=8) as pool:\n            for _ in range(3):\n                before = s.trial_balance()\n                txns = [s.post([Line(a, \"debit\", 100), Line(b, \"credit\", 100)], \"concurrent sale\") for _ in range(8)]\n                barrier = threading.Barrier(8, timeout=15)\n    \n                def reverse_all(index):\n                    barrier.wait()\n                    results = []\n                    for txn in txns:\n                        try:\n                            results.append(services[index].reverse(txn, \"concurrent undo\"))\n                        except AlreadyReversed:\n                            results.append(None)\n                    return results\n    \n                results = list(pool.map(reverse_all, range(8)))\n                for position, txn in enumerate(txns):\n                    ids = [value[position] for value in results if value[position] is not None]\n>                   assert len(ids) == 1 and type(ids[0]) is int and ids[0] != txn\nE                   assert (2 == 1)\nE                    +  where 2 = len([15, 16])\n\n..\\grader\\test_hidden_ledger.py:163: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_z3lfn7a1\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_ledger.py::test_concurrent_reversals_once - asse...\n1 failed, 18 passed in 21.09s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Checks and reverses without serialization, violating at-most-once reversal under concurrency."
+    },
+    {
+      "task": "05_double_entry",
+      "variant": "account_currency_overwrite",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 17,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_ledger::test_create_account_idempotence_and_currency_mismatch",
+        "test_hidden_ledger.TestJournal::runTest"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 13.473,
+      "stderr_tail": "             ^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'ledger.models.LedgerError'>\n\n..\\grader\\test_hidden_ledger.py:115: Failed\n_____________________________ TestJournal.runTest _____________________________\n\nself = <hypothesis.stateful.JournalMachine.TestCase testMethod=runTest>\n\n    def runTest(self):\n>       run_state_machine_as_test(cls, settings=self.settings)\n\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\hypothesis\\stateful.py:507: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\hypothesis\\stateful.py:271: in run_state_machine_as_test\n    state_machine_test()\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\hypothesis\\stateful.py:122: in run_state_machine\n    @given(st.data())\n               ^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = JournalMachine({})\n\n    @invariant()\n    def balances_match_model(self):\n        for currency, codes in self.accounts.items():\n            assert sum(self.model[a] for a in codes) == 0, currency\n>       assert all(debit == credit for debit, credit in self.service.trial_balance().values())\nE       assert False\nE        +  where False = all(<generator object JournalMachine.balances_match_model.<locals>.<genexpr> at 0x000001D947988D60>)\nE       Failing test case: <state machine>\nE       state = JournalMachine()\nE       state.balances_match_model()\nE       state.teardown()\n\n..\\grader\\test_hidden_ledger.py:222: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_nz8xir97\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_ledger.py::test_create_account_idempotence_and_currency_mismatch\nFAILED ..\\grader\\test_hidden_ledger.py::TestJournal::runTest - assert False\n2 failed, 17 passed in 12.33s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Overwrites an existing account currency, violating rejection of re-creation with a different currency."
+    },
+    {
+      "task": "05_double_entry",
+      "variant": "account_unvalidated",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 16,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_ledger::test_create_account_validation[-CAD]",
+        "test_hidden_ledger::test_create_account_validation[new-XYZ]",
+        "test_hidden_ledger::test_create_account_validation[new-]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 23.862,
+      "stderr_tail": "E       Failed: DID NOT RAISE <class 'ledger.models.LedgerError'>\n\n..\\grader\\test_hidden_ledger.py:102: Failed\n___________________ test_create_account_validation[new-XYZ] ___________________\n\ndatabase_url = 'user=bcp_05_double_entry__account_unvalidated__fina_1e7_u dbname=bcp_05_double_entry__account_unvalidated__fina_1e78f9e61ac8 host=localhost port=54329 password=Iq5C8NpEvKB_QWbJ5mq5ETKU'\ncode = 'new', currency = 'XYZ'\n\n    @pytest.mark.parametrize(\"code,currency\", [(\"\", \"CAD\"), (\"new\", \"XYZ\"), (\"new\", \"\")])\n    def test_create_account_validation(database_url, code, currency):\n        s, _ = setup(database_url)\n        before = s.trial_balance()\n>       with pytest.raises(LedgerError):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'ledger.models.LedgerError'>\n\n..\\grader\\test_hidden_ledger.py:102: Failed\n____________________ test_create_account_validation[new-] _____________________\n\ndatabase_url = 'user=bcp_05_double_entry__account_unvalidated__fina_1e7_u dbname=bcp_05_double_entry__account_unvalidated__fina_1e78f9e61ac8 host=localhost port=54329 password=Iq5C8NpEvKB_QWbJ5mq5ETKU'\ncode = 'new', currency = ''\n\n    @pytest.mark.parametrize(\"code,currency\", [(\"\", \"CAD\"), (\"new\", \"XYZ\"), (\"new\", \"\")])\n    def test_create_account_validation(database_url, code, currency):\n        s, _ = setup(database_url)\n        before = s.trial_balance()\n        with pytest.raises(LedgerError):\n            s.create_account(code, currency)\n        assert s.trial_balance() == before\n>       with pytest.raises(UnknownAccount):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'ledger.models.UnknownAccount'>\n\n..\\grader\\test_hidden_ledger.py:105: Failed\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_vucjjh1q\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_ledger.py::test_create_account_validation[-CAD]\nFAILED ..\\grader\\test_hidden_ledger.py::test_create_account_validation[new-XYZ]\nFAILED ..\\grader\\test_hidden_ledger.py::test_create_account_validation[new-]\n3 failed, 16 passed in 22.82s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Accepts empty codes and unsupported currencies, violating create_account validation."
+    },
+    {
+      "task": "05_double_entry",
+      "variant": "accounts_before_amounts",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 17,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_ledger::test_post_validation_priority[lines1-InvalidAmount]",
+        "test_hidden_ledger::test_post_validation_priority[lines2-InvalidAmount]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 23.318,
+      "stderr_tail": "database_url = 'user=bcp_05_double_entry__accounts_before_amounts___ad4_u dbname=bcp_05_double_entry__accounts_before_amounts___ad4b0db43e5c host=localhost port=54329 password=BFjDaCcHRuxxwhyvNDwdiUhy'\nlines = [Line(account_code='absent', side='debit', amount_minor=True), Line(account_code='also_absent', side='credit', amount_minor=1)]\nerror = <class 'ledger.models.InvalidAmount'>\n\n    @pytest.mark.parametrize(\"lines,error\", [\n        ([Line(\"absent\", \"bad\", 0)], UnbalancedTransaction),\n        ([Line(\"absent\", \"debit\", 0), Line(\"also_absent\", \"credit\", 1)], InvalidAmount),\n        ([Line(\"absent\", \"debit\", True), Line(\"also_absent\", \"credit\", 1)], InvalidAmount),\n        ([Line(\"absent\", \"debit\", 1), Line(\"also_absent\", \"credit\", 2)], UnknownAccount),\n    ])\n    def test_post_validation_priority(database_url, lines, error):\n        s, _ = setup(database_url)\n        before = s.trial_balance()\n        with pytest.raises(error):\n>           s.post(lines, \"invalid on several grounds\")\n\n..\\grader\\test_hidden_ledger.py:134: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nledger\\service.py:55: in post\n    self._validate(conn, lines)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = <ledger.service.LedgerService object at 0x000002149FE7A150>\nconn = <psycopg.Connection [BAD] at 0x214a03c4140>\nlines = [Line(account_code='absent', side='debit', amount_minor=True), Line(account_code='also_absent', side='credit', amount_minor=1)]\n\n    def _validate(self, conn, lines):\n        if len(lines) < 2:\n            raise UnbalancedTransaction(\"at least two lines required\")\n        for line in lines:\n            if conn.execute(\"SELECT 1 FROM accounts WHERE code=%s\", (line.account_code,)).fetchone() is None:\n>               raise UnknownAccount(line.account_code)\nE               ledger.models.UnknownAccount: absent\n\nledger\\service.py:34: UnknownAccount\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_rxaq_4wd\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_ledger.py::test_post_validation_priority[lines1-InvalidAmount]\nFAILED ..\\grader\\test_hidden_ledger.py::test_post_validation_priority[lines2-InvalidAmount]\n2 failed, 17 passed in 22.19s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Checks account existence before line validity, violating amount/side-before-accounts error priority."
+    },
+    {
+      "task": "05_double_entry",
+      "variant": "trial_inner_join",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 17,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_ledger::test_reverse_once",
+        "test_hidden_ledger::test_multiple_currencies_and_persistence"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 23.856,
+      "stderr_tail": "    def test_reverse_once(database_url):\n        s, accounts = setup(database_url)\n        a, b = accounts[\"CAD\"][:2]\n        totals = s.trial_balance()\n        txn = s.post([Line(a, \"debit\", 100), Line(b, \"credit\", 100)], \"posted\")\n        reversal = s.reverse(txn, \"reverse\")\n        assert type(reversal) is int and reversal != txn\n        assert s.balance(a) == s.balance(b) == 0\n>       assert s.trial_balance() == {c: (d + (200 if c == \"CAD\" else 0),\n                                         cr + (200 if c == \"CAD\" else 0))\n                                    for c, (d, cr) in totals.items()}\nE       AssertionError: assert {'CAD': (200, 200)} == {}\nE         \nE         Left contains 1 more item:\nE         {'CAD': (200, 200)}\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_ledger.py:50: AssertionError\n__________________ test_multiple_currencies_and_persistence ___________________\n\ndatabase_url = 'user=bcp_05_double_entry__trial_inner_join__final___a16_u dbname=bcp_05_double_entry__trial_inner_join__final___a16c348ec3ba host=localhost port=54329 password=6UdLFiP9DPjbwuC2wLF50f82'\n\n    def test_multiple_currencies_and_persistence(database_url):\n        s, accounts = setup(database_url)\n        before = s.trial_balance()\n        lines = [Line(accounts[c][i], side, 123) for c in accounts for i, side in enumerate([\"debit\", \"credit\"])]\n        s.post(lines, \"multi\")\n        restarted = LedgerService(database_url)\n        after = restarted.trial_balance()\n        for c in accounts:\n>           assert after[c] == (before[c][0] + 123, before[c][1] + 123)\n                                ^^^^^^^^^\nE           KeyError: 'USD'\n\n..\\grader\\test_hidden_ledger.py:70: KeyError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_ldcppama\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_ledger.py::test_reverse_once - AssertionError: a...\nFAILED ..\\grader\\test_hidden_ledger.py::test_multiple_currencies_and_persistence\n2 failed, 17 passed in 22.88s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Omits currencies without postings, violating the (0,0) entry for every created account currency."
+    },
+    {
+      "task": "05_double_entry",
+      "variant": "alt_running_totals",
+      "kind": "alt_valid",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "PASS",
+      "outcome": "PASS",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 19,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "must_fail_hit": [],
+      "duration_s": 24.34,
+      "stderr_tail": "...................                                                      [100%]\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_jm0jcsic\\junit.xml -\n19 passed in 23.30s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "accept",
+      "description": "Maintains denormalized account and currency totals and enforces one reversal through a unique index."
+    },
+    {
+      "task": "06_available_balance",
+      "variant": "closed_before_amount_validation",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 12,
+        "passed": 9,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[voided]",
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[captured]",
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[expired]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 8.503,
+      "stderr_tail": "E               assert 409 == 422\nE                +  where 409 = <Response [409 Conflict]>.status_code\n\n..\\grader\\test_hidden_holds.py:102: AssertionError\n________ test_capture_amount_validation_before_closed_status[expired] _________\n\ntmp_path = WindowsPath('C:/Users/User/AppData/Local/Temp/bcp/run_r6sd5o1p/pytest-tmp/test_capture_amount_validation3')\nstate = 'expired'\n\n    @pytest.mark.parametrize(\"state\", [\"active\", \"voided\", \"captured\", \"expired\"])\n    def test_capture_amount_validation_before_closed_status(tmp_path, state):\n        clock = Clock()\n        with TestClient(create_app(tmp_path / \"db\", clock)) as client:\n            id = authorize(client, 100).json()[\"auth_id\"]\n            if state in {\"voided\", \"captured\"}:\n                action = \"void\" if state == \"voided\" else \"capture\"\n                args = {} if action == \"void\" else {\"json\": {\"amount_minor\": 1}}\n                assert client.post(f\"/authorizations/{id}/{action}\", **args).status_code == 200\n            elif state == \"expired\":\n                clock.at += timedelta(days=7)\n            before = balance(client)\n            for body in [{\"amount_minor\": value} for value in (0, -1, True, 1.5, \"1\", None)] + [{}, [], {\"extra\": 1}]:\n                result = client.post(f\"/authorizations/{id}/capture\", json=body)\n>               assert result.status_code == 422\nE               assert 409 == 422\nE                +  where 409 = <Response [409 Conflict]>.status_code\n\n..\\grader\\test_hidden_holds.py:102: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_r6sd5o1p\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[voided]\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[captured]\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[expired]\n3 failed, 9 passed, 1 warning in 7.84s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Checks closed status before capture amount validity, violating the explicit amount-before-closed priority."
+    },
+    {
+      "task": "06_available_balance",
+      "variant": "bool_amount_accepted",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 12,
+        "passed": 7,
+        "failed": 5,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[active]",
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[voided]",
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[captured]",
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[expired]",
+        "test_hidden_holds::test_authorization_validation_and_unknown_ids"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 7.748,
+      "stderr_tail": "                action = \"void\" if state == \"voided\" else \"capture\"\n                args = {} if action == \"void\" else {\"json\": {\"amount_minor\": 1}}\n                assert client.post(f\"/authorizations/{id}/{action}\", **args).status_code == 200\n            elif state == \"expired\":\n                clock.at += timedelta(days=7)\n            before = balance(client)\n            for body in [{\"amount_minor\": value} for value in (0, -1, True, 1.5, \"1\", None)] + [{}, [], {\"extra\": 1}]:\n                result = client.post(f\"/authorizations/{id}/capture\", json=body)\n>               assert result.status_code == 422\nE               assert 409 == 422\nE                +  where 409 = <Response [409 Conflict]>.status_code\n\n..\\grader\\test_hidden_holds.py:102: AssertionError\n________________ test_authorization_validation_and_unknown_ids ________________\n\ntmp_path = WindowsPath('C:/Users/User/AppData/Local/Temp/bcp/run_y16qd01d/pytest-tmp/test_authorization_validation_0')\n\n    def test_authorization_validation_and_unknown_ids(tmp_path):\n        with TestClient(create_app(tmp_path / \"db\", Clock())) as client:\n            for value in (0, -1, True, 1.5, \"100\"):\n                result = authorize(client, value)\n>               assert result.status_code == 422 and result.json()[\"error\"][\"code\"] == \"invalid_amount\"\nE               assert (201 == 422)\nE                +  where 201 = <Response [201 Created]>.status_code\n\n..\\grader\\test_hidden_holds.py:117: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_y16qd01d\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[active]\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[voided]\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[captured]\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[expired]\nFAILED ..\\grader\\test_hidden_holds.py::test_authorization_validation_and_unknown_ids\n5 failed, 7 passed, 1 warning in 6.83s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Treats bool as int, violating positive integer amounts never bool."
+    },
+    {
+      "task": "06_available_balance",
+      "variant": "unknown_auth_is_409",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 12,
+        "passed": 11,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_holds::test_authorization_validation_and_unknown_ids"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 7.342,
+      "stderr_tail": ".........F..                                                             [100%]\n================================== FAILURES ===================================\n________________ test_authorization_validation_and_unknown_ids ________________\n\ntmp_path = WindowsPath('C:/Users/User/AppData/Local/Temp/bcp/run_0wd4w992/pytest-tmp/test_authorization_validation_0')\n\n    def test_authorization_validation_and_unknown_ids(tmp_path):\n        with TestClient(create_app(tmp_path / \"db\", Clock())) as client:\n            for value in (0, -1, True, 1.5, \"100\"):\n                result = authorize(client, value)\n                assert result.status_code == 422 and result.json()[\"error\"][\"code\"] == \"invalid_amount\"\n            for path, args in [\n                (\"/accounts/absent/authorizations\", {\"json\": {\"amount_minor\": 1}}),\n                (\"/authorizations/absent/void\", {}),\n                (\"/authorizations/absent/capture\", {\"json\": {\"amount_minor\": 1}}),\n            ]:\n                result = client.post(path, **args)\n>               assert result.status_code == 404 and result.json()[\"error\"][\"code\"] == \"not_found\"\nE               assert (409 == 404)\nE                +  where 409 = <Response [409 Conflict]>.status_code\n\n..\\grader\\test_hidden_holds.py:124: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_0wd4w992\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_holds.py::test_authorization_validation_and_unknown_ids\n1 failed, 11 passed, 1 warning in 6.52s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Reports unknown authorizations as closed, violating the 404 not_found rule."
+    },
+    {
+      "task": "06_available_balance",
+      "variant": "alt_iso_text",
+      "kind": "alt_valid",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "PASS",
+      "outcome": "PASS",
+      "verdict": "ok",
+      "tests": {
+        "total": 12,
+        "passed": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "must_fail_hit": [],
+      "duration_s": 6.427,
+      "stderr_tail": "............                                                             [100%]\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_1eao5vx1\\junit.xml -\n12 passed, 1 warning in 5.79s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "accept",
+      "description": "Stores ISO timestamp text and compares datetimes through the declared clock interface."
+    },
+    {
+      "task": "06_available_balance",
+      "variant": "exceeds_before_closed",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 12,
+        "passed": 8,
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[voided]",
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[captured]",
+        "test_hidden_holds::test_capture_amount_validation_before_closed_status[expired]",
+        "test_hidden_holds::test_random_operation_model"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 2.061,
+      "stderr_tail": "                    return sum(h[0] for h in holds.values() if not h[2] and clock.at < h[1] + timedelta(days=7))\n                for operation, value, index in operations:\n                    if operation == \"advance\":\n                        clock.at += timedelta(hours=value % 200)\n                    elif operation == \"authorize\":\n                        result = authorize(client, value, account)\n                        allowed = value <= posted - active() + overdraft\n                        assert result.status_code == (201 if allowed else 402)\n                        if allowed:\n                            id = result.json()[\"auth_id\"]\n                            assert id and id not in holds\n                            holds[id] = [value, clock.at, False]\n                    elif holds:\n                        id = list(holds)[index % len(holds)]\n                        held, at, closed = holds[id]\n                        args = {\"json\": {\"amount_minor\": value}} if operation == \"capture\" else {}\n                        result = client.post(f\"/authorizations/{id}/{operation}\", **args)\n                        if closed or clock.at >= at + timedelta(days=7):\n>                           assert result.status_code == 409\nE                           assert 422 == 409\nE                            +  where 422 = <Response [422 Unprocessable Entity]>.status_code\nE                           Failing explicit example: test_random_operation_model(\nE                               flex=False,\nE                               operations=[('authorize', 100, 0), ('void', 1, 0), ('capture', 101, 0)],\nE                           )\n\n..\\grader\\test_hidden_holds.py:168: AssertionError\n============================== warnings summary ===============================\n..\\..\\..\\..\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_pa41yz40\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[voided]\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[captured]\nFAILED ..\\grader\\test_hidden_holds.py::test_capture_amount_validation_before_closed_status[expired]\nFAILED ..\\grader\\test_hidden_holds.py::test_random_operation_model - assert 4...\n4 failed, 8 passed, 1 warning in 1.52s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Checks overcapture before closed status, violating PROBLEM.md lines 21-24 requiring closed/expired status before overcapture (original review label: correct; F-407 false_fail clarification)."
+    },
+    {
+      "task": "07_statement_periods",
+      "variant": "no_id_tiebreak",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 18,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_periods::test_naive_and_instant_order"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 0.777,
+      "stderr_tail": "......F............                                                      [100%]\n================================== FAILURES ===================================\n________________________ test_naive_and_instant_order _________________________\n\n    def test_naive_and_instant_order():\n        with pytest.raises(ValueError):\n            select([Txn(\"naive\", datetime(2020, 1, 1))], \"UTC\", 2026, 1)\n        a = datetime.fromisoformat(\"2026-01-15T09:00:00+05:30\")\n        b = datetime.fromisoformat(\"2026-01-15T03:30:00+00:00\")\n>       assert select([Txn(\"b\", a), Txn(\"a\", b)], \"UTC\", 2026, 1) == [\"a\", \"b\"]\nE       AssertionError: assert ['b', 'a'] == ['a', 'b']\nE         \nE         At index 0 diff: 'b' != 'a'\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_periods.py:41: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_stz886om\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_periods.py::test_naive_and_instant_order - Asser...\n1 failed, 18 passed in 0.33s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Sorts tied timestamps by input order, violating the lexicographic id tie-break."
+    },
+    {
+      "task": "07_statement_periods",
+      "variant": "validates_only_selected",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 17,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_periods::test_naive_and_instant_order",
+        "test_hidden_periods::test_non_none_tzinfo_with_no_offset_is_naive"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 0.779,
+      "stderr_tail": "......FF...........                                                      [100%]\n================================== FAILURES ===================================\n________________________ test_naive_and_instant_order _________________________\n\n    def test_naive_and_instant_order():\n>       with pytest.raises(ValueError):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'ValueError'>\n\n..\\grader\\test_hidden_periods.py:37: Failed\n________________ test_non_none_tzinfo_with_no_offset_is_naive _________________\n\n    def test_non_none_tzinfo_with_no_offset_is_naive():\n        class NoOffset(tzinfo):\n            def utcoffset(self, dt):\n                return None\n    \n        for year in (2020, 2026):\n>           with pytest.raises(ValueError):\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\nE           Failed: DID NOT RAISE <class 'ValueError'>\n\n..\\grader\\test_hidden_periods.py:50: Failed\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_3ht6ph69\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_periods.py::test_naive_and_instant_order - Faile...\nFAILED ..\\grader\\test_hidden_periods.py::test_non_none_tzinfo_with_no_offset_is_naive\n2 failed, 17 passed in 0.31s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Validates only selected timestamps, violating validation even outside the selected month."
+    },
+    {
+      "task": "07_statement_periods",
+      "variant": "tzinfo_only_aware_check",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 18,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_periods::test_non_none_tzinfo_with_no_offset_is_naive"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 0.764,
+      "stderr_tail": ".......F...........                                                      [100%]\n================================== FAILURES ===================================\n________________ test_non_none_tzinfo_with_no_offset_is_naive _________________\n\n    def test_non_none_tzinfo_with_no_offset_is_naive():\n        class NoOffset(tzinfo):\n            def utcoffset(self, dt):\n                return None\n    \n        for year in (2020, 2026):\n>           with pytest.raises(ValueError):\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\nE           Failed: DID NOT RAISE <class 'ValueError'>\n\n..\\grader\\test_hidden_periods.py:50: Failed\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_bxb5cvr8\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_periods.py::test_non_none_tzinfo_with_no_offset_is_naive\n1 failed, 18 passed in 0.29s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Checks only tzinfo presence, violating the requirement for a non-None utcoffset."
+    },
+    {
+      "task": "08_refund_limits",
+      "variant": "refund_check_then_write",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 8,
+        "passed": 7,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_refunds::test_concurrent_refunds_respect_budget"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 8.743,
+      "stderr_tail": "......F.                                                                 [100%]\n================================== FAILURES ===================================\n___________________ test_concurrent_refunds_respect_budget ____________________\n\ntmp_path = WindowsPath('C:/Users/User/AppData/Local/Temp/bcp/run_w7zy3irr/pytest-tmp/test_concurrent_refunds_respec0')\n\n    def test_concurrent_refunds_respect_budget(tmp_path):\n        path = tmp_path / \"db\"\n        services = [RefundService(path) for _ in range(8)]\n        with ThreadPoolExecutor(max_workers=8) as pool:\n            for _ in range(20):\n                s, pid = payment(path)\n                barrier = threading.Barrier(8, timeout=15)\n    \n                def refund(index):\n                    barrier.wait()\n                    try:\n                        return services[index].refund(pid, 100)\n                    except RefundExceedsCaptured:\n                        return None\n    \n                results = list(pool.map(refund, range(8)))\n                ids = [value for value in results if value is not None]\n>               assert len(ids) == 1 and type(ids[0]) is int and ids[0] > 0\nE               assert (6 == 1)\nE                +  where 6 = len([4, 1, 5, 6, 3, 2])\n\n..\\grader\\test_hidden_refunds.py:109: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_w7zy3irr\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_refunds.py::test_concurrent_refunds_respect_budget\n1 failed, 7 passed in 8.24s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Checks refund budget and writes in separate transactions, violating atomic cumulative refund limits."
+    },
+    {
+      "task": "08_refund_limits",
+      "variant": "alt_conditional_update",
+      "kind": "alt_valid",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "PASS",
+      "outcome": "PASS",
+      "verdict": "ok",
+      "tests": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "must_fail_hit": [],
+      "duration_s": 11.059,
+      "stderr_tail": "........                                                                 [100%]\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_9umd73y1\\junit.xml -\n8 passed in 10.57s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "accept",
+      "description": "Atomically reserves refund budget with a conditional UPDATE instead of an explicit read lock."
+    },
+    {
+      "task": "09_tiered_fees",
+      "variant": "schedule_unvalidated",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 13,
+        "failed": 6,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_fees::test_invalid_schedule_raises_for_any_amount[tiers1-0-100]",
+        "test_hidden_fees::test_invalid_schedule_raises_for_any_amount[tiers2-0-100]",
+        "test_hidden_fees::test_invalid_schedule_raises_for_any_amount[tiers3-0-100]",
+        "test_hidden_fees::test_invalid_schedule_raises_for_any_amount[tiers4-0-100]",
+        "test_hidden_fees::test_invalid_schedule_raises_for_any_amount[tiers5-20-10]",
+        "test_hidden_fees::test_schedule_revalidated_after_tier_list_mutation"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 0.866,
+      "stderr_tail": "    @pytest.mark.parametrize(\"tiers,floor,cap\", [\n        ([], 0, 100),\n        ([Tier(1000, 1, 0)], 0, 100),\n        ([Tier(1000, 1, 0), Tier(1000, 2, 0), Tier(None, 3, 0)], 0, 100),\n        ([Tier(2000, 1, 0), Tier(1000, 2, 0), Tier(None, 3, 0)], 0, 100),\n        ([Tier(None, 1, 0), Tier(None, 2, 0)], 0, 100),\n        ([Tier(None, 1, 0)], 20, 10),\n    ])\n    def test_invalid_schedule_raises_for_any_amount(tiers, floor, cap):\n        # Bypass construction so only compute_fee can raise; the public dataclass\n        # constructor already rejects these values and used to make this test vacuous.\n        schedule = object.__new__(Schedule)\n        for name, value in [(\"tiers\", tiers), (\"min_fee_minor\", floor), (\"max_fee_minor\", cap)]:\n            object.__setattr__(schedule, name, value)\n        for amount in (0, 1, 5000):\n>           with pytest.raises(ValueError):\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\nE           Failed: DID NOT RAISE <class 'ValueError'>\n\n..\\grader\\test_hidden_fees.py:66: Failed\n_____________ test_schedule_revalidated_after_tier_list_mutation ______________\n\n    def test_schedule_revalidated_after_tier_list_mutation():\n        schedule = Schedule([Tier(None, 1, 0)], 0, 100)\n        assert compute_fee(1, schedule) == 0\n        schedule.tiers.append(Tier(None, 2, 0))\n>       with pytest.raises(ValueError):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE <class 'ValueError'>\n\n..\\grader\\test_hidden_fees.py:74: Failed\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_558o4jcr\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_schedule_raises_for_any_amount[tiers1-0-100]\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_schedule_raises_for_any_amount[tiers2-0-100]\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_schedule_raises_for_any_amount[tiers3-0-100]\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_schedule_raises_for_any_amount[tiers4-0-100]\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_schedule_raises_for_any_amount[tiers5-20-10]\nFAILED ..\\grader\\test_hidden_fees.py::test_schedule_revalidated_after_tier_list_mutation\n6 failed, 13 passed in 0.28s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Does not validate schedules inside compute_fee, violating validation on every call whatever the amount."
+    },
+    {
+      "task": "09_tiered_fees",
+      "variant": "amount_type_unchecked",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 19,
+        "passed": 14,
+        "failed": 5,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_fees::test_invalid_amount_type[True]",
+        "test_hidden_fees::test_invalid_amount_type[False]",
+        "test_hidden_fees::test_invalid_amount_type[1.5]",
+        "test_hidden_fees::test_invalid_amount_type[1]",
+        "test_hidden_fees::test_invalid_amount_type[None]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.278,
+      "stderr_tail": "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\namount_minor = '1'\nschedule = Schedule(tiers=[Tier(up_to_minor=None, bps=1, fixed_minor=0)], min_fee_minor=0, max_fee_minor=100)\n\n    def compute_fee(amount_minor, schedule):\n>       if amount_minor < 0:\n           ^^^^^^^^^^^^^^^^\nE       TypeError: '<' not supported between instances of 'str' and 'int'\n\nfees\\schedule.py:33: TypeError\n_______________________ test_invalid_amount_type[None] ________________________\n\namount = None\n\n    @pytest.mark.parametrize(\"amount\", [True, False, 1.5, \"1\", None])\n    def test_invalid_amount_type(amount):\n        with pytest.raises(ValueError):\n>           compute_fee(amount, Schedule([Tier(None, 1, 0)], 0, 100))\n\n..\\grader\\test_hidden_fees.py:81: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\namount_minor = None\nschedule = Schedule(tiers=[Tier(up_to_minor=None, bps=1, fixed_minor=0)], min_fee_minor=0, max_fee_minor=100)\n\n    def compute_fee(amount_minor, schedule):\n>       if amount_minor < 0:\n           ^^^^^^^^^^^^^^^^\nE       TypeError: '<' not supported between instances of 'NoneType' and 'int'\n\nfees\\schedule.py:33: TypeError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_z0w45yob\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_amount_type[True] - Failed...\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_amount_type[False] - Faile...\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_amount_type[1.5] - Failed:...\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_amount_type[1] - TypeError...\nFAILED ..\\grader\\test_hidden_fees.py::test_invalid_amount_type[None] - TypeEr...\n5 failed, 14 passed in 0.44s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Accepts bool and float amounts, violating nonnegative integer amounts never bool."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "zero_amount_accepted",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 38,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_field_formats[1-13-25-000000000000-invalid_detail]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.13,
+      "stderr_tail": "___________ test_field_formats[1-13-25-000000000000-invalid_detail] ___________\n\nrow = 1, start = 13, end = 25, value = b'000000000000', code = 'invalid_detail'\n\n    @pytest.mark.parametrize(\"row,start,end,value,code\", [\n        (0, 1, 13, b\"synthetic001\", \"invalid_header\"),\n        (0, 1, 13, b\"SYNTHETIC00!\", \"invalid_header\"),\n        (0, 13, 21, b\"20260230\", \"invalid_header\"),\n        (0, 21, 24, b\"XYZ\", \"invalid_header\"),\n        (0, 24, 25, b\"X\", \"invalid_header\"),\n        (1, 1, 13, b\"00000000012X\", \"invalid_detail\"),\n        (1, 13, 25, b\"000000000000\", \"invalid_detail\"),\n        (1, 13, 25, b\"00000000000X\", \"invalid_detail\"),\n        (1, 25, 45, b\" \" * 20, \"invalid_detail\"),\n        (1, 45, 46, b\"X\", \"invalid_detail\"),\n        (2, 1, 7, b\"00000X\", \"invalid_trailer\"),\n        (2, 7, 22, b\"00000000000000X\", \"invalid_trailer\"),\n        (2, 22, 32, b\"000000000X\", \"invalid_trailer\"),\n        (2, 32, 33, b\"X\", \"invalid_trailer\"),\n    ])\n    def test_field_formats(row, start, end, value, code):\n        rows = render(fixture()).splitlines()\n        rows[row] = rows[row][:start] + value + rows[row][end:]\n        result = parse(b\"\\n\".join(rows))\n        expected = [(row + 1, code)]\n        if row == 1:\n            expected += [(3, \"control_total_mismatch\"), (3, \"hash_total_mismatch\")]\n        assert not result.accepted and result.payments == []\n>       assert errors(result) == expected\nE       AssertionError: assert [(3, 'control...al_mismatch')] == [(2, 'invalid...al_mismatch')]\nE         \nE         At index 0 diff: (3, 'control_total_mismatch') != (2, 'invalid_detail')\nE         Right contains 2 more items, first extra item: (3, 'control_total_mismatch')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_batch.py:112: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_eid9jfhl\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_field_formats[1-13-25-000000000000-invalid_detail]\n1 failed, 38 passed in 0.57s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Accepts zero detail amounts, violating the positive minor-unit amount field."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "blank_reference_accepted",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 38,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_field_formats[1-25-45-                    -invalid_detail]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.161,
+      "stderr_tail": ".................F.....................                                  [100%]\n================================== FAILURES ===================================\n_______ test_field_formats[1-25-45-                    -invalid_detail] _______\n\nrow = 1, start = 25, end = 45, value = b'                    '\ncode = 'invalid_detail'\n\n    @pytest.mark.parametrize(\"row,start,end,value,code\", [\n        (0, 1, 13, b\"synthetic001\", \"invalid_header\"),\n        (0, 1, 13, b\"SYNTHETIC00!\", \"invalid_header\"),\n        (0, 13, 21, b\"20260230\", \"invalid_header\"),\n        (0, 21, 24, b\"XYZ\", \"invalid_header\"),\n        (0, 24, 25, b\"X\", \"invalid_header\"),\n        (1, 1, 13, b\"00000000012X\", \"invalid_detail\"),\n        (1, 13, 25, b\"000000000000\", \"invalid_detail\"),\n        (1, 13, 25, b\"00000000000X\", \"invalid_detail\"),\n        (1, 25, 45, b\" \" * 20, \"invalid_detail\"),\n        (1, 45, 46, b\"X\", \"invalid_detail\"),\n        (2, 1, 7, b\"00000X\", \"invalid_trailer\"),\n        (2, 7, 22, b\"00000000000000X\", \"invalid_trailer\"),\n        (2, 22, 32, b\"000000000X\", \"invalid_trailer\"),\n        (2, 32, 33, b\"X\", \"invalid_trailer\"),\n    ])\n    def test_field_formats(row, start, end, value, code):\n        rows = render(fixture()).splitlines()\n        rows[row] = rows[row][:start] + value + rows[row][end:]\n        result = parse(b\"\\n\".join(rows))\n        expected = [(row + 1, code)]\n        if row == 1:\n            expected += [(3, \"control_total_mismatch\"), (3, \"hash_total_mismatch\")]\n>       assert not result.accepted and result.payments == []\nE       AssertionError: assert (not True)\nE        +  where True = BatchResult(accepted=True, payments=[Payment(payee_account='000000000123', amount_minor=100, reference='')], errors=[]).accepted\n\n..\\grader\\test_hidden_batch.py:111: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_8qe7fuu4\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_field_formats[1-25-45-                    -invalid_detail]\n1 failed, 38 passed in 0.64s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Accepts blank references, violating the nonblank detail reference field."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "header_currency_any_alpha",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 38,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_field_formats[0-21-24-XYZ-invalid_header]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.299,
+      "stderr_tail": "............F..........................                                  [100%]\n================================== FAILURES ===================================\n_______________ test_field_formats[0-21-24-XYZ-invalid_header] ________________\n\nrow = 0, start = 21, end = 24, value = b'XYZ', code = 'invalid_header'\n\n    @pytest.mark.parametrize(\"row,start,end,value,code\", [\n        (0, 1, 13, b\"synthetic001\", \"invalid_header\"),\n        (0, 1, 13, b\"SYNTHETIC00!\", \"invalid_header\"),\n        (0, 13, 21, b\"20260230\", \"invalid_header\"),\n        (0, 21, 24, b\"XYZ\", \"invalid_header\"),\n        (0, 24, 25, b\"X\", \"invalid_header\"),\n        (1, 1, 13, b\"00000000012X\", \"invalid_detail\"),\n        (1, 13, 25, b\"000000000000\", \"invalid_detail\"),\n        (1, 13, 25, b\"00000000000X\", \"invalid_detail\"),\n        (1, 25, 45, b\" \" * 20, \"invalid_detail\"),\n        (1, 45, 46, b\"X\", \"invalid_detail\"),\n        (2, 1, 7, b\"00000X\", \"invalid_trailer\"),\n        (2, 7, 22, b\"00000000000000X\", \"invalid_trailer\"),\n        (2, 22, 32, b\"000000000X\", \"invalid_trailer\"),\n        (2, 32, 33, b\"X\", \"invalid_trailer\"),\n    ])\n    def test_field_formats(row, start, end, value, code):\n        rows = render(fixture()).splitlines()\n        rows[row] = rows[row][:start] + value + rows[row][end:]\n        result = parse(b\"\\n\".join(rows))\n        expected = [(row + 1, code)]\n        if row == 1:\n            expected += [(3, \"control_total_mismatch\"), (3, \"hash_total_mismatch\")]\n>       assert not result.accepted and result.payments == []\nE       AssertionError: assert (not True)\nE        +  where True = BatchResult(accepted=True, payments=[Payment(payee_account='000000000123', amount_minor=100, reference='reference')], errors=[]).accepted\n\n..\\grader\\test_hidden_batch.py:111: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_rno_rd4p\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_field_formats[0-21-24-XYZ-invalid_header]\n1 failed, 38 passed in 0.79s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Accepts arbitrary alphabetic currencies, violating the enumerated header currency set."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "lowercase_batch_id",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 38,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_field_formats[0-1-13-synthetic001-invalid_header]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.696,
+      "stderr_tail": ".........F.............................                                  [100%]\n================================== FAILURES ===================================\n___________ test_field_formats[0-1-13-synthetic001-invalid_header] ____________\n\nrow = 0, start = 1, end = 13, value = b'synthetic001', code = 'invalid_header'\n\n    @pytest.mark.parametrize(\"row,start,end,value,code\", [\n        (0, 1, 13, b\"synthetic001\", \"invalid_header\"),\n        (0, 1, 13, b\"SYNTHETIC00!\", \"invalid_header\"),\n        (0, 13, 21, b\"20260230\", \"invalid_header\"),\n        (0, 21, 24, b\"XYZ\", \"invalid_header\"),\n        (0, 24, 25, b\"X\", \"invalid_header\"),\n        (1, 1, 13, b\"00000000012X\", \"invalid_detail\"),\n        (1, 13, 25, b\"000000000000\", \"invalid_detail\"),\n        (1, 13, 25, b\"00000000000X\", \"invalid_detail\"),\n        (1, 25, 45, b\" \" * 20, \"invalid_detail\"),\n        (1, 45, 46, b\"X\", \"invalid_detail\"),\n        (2, 1, 7, b\"00000X\", \"invalid_trailer\"),\n        (2, 7, 22, b\"00000000000000X\", \"invalid_trailer\"),\n        (2, 22, 32, b\"000000000X\", \"invalid_trailer\"),\n        (2, 32, 33, b\"X\", \"invalid_trailer\"),\n    ])\n    def test_field_formats(row, start, end, value, code):\n        rows = render(fixture()).splitlines()\n        rows[row] = rows[row][:start] + value + rows[row][end:]\n        result = parse(b\"\\n\".join(rows))\n        expected = [(row + 1, code)]\n        if row == 1:\n            expected += [(3, \"control_total_mismatch\"), (3, \"hash_total_mismatch\")]\n>       assert not result.accepted and result.payments == []\nE       AssertionError: assert (not True)\nE        +  where True = BatchResult(accepted=True, payments=[Payment(payee_account='000000000123', amount_minor=100, reference='reference')], errors=[]).accepted\n\n..\\grader\\test_hidden_batch.py:111: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_v0rbzr1x\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_field_formats[0-1-13-synthetic001-invalid_header]\n1 failed, 38 passed in 0.93s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Accepts lowercase batch ids, violating uppercase ASCII letters/digits."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "bare_cr_is_terminator",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 37,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\rD000000000123000000000100reference                                              \\rT0000010000000000001000000000123                                                \\r-want0]",
+        "test_hidden_batch::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference                                              \\nT0000010000000000001000000000123                                                \\r-want1]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.745,
+      "stderr_tail": "            (1, \"invalid_encoding\"), (1, \"missing_trailer\")]),\n        (render(fixture()).rstrip(b\"\\n\") + b\"\\r\", [(3, \"invalid_encoding\")]),\n        (render(fixture()).replace(b\"\\n\", b\"\\n\", 1).splitlines()[0] + b\"\\n\\n\" +\n         b\"\\n\".join(render(fixture()).splitlines()[1:]), [(2, \"line_length\")]),\n        (b\"\\n\".join(render(fixture()).splitlines()[:2]), [\n            (2, \"missing_trailer\"), (2, \"record_order\")]),\n    ])\n    def test_terminator_blank_and_missing_trailer_errors(data, want):\n        result = parse(data)\n>       assert not result.accepted and result.payments == []\nE       AssertionError: assert (not True)\nE        +  where True = BatchResult(accepted=True, payments=[Payment(payee_account='000000000123', amount_minor=100, reference='reference')], errors=[]).accepted\n\n..\\grader\\test_hidden_batch.py:142: AssertionError\n_ test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference                                              \\nT0000010000000000001000000000123                                                \\r-want1] _\n\ndata = b'HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference...                                  \\nT0000010000000000001000000000123                                                \\r'\nwant = [(3, 'invalid_encoding')]\n\n    @pytest.mark.parametrize(\"data,want\", [\n        (render(fixture()).replace(b\"\\n\", b\"\\r\"), [\n            (1, \"invalid_encoding\"), (1, \"missing_trailer\")]),\n        (render(fixture()).rstrip(b\"\\n\") + b\"\\r\", [(3, \"invalid_encoding\")]),\n        (render(fixture()).replace(b\"\\n\", b\"\\n\", 1).splitlines()[0] + b\"\\n\\n\" +\n         b\"\\n\".join(render(fixture()).splitlines()[1:]), [(2, \"line_length\")]),\n        (b\"\\n\".join(render(fixture()).splitlines()[:2]), [\n            (2, \"missing_trailer\"), (2, \"record_order\")]),\n    ])\n    def test_terminator_blank_and_missing_trailer_errors(data, want):\n        result = parse(data)\n>       assert not result.accepted and result.payments == []\nE       AssertionError: assert (not True)\nE        +  where True = BatchResult(accepted=True, payments=[Payment(payee_account='000000000123', amount_minor=100, reference='reference')], errors=[]).accepted\n\n..\\grader\\test_hidden_batch.py:142: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_k8e29754\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\rD000000000123000000000100reference                                              \\rT0000010000000000001000000000123                                                \\r-want0]\nFAILED ..\\grader\\test_hidden_batch.py::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference                                              \\nT0000010000000000001000000000123                                                \\r-want1]\n2 failed, 37 passed in 0.92s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Treats bare CR as a terminator, violating invalid_encoding for bare CR."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "blank_lines_skipped",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 38,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\n\\nD000000000123000000000100reference                                              \\nT0000010000000000001000000000123                                                -want2]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.739,
+      "stderr_tail": "...................................F...                                  [100%]\n================================== FAILURES ===================================\n_ test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\n\\nD000000000123000000000100reference                                              \\nT0000010000000000001000000000123                                                -want2] _\n\ndata = b'HSYNTHETIC00120260101CAD                                                        \\n\\nD000000000123000000000100referen...                                    \\nT0000010000000000001000000000123                                                '\nwant = [(2, 'line_length')]\n\n    @pytest.mark.parametrize(\"data,want\", [\n        (render(fixture()).replace(b\"\\n\", b\"\\r\"), [\n            (1, \"invalid_encoding\"), (1, \"missing_trailer\")]),\n        (render(fixture()).rstrip(b\"\\n\") + b\"\\r\", [(3, \"invalid_encoding\")]),\n        (render(fixture()).replace(b\"\\n\", b\"\\n\", 1).splitlines()[0] + b\"\\n\\n\" +\n         b\"\\n\".join(render(fixture()).splitlines()[1:]), [(2, \"line_length\")]),\n        (b\"\\n\".join(render(fixture()).splitlines()[:2]), [\n            (2, \"missing_trailer\"), (2, \"record_order\")]),\n    ])\n    def test_terminator_blank_and_missing_trailer_errors(data, want):\n        result = parse(data)\n>       assert not result.accepted and result.payments == []\nE       AssertionError: assert (not True)\nE        +  where True = BatchResult(accepted=True, payments=[Payment(payee_account='000000000123', amount_minor=100, reference='reference')], errors=[]).accepted\n\n..\\grader\\test_hidden_batch.py:142: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_cfr1295q\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\n\\nD000000000123000000000100reference                                              \\nT0000010000000000001000000000123                                                -want2]\n1 failed, 38 passed in 0.94s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Skips interior blank lines, violating their treatment as invalid records."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "missing_trailer_after_last",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 37,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\rD000000000123000000000100reference                                              \\rT0000010000000000001000000000123                                                \\r-want0]",
+        "test_hidden_batch::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference                                              -want3]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.71,
+      "stderr_tail": "    ])\n    def test_terminator_blank_and_missing_trailer_errors(data, want):\n        result = parse(data)\n        assert not result.accepted and result.payments == []\n>       assert errors(result) == want\nE       AssertionError: assert [(1, 'invalid...ing_trailer')] == [(1, 'invalid...ing_trailer')]\nE         \nE         At index 1 diff: (2, 'missing_trailer') != (1, 'missing_trailer')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_batch.py:143: AssertionError\n_ test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference                                              -want3] _\n\ndata = b'HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference                                              '\nwant = [(2, 'missing_trailer'), (2, 'record_order')]\n\n    @pytest.mark.parametrize(\"data,want\", [\n        (render(fixture()).replace(b\"\\n\", b\"\\r\"), [\n            (1, \"invalid_encoding\"), (1, \"missing_trailer\")]),\n        (render(fixture()).rstrip(b\"\\n\") + b\"\\r\", [(3, \"invalid_encoding\")]),\n        (render(fixture()).replace(b\"\\n\", b\"\\n\", 1).splitlines()[0] + b\"\\n\\n\" +\n         b\"\\n\".join(render(fixture()).splitlines()[1:]), [(2, \"line_length\")]),\n        (b\"\\n\".join(render(fixture()).splitlines()[:2]), [\n            (2, \"missing_trailer\"), (2, \"record_order\")]),\n    ])\n    def test_terminator_blank_and_missing_trailer_errors(data, want):\n        result = parse(data)\n        assert not result.accepted and result.payments == []\n>       assert errors(result) == want\nE       AssertionError: assert [(2, 'record_...ing_trailer')] == [(2, 'missing...ecord_order')]\nE         \nE         At index 0 diff: (2, 'record_order') != (2, 'missing_trailer')\nE         Use -v to get more diff\n\n..\\grader\\test_hidden_batch.py:143: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_l5fen4f4\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\rD000000000123000000000100reference                                              \\rT0000010000000000001000000000123                                                \\r-want0]\nFAILED ..\\grader\\test_hidden_batch.py::test_terminator_blank_and_missing_trailer_errors[HSYNTHETIC00120260101CAD                                                        \\nD000000000123000000000100reference                                              -want3]\n2 failed, 37 passed in 0.98s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Reports a missing trailer beyond the last line, violating last-line error positioning."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "reference_strip_both",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 38,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_reference_preserves_leading_spaces"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.701,
+      "stderr_tail": ".....................................F.                                  [100%]\n================================== FAILURES ===================================\n___________________ test_reference_preserves_leading_spaces ___________________\n\n    def test_reference_preserves_leading_spaces():\n        payments = [Payment(\"000000000123\", 100, \"  reference\")]\n        result = parse(render(payments))\n>       assert result.accepted and result.errors == [] and result.payments == payments\nE       AssertionError: assert (True and [] == []\nE        +  where True = BatchResult(accepted=True, payments=[Payment(payee_account='000000000123', amount_minor=100, reference='reference')], errors=[]).accepted\nE         \nE         Use -v to get more diff and [Payment(paye...='reference')] == [Payment(paye...  reference')]\nE         \nE         At index 0 diff: Payment(payee_account='000000000123', amount_minor=100, reference='reference') != Payment(payee_account='000000000123', amount_minor=100, reference='  reference')\nE         Use -v to get more diff)\n\n..\\grader\\test_hidden_batch.py:149: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_pqc7uxu6\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_reference_preserves_leading_spaces\n1 failed, 38 passed in 0.93s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Strips leading reference spaces, violating right-padding-only removal."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "crlf_all_or_nothing",
+      "kind": "wrong",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "FAIL",
+      "outcome": "FAIL",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 36,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [
+        "test_hidden_batch::test_mixed_terminators_and_optional_final[]",
+        "test_hidden_batch::test_mixed_terminators_and_optional_final[\\n]",
+        "test_hidden_batch::test_mixed_terminators_and_optional_final[\\r\\n]"
+      ],
+      "must_fail_hit": [],
+      "duration_s": 1.73,
+      "stderr_tail": "        result = parse(data)\n>       assert result.accepted and result.payments == fixture() and result.errors == []\nE       AssertionError: assert (False)\nE        +  where False = BatchResult(accepted=False, payments=[], errors=[BatchError(line_no=2, code='invalid_encoding'), BatchError(line_no=2, code='missing_trailer'), BatchError(line_no=2, code='record_order')]).accepted\n\n..\\grader\\test_hidden_batch.py:128: AssertionError\n________________ test_mixed_terminators_and_optional_final[\\n] ________________\n\nfinal = b'\\n'\n\n    @pytest.mark.parametrize(\"final\", [b\"\", b\"\\n\", b\"\\r\\n\"])\n    def test_mixed_terminators_and_optional_final(final):\n        rows = render(fixture()).splitlines()\n        data = rows[0] + b\"\\r\\n\" + rows[1] + b\"\\n\" + rows[2] + final\n        result = parse(data)\n>       assert result.accepted and result.payments == fixture() and result.errors == []\nE       AssertionError: assert (False)\nE        +  where False = BatchResult(accepted=False, payments=[], errors=[BatchError(line_no=2, code='invalid_encoding'), BatchError(line_no=2, code='missing_trailer'), BatchError(line_no=2, code='record_order')]).accepted\n\n..\\grader\\test_hidden_batch.py:128: AssertionError\n_______________ test_mixed_terminators_and_optional_final[\\r\\n] _______________\n\nfinal = b'\\r\\n'\n\n    @pytest.mark.parametrize(\"final\", [b\"\", b\"\\n\", b\"\\r\\n\"])\n    def test_mixed_terminators_and_optional_final(final):\n        rows = render(fixture()).splitlines()\n        data = rows[0] + b\"\\r\\n\" + rows[1] + b\"\\n\" + rows[2] + final\n        result = parse(data)\n>       assert result.accepted and result.payments == fixture() and result.errors == []\nE       AssertionError: assert (False)\nE        +  where False = BatchResult(accepted=False, payments=[], errors=[BatchError(line_no=2, code='invalid_encoding'), BatchError(line_no=2, code='missing_trailer'), BatchError(line_no=2, code='record_order')]).accepted\n\n..\\grader\\test_hidden_batch.py:128: AssertionError\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_v83ly0pm\\junit.xml -\n=========================== short test summary info ===========================\nFAILED ..\\grader\\test_hidden_batch.py::test_mixed_terminators_and_optional_final[]\nFAILED ..\\grader\\test_hidden_batch.py::test_mixed_terminators_and_optional_final[\\n]\nFAILED ..\\grader\\test_hidden_batch.py::test_mixed_terminators_and_optional_final[\\r\\n]\n3 failed, 36 passed in 0.95s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "reject",
+      "description": "Rejects mixed LF/CRLF records, violating acceptance of mixed terminators."
+    },
+    {
+      "task": "10_batch_parser",
+      "variant": "alt_cleanroom",
+      "kind": "alt_valid",
+      "grader": "final",
+      "repeat": 0,
+      "expected": "PASS",
+      "outcome": "PASS",
+      "verdict": "ok",
+      "tests": {
+        "total": 39,
+        "passed": 39,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed_tests": [],
+      "must_fail_hit": [],
+      "duration_s": 1.608,
+      "stderr_tail": ".......................................                                  [100%]\n- generated xml file: C:\\Users\\User\\AppData\\Local\\Temp\\bcp\\run_oojj68ro\\junit.xml -\n39 passed in 0.82s",
+      "predicted_naive": "",
+      "extra": {},
+      "expect": "accept",
+      "description": "Uses an independently written rule-table parser with separate record and structure validation."
+    }
+  ],
+  "table": "task | wrong rejected / total | correct accepted / total\n01 | 5/5 | 1/1\n02 | 5/5 | 0/0\n03 | 4/4 | 0/0\n04 | 7/7 | 1/1\n05 | 6/6 | 1/1\n06 | 4/4 | 1/1\n07 | 3/3 | 0/0\n08 | 1/1 | 1/1\n09 | 2/2 | 0/0\n10 | 9/9 | 1/1\nTOTAL | 46/46 | 6/6\nWrong rejected: 46/46 (100.00%)\nCorrect accepted: 6/6 (100.00%)"
+}

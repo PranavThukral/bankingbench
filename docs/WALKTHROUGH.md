@@ -21,8 +21,8 @@ structurally different correct solution for every task. Zero flips across repeat
 parser dropped an earlier regression test, so the unmodified starter passed. Running the starter
 through every grader version caught it. And a review of my own starters found they were one line
 away from the answer, so I rebuilt them with the feature genuinely missing; that is what moved the
-naive false-pass count from 29 to 20. That's the kind of check that scales to a task factory."
+naive false-pass count from 29 to 20. Then an independent review wrote 44 more wrong solutions: my hardened graders caught only 6. Every miss broke a rule the ticket stated but no test checked. Closing those gaps is the lesson that scales to a task factory."
 
-**80–90 s — Harbor export.** *Show `dist/harbor/01_idempotent_payments/`.*
+**80–90 s — Harbor export.** *Run `python -m harness.export_harbor`, then show `dist/harbor/01_idempotent_payments/`.*
 "Every task exports to the Harbor format with an oracle check: the reference solution scores 1,
 the starter scores 0. Repo link in the description."
