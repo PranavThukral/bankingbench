@@ -85,6 +85,70 @@ def test_missing_and_order():
     assert (2, "record_order") in errors(result)
 
 
+@pytest.mark.parametrize("row,start,end,value,code", [
+    (0, 1, 13, b"synthetic001", "invalid_header"),
+    (0, 1, 13, b"SYNTHETIC00!", "invalid_header"),
+    (0, 13, 21, b"20260230", "invalid_header"),
+    (0, 21, 24, b"XYZ", "invalid_header"),
+    (0, 24, 25, b"X", "invalid_header"),
+    (1, 1, 13, b"00000000012X", "invalid_detail"),
+    (1, 13, 25, b"000000000000", "invalid_detail"),
+    (1, 13, 25, b"00000000000X", "invalid_detail"),
+    (1, 25, 45, b" " * 20, "invalid_detail"),
+    (1, 45, 46, b"X", "invalid_detail"),
+    (2, 1, 7, b"00000X", "invalid_trailer"),
+    (2, 7, 22, b"00000000000000X", "invalid_trailer"),
+    (2, 22, 32, b"000000000X", "invalid_trailer"),
+    (2, 32, 33, b"X", "invalid_trailer"),
+])
+def test_field_formats(row, start, end, value, code):
+    rows = render(fixture()).splitlines()
+    rows[row] = rows[row][:start] + value + rows[row][end:]
+    result = parse(b"\n".join(rows))
+    expected = [(row + 1, code)]
+    if row == 1:
+        expected += [(3, "control_total_mismatch"), (3, "hash_total_mismatch")]
+    assert not result.accepted and result.payments == []
+    assert errors(result) == expected
+
+
+@pytest.mark.parametrize("currency", ["CAD", "USD", "EUR", "GBP", "JPY", "KWD", "BHD"])
+def test_supported_currencies_preserve_minor_units(currency):
+    rows = render(fixture()).splitlines()
+    rows[0] = rows[0][:21] + currency.encode() + rows[0][24:]
+    result = parse(b"\n".join(rows))
+    assert result.accepted and result.errors == [] and result.payments == fixture()
+
+
+@pytest.mark.parametrize("final", [b"", b"\n", b"\r\n"])
+def test_mixed_terminators_and_optional_final(final):
+    rows = render(fixture()).splitlines()
+    data = rows[0] + b"\r\n" + rows[1] + b"\n" + rows[2] + final
+    result = parse(data)
+    assert result.accepted and result.payments == fixture() and result.errors == []
+
+
+@pytest.mark.parametrize("data,want", [
+    (render(fixture()).replace(b"\n", b"\r"), [
+        (1, "invalid_encoding"), (1, "missing_trailer")]),
+    (render(fixture()).rstrip(b"\n") + b"\r", [(3, "invalid_encoding")]),
+    (render(fixture()).replace(b"\n", b"\n", 1).splitlines()[0] + b"\n\n" +
+     b"\n".join(render(fixture()).splitlines()[1:]), [(2, "line_length")]),
+    (b"\n".join(render(fixture()).splitlines()[:2]), [
+        (2, "missing_trailer"), (2, "record_order")]),
+])
+def test_terminator_blank_and_missing_trailer_errors(data, want):
+    result = parse(data)
+    assert not result.accepted and result.payments == []
+    assert errors(result) == want
+
+
+def test_reference_preserves_leading_spaces():
+    payments = [Payment("000000000123", 100, "  reference")]
+    result = parse(render(payments))
+    assert result.accepted and result.errors == [] and result.payments == payments
+
+
 @given(cases=st.lists(st.tuples(st.integers(0, 999999999999), st.integers(1, 10**8),
                               st.text(alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", min_size=1, max_size=20)),
                      min_size=1, max_size=20), crlf=st.booleans())

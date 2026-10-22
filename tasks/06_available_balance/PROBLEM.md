@@ -18,7 +18,10 @@ All money is integer CAD minor units (2 dp). All amounts must be positive ints, 
 - Capturing/voiding an expired or already closed hold ->409 `authorization_closed`, no effect.
 - Invalid body/amount ->422 `invalid_amount`; unknown account/auth ->404 `not_found`.
   Errors are `{"error":{"code":"...","message":"..."}}`; message text is free.
-  Validate amount before closed status for capture. Void has no JSON body.
+  For capture, validate body/amount first, then existence, then closed/expired status, then
+  overcapture. Thus a positive overcapture on a closed/expired hold returns 409
+  `authorization_closed`; an invalid amount on that hold returns 422 `invalid_amount`.
+  Void has no JSON body.
 - Auth ids are nonempty unique strings; available may be negative within overdraft.
   State survives creating another app on the same file. Operations are atomic and per account.
 

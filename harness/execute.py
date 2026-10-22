@@ -12,7 +12,7 @@ from harness import config, db, junit, verdict, workspace
 from harness.model import RunResult
 
 
-def run_one(spec):
+def run_one(spec, overlay=None, pytest_args=()):
     started = time.perf_counter()
     task, variant = spec.task, spec.variant
     run_id = f"{task.id}__{variant.name}__{spec.grader}__r{spec.repeat}__{uuid.uuid4().hex[:8]}"
@@ -21,7 +21,8 @@ def run_one(spec):
     name, database_created = db.db_name(run_id), False
     outcome, counts, failures, tail = "ERROR", dict(total=0, passed=0, failed=0, errors=0, skipped=0), [], ""
     try:
-        overlay = None if variant.name == "starter" else task.path / "solutions" / variant.name
+        if overlay is None and variant.name != "starter":
+            overlay = task.path / "solutions" / variant.name
         work = workspace.materialize(task.path / "starter", overlay, run_dir / "work")
         workspace.copy_tree(task.path / "grader" / spec.grader, run_dir / "grader")
         workspace.copy_tree(config.ROOT / "graderlib", run_dir / "graderlib")
@@ -33,7 +34,7 @@ def run_one(spec):
         command = [sys.executable, "-m", "pytest", str(run_dir / "grader"), "-q", "-p", "no:cacheprovider",
                    f"--rootdir={run_dir / 'grader'}", f"--confcutdir={run_dir / 'grader'}",
                    f"--basetemp={run_dir / 'pytest-tmp'}",
-                   f"--junitxml={run_dir / 'junit.xml'}", "-o", "junit_family=xunit2"]
+                   f"--junitxml={run_dir / 'junit.xml'}", "-o", "junit_family=xunit2", *pytest_args]
         proc = subprocess.run(command, cwd=work, env=env, capture_output=True,
                               text=True, encoding="utf-8", errors="replace", timeout=task.timeout_seconds)
         tail = "\n".join((proc.stdout + proc.stderr).splitlines()[-40:])

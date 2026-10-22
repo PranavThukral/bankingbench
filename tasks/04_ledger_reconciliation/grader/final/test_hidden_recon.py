@@ -1,6 +1,7 @@
 from collections import Counter
 from datetime import date, timedelta
 from hypothesis import given, strategies as st
+import pytest
 
 from recon.engine import reconcile, StatementLine as S, LedgerEntry as L
 
@@ -74,6 +75,55 @@ def test_tie_breaks_and_window():
     assert result.unmatched_ledger == {"z", "b", "far"}
     boundary = reconcile([S("s", DAY, 100, "r")], [L("l", DAY + timedelta(days=3), 100, "r")])
     assert pairs(boundary) == {match(["s"], ["l"], "R1")}
+
+
+@pytest.mark.parametrize("statement,ledger,ss,lid,rule,reasons", [
+    ([S("s", DAY, 100, "r")],
+     [L("a", DAY + timedelta(days=1), 100, "r"), L("z", DAY - timedelta(days=1), 100, "r")],
+     ["s"], "z", "R1", {}),
+    ([S("s", DAY, 100, "r")], [L("z", DAY, 100, "r"), L("a", DAY, 100, "r")],
+     ["s"], "a", "R1", {}),
+    ([S("s", DAY, 100, "r")], [L("a", DAY - timedelta(days=3), 100, "r"), L("z", DAY, 100, "r")],
+     ["s"], "z", "R1", {}),
+    ([S("a", DAY + timedelta(days=1), 100, "r"), S("z", DAY, 100, "r")],
+     [L("l", DAY, 100, "r")], ["z"], "l", "R1", {"a": "no_match"}),
+    ([S("s", DAY, 100, "r")],
+     [L("a", DAY, 100, "r", "refund", "r"), L("z", DAY + timedelta(days=1), 100, "r")],
+     ["s"], "z", "R1", {}),
+    ([S("x", DAY, 40, "r"), S("y", DAY, 60, "r")],
+     [L("a", DAY + timedelta(days=1), 100, "r"), L("z", DAY, 100, "r")],
+     ["x", "y"], "z", "R2", {}),
+    ([S("x", DAY, 40, "r"), S("y", DAY, 60, "r")],
+     [L("z", DAY, 100, "r"), L("a", DAY, 100, "r")], ["x", "y"], "a", "R2", {}),
+    ([S("x", DAY, 140, "r"), S("y", DAY, -40, "r")],
+     [L("l", DAY, 100, "r")], ["x", "y"], "l", "R2", {}),
+    ([S("s", DAY, -100, "r")],
+     [L("a", DAY + timedelta(days=20), 100, "own", "refund", "r"),
+      L("z", DAY - timedelta(days=20), 100, "other", "refund", "r")],
+     ["s"], "z", "R3", {}),
+    ([S("s", DAY, -100, "r")],
+     [L("z", DAY, 100, "own", "refund", "r"), L("a", DAY, 100, "other", "refund", "r")],
+     ["s"], "a", "R3", {}),
+    ([S("a", DAY + timedelta(days=1), -100, "r"), S("z", DAY, -100, "r")],
+     [L("l", DAY, 100, "own", "refund", "r")], ["z"], "l", "R3", {"a": "no_match"}),
+], ids=["r1-booking-date", "r1-id", "r1-distance", "r1-statement-order", "r1-payments-only",
+        "r2-booking-date", "r2-id", "r2-signed-lines", "r3-booking-date", "r3-id", "r3-statement-order"])
+def test_ordering_and_candidate_rules(statement, ledger, ss, lid, rule, reasons):
+    before = list(statement), list(ledger)
+    result = reconcile(statement, ledger)
+    assert pairs(result) == {match(ss, [lid], rule)}
+    assert result.unmatched_statement == reasons
+    assert result.unmatched_ledger == {e.id for e in ledger} - {lid}
+    partition(statement, ledger, result)
+    assert (statement, ledger) == before
+
+
+def test_duplicate_signature_includes_date():
+    statement = [S("a", DAY, 100, "r"), S("b", DAY + timedelta(days=1), 100, "r")]
+    result = reconcile(statement, [L("l", DAY, 100, "r")])
+    assert pairs(result) == {match(["a"], ["l"], "R1")}
+    assert result.unmatched_statement == {"b": "no_match"}
+    assert not result.unmatched_ledger
 
 
 @given(st.lists(st.tuples(st.sampled_from(["exact", "split", "refund", "duplicate", "noise"]),

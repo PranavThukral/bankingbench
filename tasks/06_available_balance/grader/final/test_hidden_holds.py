@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from hypothesis import given, settings, strategies as st
+from hypothesis import example, given, settings, strategies as st
 from fastapi.testclient import TestClient
 from holds.main import create_app
+import pytest
 
 
 class Clock:
@@ -84,7 +85,59 @@ def test_overdraft_boundary(tmp_path):
         assert balance(client)["available_minor"] == 10000
 
 
+@pytest.mark.parametrize("state", ["active", "voided", "captured", "expired"])
+def test_capture_amount_validation_before_closed_status(tmp_path, state):
+    clock = Clock()
+    with TestClient(create_app(tmp_path / "db", clock)) as client:
+        id = authorize(client, 100).json()["auth_id"]
+        if state in {"voided", "captured"}:
+            action = "void" if state == "voided" else "capture"
+            args = {} if action == "void" else {"json": {"amount_minor": 1}}
+            assert client.post(f"/authorizations/{id}/{action}", **args).status_code == 200
+        elif state == "expired":
+            clock.at += timedelta(days=7)
+        before = balance(client)
+        for body in [{"amount_minor": value} for value in (0, -1, True, 1.5, "1", None)] + [{}, [], {"extra": 1}]:
+            result = client.post(f"/authorizations/{id}/capture", json=body)
+            assert result.status_code == 422
+            assert result.json()["error"]["code"] == "invalid_amount"
+            assert balance(client) == before
+        result = client.post(f"/authorizations/{id}/capture", content=b"{")
+        assert result.status_code == 422 and result.json()["error"]["code"] == "invalid_amount"
+        result = client.post(f"/authorizations/{id}/capture", json={"amount_minor": 101})
+        expected = (422, "capture_exceeds_hold") if state == "active" else (409, "authorization_closed")
+        assert (result.status_code, result.json()["error"]["code"]) == expected
+        assert balance(client) == before
+
+
+def test_authorization_validation_and_unknown_ids(tmp_path):
+    with TestClient(create_app(tmp_path / "db", Clock())) as client:
+        for value in (0, -1, True, 1.5, "100"):
+            result = authorize(client, value)
+            assert result.status_code == 422 and result.json()["error"]["code"] == "invalid_amount"
+        for path, args in [
+            ("/accounts/absent/authorizations", {"json": {"amount_minor": 1}}),
+            ("/authorizations/absent/void", {}),
+            ("/authorizations/absent/capture", {"json": {"amount_minor": 1}}),
+        ]:
+            result = client.post(path, **args)
+            assert result.status_code == 404 and result.json()["error"]["code"] == "not_found"
+        result = client.get("/accounts/absent/balance")
+        assert result.status_code == 404 and result.json()["error"]["code"] == "not_found"
+        assert balance(client) == {"posted_minor": 10000, "available_minor": 10000}
+
+
+def test_naive_clock_rejected(tmp_path):
+    class NaiveClock:
+        def now(self):
+            return datetime(2026, 1, 1)
+
+    with pytest.raises(ValueError):
+        create_app(tmp_path / "db", NaiveClock())
+
+
 @settings(max_examples=100)
+@example(flex=False, operations=[("authorize", 100, 0), ("void", 1, 0), ("capture", 101, 0)])
 @given(flex=st.booleans(), operations=st.lists(st.tuples(
     st.sampled_from(["authorize", "capture", "void", "advance"]), st.integers(1, 15001), st.integers(0, 50)), max_size=25))
 def test_random_operation_model(flex, operations):

@@ -158,3 +158,73 @@ def test_required_key(database_url, key):
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "idempotency_key_required"
     assert not gateway.calls
+
+
+@pytest.mark.parametrize("length", [1, 100, 255])
+def test_valid_key_lengths_and_reordered_body(database_url, length):
+    gateway = Gateway()
+    # No lifespan event is needed: the ticket requires readiness on factory return.
+    client = TestClient(create_app(database_url, gateway))
+    args = request(key="k" * length, merchant=str(uuid4()))
+    first = client.post("/v1/payments", **args)
+    assert first.status_code == 201
+    args["json"] = dict(reversed(list(args["json"].items())))
+    same(first, client.post("/v1/payments", **args))
+    assert len(gateway.calls) == 1
+
+
+def test_invalid_payment_fields_and_merchant(database_url):
+    gateway = Gateway()
+    client = TestClient(create_app(database_url, gateway))
+    for body in [None, [], {}, {"amount_minor": 1}, *[
+        {**request()["json"], **change} for change in [
+            dict(amount_minor=0), dict(amount_minor=-1), dict(amount_minor=True),
+            dict(amount_minor=1.5), dict(currency="XYZ"), dict(currency=1),
+            dict(source_token=""), dict(source_token=1), dict(extra=1),
+        ]
+    ]]:
+        args = request()
+        args["json"] = body
+        result = client.post("/v1/payments", **args)
+        assert result.status_code == 422
+        assert result.json()["error"]["code"] == "invalid_payment"
+    args = request()
+    del args["json"]
+    result = client.post("/v1/payments", content=b"{", **args)
+    assert result.status_code == 422 and result.json()["error"]["code"] == "invalid_payment"
+    for merchant in (None, ""):
+        args = request()
+        if merchant is None:
+            del args["headers"]["X-Merchant-Id"]
+        else:
+            args["headers"]["X-Merchant-Id"] = merchant
+        result = client.post("/v1/payments", **args)
+        assert result.status_code == 400 and result.json()["error"]["code"] == "merchant_required"
+    assert not gateway.calls
+
+
+def test_concurrent_duplicates_across_app_instances(database_url):
+    gateway = Gateway(latency=.15)
+    apps = [create_app(database_url, gateway) for _ in range(2)]
+    with live_server(apps[0]) as left, live_server(apps[1]) as right:
+        with httpx.Client(timeout=30, trust_env=False) as client, ThreadPoolExecutor(max_workers=8) as pool:
+            for round_no in range(10):
+                token = f"cross_app_{round_no}"
+                args = request(source_token=token)
+                barrier = threading.Barrier(8, timeout=15)
+
+                def call(index):
+                    barrier.wait()
+                    return client.post([left, right][index % 2] + "/v1/payments", **args)
+
+                responses = list(pool.map(call, range(8)))
+                successes = [r for r in responses if r.status_code == 201]
+                assert successes, [r.status_code for r in responses]
+                for response in responses:
+                    if response.status_code == 409:
+                        assert response.json()["error"]["code"] == "idempotency_request_in_progress"
+                    else:
+                        same(successes[0], response)
+                for url in (left, right):
+                    same(successes[0], client.post(url + "/v1/payments", **args))
+                assert len([c for c in gateway.calls if c[3] == token]) == 1

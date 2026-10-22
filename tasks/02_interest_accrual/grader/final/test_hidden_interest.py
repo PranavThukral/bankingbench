@@ -1,5 +1,5 @@
 import calendar
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal as D
 from fractions import Fraction
 
@@ -36,10 +36,36 @@ def check(principal, rate, start, end, method):
     return rows
 
 
-@pytest.mark.parametrize("principal,rate,days", [("50", "0.0365", 1), ("73", "0.025", 1), ("25", "0.0365", 2)])
+@pytest.mark.parametrize("principal,rate,days", [
+    ("50", "0.0365", 1), ("73", "0.025", 1), ("25", "0.0365", 2),
+    ("237250.00", "0.0001", 1), ("237250.00", "0.0001", 29),
+    ("237250.00", "0.0001", 31),
+])
 def test_half_cent_ties_bankers(principal, rate, days):
     # Search output from tools/find_ties.py, independently cross-checked with Fraction.
     check(D(principal), D(rate), date(2026, 1, 1), date(2026, 1, 1) + timedelta(days=days), "simple_monthly")
+
+
+@pytest.mark.parametrize("principal,rate", [
+    (D("-1"), D(".1")), (D("1.001"), D(".1")), (D("NaN"), D(".1")),
+    (D("Infinity"), D(".1")), (D("1"), D("-0.1")), (D("1"), D("NaN")),
+    (D("1"), D("Infinity")), (1, D(".1")), (D("1"), .1),
+])
+@pytest.mark.parametrize("method", ["simple_monthly", "daily_compound"])
+def test_invalid_money_raises(principal, rate, method):
+    with pytest.raises(ValueError):
+        accrue(principal, rate, date(2026, 1, 1), date(2026, 2, 1), method)
+
+
+@pytest.mark.parametrize("start,end,method", [
+    (date(2026, 2, 1), date(2026, 1, 1), "simple_monthly"),
+    (datetime(2026, 1, 1, tzinfo=timezone.utc), date(2026, 2, 1), "simple_monthly"),
+    (date(2026, 1, 1), datetime(2026, 2, 1), "daily_compound"),
+    (date(2026, 1, 1), date(2026, 1, 1), "unknown"),
+])
+def test_invalid_dates_and_method_raise(start, end, method):
+    with pytest.raises(ValueError):
+        accrue(D("1.00"), D(".1"), start, end, method)
 
 
 @pytest.mark.parametrize("method", ["simple_monthly", "daily_compound"])

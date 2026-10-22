@@ -63,6 +63,29 @@ def test_unavailable_and_zero():
     assert result.fee_minor == result.converted_minor == 0
 
 
+@pytest.mark.parametrize("amount", [0, 100])
+def test_inverse_only_is_unavailable(amount):
+    with pytest.raises(RateUnavailable):
+        quote_transfer(amount, "CAD", "EUR", {("EUR", "CAD"): D("2")}, 0)
+
+
+@pytest.mark.parametrize("left,right", [
+    ("1.23456789", "1.34567891"),
+    ("1.12345678901234567890123456789", "1.98765432109876543210987654321"),
+])
+def test_full_precision_cross_rate(left, right):
+    check(10**9, "GBP", "CAD", {("GBP", "USD"): D(left), ("USD", "CAD"): D(right)}, 17)
+
+
+@pytest.mark.parametrize("amount,bps", [
+    (True, 0), (-1, 0), (1.5, 0), ("1", 0), (1, True), (1, -1),
+    (1, 10001), (1, 1.5), (1, "5"),
+])
+def test_invalid_amount_and_fee(amount, bps):
+    with pytest.raises(ValueError):
+        quote_transfer(amount, "CAD", "USD", {("CAD", "USD"): D(".5")}, bps)
+
+
 @given(amount=st.integers(0, 10**12), extra=st.integers(0, 10**8), units=st.integers(1, 100000),
        bps=st.integers(0, 10000), pair=st.sampled_from([("CAD", "USD"), ("JPY", "KWD"), ("BHD", "JPY")]))
 def test_exact_scaling_and_monotonicity(amount, extra, units, bps, pair):

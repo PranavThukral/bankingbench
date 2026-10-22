@@ -413,15 +413,15 @@ runs=12 final_ok=6/6 naive_false_pass=1 infra_errors=0 flips=0 wall_s=48.248
 
 <a id="09_tiered_fees-v2"></a>
 ### F-104 · 09_tiered_fees · v2 redesign
-- **Correction (2026-10-19):** the claim below that schedule validation moved from the data model into `compute_fee` is wrong. `starter/fees/models.py` still validates in `Schedule.__post_init__`, so `test_invalid_schedule_raises_for_any_amount` raises before `compute_fee` runs and does not test `compute_fee`. A reference with `validate_schedule` removed still passes (independent review, probe `schedule_unvalidated`). Fix pending: test a schedule mutated after construction.
+- **Correction (2026-10-19):** the claim below that schedule validation moved from the data model into `compute_fee` is wrong. `starter/fees/models.py` still validates in `Schedule.__post_init__`, so `test_invalid_schedule_raises_for_any_amount` raises before `compute_fee` runs and does not test `compute_fee`. A reference with `validate_schedule` removed still passes (independent review, probe `schedule_unvalidated`). Resolved in F-410: constructor bypass plus a schedule mutated after construction now exercise compute_fee itself.
 - **Why v1 was redesigned:** review R1. The v1 starter differed from the reference by 2 changed
   lines (the clamp). It already selected tiers, rounded half up in integer arithmetic and validated
   everything, so all three v1 wrongs (`wrong_exclusive_boundary`, `wrong_float_bps`, `wrong_marginal`)
   were regressions of code the starter got right. v1 entries for this task are **superseded by v2**.
   The v1 starter (198 lines including tests) also failed S1.
 - **v2 starter:** prices every amount with the first tier's rate using truncating integer division;
-  no tier selection, half-up rounding, clamp, amount validation or schedule validation (the latter
-  moved from the `Schedule` constructor into `compute_fee`, and PROBLEM.md now says so); plus
+  no tier selection, half-up rounding, clamp or amount validation in compute_fee; the starter
+  Schedule constructor still validates schedules (the original claim of moving it was wrong); plus
   loader, catalog and report support code (216 non-test lines). `ref_diff_lines` 2 -> 35 (floor 25).
 - **v2 wrong variants:** `wrong_exclusive_boundary` (`<` in tier selection), `wrong_float_bps`
   (half-up via a float percentage), `wrong_marginal` (bands priced separately). None is regressive.
@@ -913,13 +913,134 @@ passes; the old overlay directories are absent, each task still has three wrong 
 and no protected path (`README.md`, `docs/`, `site/`, `results/final/`, any grader, starter,
 reference, alt_valid or PROBLEM.md) changed. The replacement was approved for v3.
 
+### F-401 ? Independent held-out baseline ? false_pass / false_fail under final
+- **Source:** independent review-v2 probe log (F1-F16 and F22 read); 52 byte-identical overlays copied to `heldout/`, excluding `forge_junit`; the demos folder is out of scope.
+- **Evidence:** `results/20261022T190223289624Z/heldout.json`, generated before any grader or ticket change, with task/overlay/catalog SHA-256 digests; no infrastructure errors or source changes during execution. No commit is made in this phase (read-only `.git`); receipt records the starting SHA and dirty state.
+- **Classification:** original review labels, verified against ticket rules and inspected overlay differences: 44 wrong, 8 correct. Task 02's 28-digit solution is permitted by the original wording (F9); retain the review label here to reproduce the baseline, then clarify precision in F-403. The two original false fails are documented in F-402 and F-407 before reclassification.
+- **Baseline:**
+
+```text
+task | wrong rejected / total | correct accepted / total
+01 | 0/4 | 1/2
+02 | 3/5 | 0/0
+03 | 0/4 | 0/0
+04 | 0/7 | 1/1
+05 | 1/6 | 1/1
+06 | 0/3 | 1/2
+07 | 2/3 | 0/0
+08 | 0/1 | 1/1
+09 | 0/2 | 0/0
+10 | 0/9 | 1/1
+TOTAL | 6/44 | 6/8
+Wrong rejected: 6/44 (13.64%)
+Correct accepted: 6/8 (75.00%)
+```
+
+### F-402 ? 01_idempotent_payments ? held-out false_pass and false_fail
+- **Ungraded rules / probes:** `rawbody_fingerprint` ignored validated-field equality; `key_limit_64` and `key_limit_254` rejected legal keys; `process_local_lock` charged twice across apps.
+- **Hardening:** `test_valid_key_lengths_and_reordered_body` sends keys of lengths 1, 100 and 255 then reverses JSON member order; `test_invalid_payment_fields_and_merchant` asserts body/field/header validation and no charge. `test_concurrent_duplicates_across_app_instances` runs eight barrier-synchronized callers, split across two live apps, for ten independent keys, checking charge count and exact replay on both apps.
+- **false_fail (review F15):** `alt_schema_in_lifespan` was valid under the original ticket but failed because tests sent requests without startup events. PROBLEM.md:33-34 now explicitly requires schema readiness when `create_app()` returns and HTTP operation without lifespan handlers. The unchanged overlay is reclassified as reject in the catalog, citing that rule; the baseline keeps its original accept label. Tests assert HTTP behavior, never table names or schema contents.
+- **Evidence:** reference and alt_valid passed the 20-run valid-design matrix (`results/20261022T190515614662Z/matrix.json`). New concurrency test: 20/20 reference passes, 0 flips (`results/20261022T190520432521Z/concurrency.json`).
+
+### F-403 ? 02_interest_accrual ? held-out false_pass / precision ambiguity
+- **Ungraded rules / probes:** `no_validate` removed validation and still passed final; `daily_rate_first_prec28` divided the rate first and changed exact half-cent ties.
+- **Ticket decision (review F9):** the old wording allowed precision 28, so disagreement caused solely by that permitted intermediate rounding was defensible; the review's wrong label overstates the original contract. The F-401 table deliberately reproduces the review labels. PROBLEM.md:20-23 now requires at least 34 significant digits or exact arithmetic and preserves mathematically exact half-even ties. The 28-digit overlay is wrong under this clarified contract. No reference or alternative was edited.
+- **Hardening:** extended `test_half_cent_ties_bankers` with principal 237250.00, rate 0.0001 and 1/29/31-day periods (Fraction oracle; the one-day exact interest is 0.065, which must post 0.06). Added `test_invalid_money_raises` for both methods and `test_invalid_dates_and_method_raise`, including empty-period validation. This checks the accrual API directly, without importing starter calendar helpers.
+
+### F-404 ? 03_fx_quotes ? held-out false_pass
+- **Ungraded rules / probes:** `infers_inverse`, `cross_rate_6dp`, `default_context_prec28` and `weak_validation` violated route, precision and input constraints.
+- **Hardening:** `test_inverse_only_is_unavailable` includes zero amount; `test_full_precision_cross_rate` uses both an eight-digit product and two 30-digit factors with a billion minor units, comparing rate_used and converted_minor to exact Fraction arithmetic; `test_invalid_amount_and_fee` covers bool, negative, noninteger and out-of-range fees/amounts. Existing route preference and minor-unit tests remain.
+
+### F-405 ? 04_ledger_reconciliation ? held-out false_pass
+- **Ungraded rules / probes:** `r3_latest_booking`, `r1_no_booking_tiebreak`, `statements_by_id_only`, `r1_matches_refunds`, `r2_ledger_order_by_id`, `dup_ignores_date`, `r2_excludes_negative`.
+- **Hardening:** parametrized `test_ordering_and_candidate_rules` makes date and id preferences conflict: R1 distance/booking/id and statement order, payment-only candidates, R2 booking/id and signed negative lines, R3 booking/id and statement order. It asserts exact memberships, unmatched partitions, and unchanged inputs. `test_duplicate_signature_includes_date` distinguishes equal signatures on different dates. Ordering passes on disjoint references commute and match-list order remains ungraded, as the ticket requires.
+
+### F-406 ? 05_double_entry ? held-out false_pass
+- **Ungraded rules / probes:** `trial_excludes_reversals`, `account_currency_overwrite`, `account_unvalidated`, `accounts_before_amounts`, `reverse_without_row_lock`; `trial_inner_join` was already rejected by the existing persistence test.
+- **Hardening:** extended `test_reverse_once` to assert reversal turnover adds both debit and credit totals. Added `test_create_account_validation`, `test_create_account_idempotence_and_currency_mismatch`, and parametrized `test_post_validation_priority`, with trial-balance/observable-state checks after rejections. `test_concurrent_reversals_once` uses eight independent services and a barrier for ten originals, asserting exactly one returned reversal id, seven AlreadyReversed results, zero net balances, and exactly doubled turnover.
+- **Flake evidence:** new concurrency test 20/20 reference passes, 0 flips (`results/20261022T190520432521Z/concurrency.json`).
+
+### F-407 ? 06_available_balance ? held-out false_pass and false_fail
+- **Ungraded rules / probes:** `closed_before_amount_validation`, `bool_amount_accepted`, `unknown_auth_is_409`.
+- **Hardening:** `test_capture_amount_validation_before_closed_status` exercises active, voided, captured and exactly expired authorizations with zero/negative/bool/noninteger/malformed bodies, then overcapture and unchanged balances. `test_authorization_validation_and_unknown_ids` checks authorization amounts, all unknown-id endpoints and balances. `test_naive_clock_rejected` checks the injected clock through create_app.
+- **false_fail (review F14):** `exceeds_before_closed` was defensible because the old ticket did not order these two errors. PROBLEM.md:21-24 now states body/amount, existence, closed/expired status, then overcapture. The unchanged overlay is reclassified as reject with that ticket citation; its original accept classification remains in F-401. Closed positive overcapture must be 409, invalid amount must be 422. The existing `test_random_operation_model` now grades an explicit rule and includes an explicit authorize/void/overcapture example. An initial full held-out run timed out after 90 seconds while shrinking this probe (`results/20261022T191321648616Z/heldout.json`, 45/46 wrong rejected, 6/6 correct accepted); explicit-example failure makes the rejection immediate without reducing random coverage. This is a grader runtime fix, not a counted catch from an infrastructure error.
+
+### F-408 ? 07_statement_periods ? held-out false_pass
+- **Ungraded rule / probe:** `tzinfo_only_aware_check` accepted timestamps whose tzinfo existed but utcoffset was None.
+- **Hardening:** `test_non_none_tzinfo_with_no_offset_is_naive` supplies a tzinfo subclass returning None and asserts ValueError both inside and outside the selected month. Existing `no_id_tiebreak` and `validates_only_selected` probes remain rejected.
+
+### F-409 ? 08_refund_limits ? held-out false_pass
+- **Ungraded rule / probe:** `refund_check_then_write` passed sequential tests but could over-refund under contention, violating atomicity.
+- **Hardening:** `test_concurrent_refunds_respect_budget` uses eight services and barrier-synchronized full-budget refund attempts over twenty fresh payments. Exactly one positive refund id must succeed; all seven others must raise RefundExceedsCaptured, restarted totals must equal the capture, and a later refund must still be rejected without changing totals. No storage helpers or SQLite internals are touched.
+- **Flake evidence:** new concurrency test 20/20 reference passes, 0 flips (`results/20261022T190520432521Z/concurrency.json`). The independent conditional-UPDATE alternative is also included in the held-out acceptance checks.
+
+### F-410 ? 09_tiered_fees ? held-out false_pass / correction to F-104
+- **Ungraded rules / probes:** `schedule_unvalidated` omitted per-call validation; `amount_type_unchecked` accepted bool/float amounts.
+- **Correction:** F-104's original claim that validation moved out of the starter model was false: Schedule.__post_init__ still validates, and the previous hidden test caught its exception before compute_fee ran. No starter/model changes were made here.
+- **Hardening:** changed `test_invalid_schedule_raises_for_any_amount` to bypass the Schedule constructor and populate only its public dataclass fields outside pytest.raises, so the six invalid schedules at amounts 0, 1 and 5000 exercise compute_fee itself. Added `test_schedule_revalidated_after_tier_list_mutation`, which starts with a valid schedule and then mutates its public tiers list. `test_invalid_amount_type` covers bool, float, string and None directly through compute_fee.
+
+### F-411 ? 10_batch_parser ? held-out false_pass
+- **Ungraded rules / probes:** `zero_amount_accepted`, `blank_reference_accepted`, `header_currency_any_alpha`, `lowercase_batch_id`, `bare_cr_is_terminator`, `blank_lines_skipped`, `missing_trailer_after_last`, `reference_strip_both`, `crlf_all_or_nothing`.
+- **Hardening:** parametrized `test_field_formats` covers all header/detail/trailer fields and reserved spaces with exact error sets (including independent trailer mismatches). `test_supported_currencies_preserve_minor_units` accepts every declared currency without conversion; `test_mixed_terminators_and_optional_final` covers mixed separators and each permitted final terminator choice; `test_terminator_blank_and_missing_trailer_errors` checks bare CR, an interior blank record and last-line missing-trailer positions; `test_reference_preserves_leading_spaces` asserts right-only padding removal. Only parse, Payment and returned public records are used.
+
+### Verification for F-401?F-411
+- **Final held-out receipt:** `results/20261022T192204381689Z/heldout.json`; all task, overlay and catalog digests match, no source changes during execution and no infrastructure errors. Every expectation passes; no probes remain unhandled.
+
+```text
+task | wrong rejected / total | correct accepted / total
+01 | 5/5 | 1/1
+02 | 5/5 | 0/0
+03 | 4/4 | 0/0
+04 | 7/7 | 1/1
+05 | 6/6 | 1/1
+06 | 4/4 | 1/1
+07 | 3/3 | 0/0
+08 | 1/1 | 1/1
+09 | 2/2 | 0/0
+10 | 9/9 | 1/1
+TOTAL | 46/46 | 6/6
+Wrong rejected: 46/46 (100.00%)
+Correct accepted: 6/6 (100.00%)
+```
+
+- **Stable final matrix:** `results/20261022T192102562326Z/matrix.json`; task digests match the final sources, all 30 wrong variants hit a declared must_fail test, references/alt_valid pass and starters fail. No source changes during execution.
+
+```text
+runs=120 final_ok=60/60 naive_false_pass=21 infra_errors=0 flips=0 wall_s=344.804
+```
+
+- **Concurrency:** `python -m harness.measure_concurrency` (20 isolated reference runs per new test, eight barrier-synchronized callers per round); source digests match tasks 01/05/08. Receipt: `results/20261022T190520432521Z/concurrency.json`.
+
+```text
+01 test_concurrent_duplicates_across_app_instances: 20/20 passed, flips=0
+05 test_concurrent_reversals_once: 20/20 passed, flips=0
+08 test_concurrent_refunds_respect_budget: 20/20 passed, flips=0
+```
+
+- **Other checks:** `python -m pytest harness/tests -q` ? 58 passed; `python -m harness.check_realism` ? all 60 visible-test rows and all 10 design rows pass, no regressive variants, Python 3.12 lint passes (`results/realism.json`, current task digests); `python -m harness.lint_leaks` ? 10/10 pass; `git diff --check` passes.
+- **Harness portability fix:** the required toy export meta-test initially failed when Git Bash mkdir interpreted a native Windows BCP_APP_DIR path incorrectly. Generated solve.sh now normalizes that destination with cygpath when available; the existing toy solve/test oracle and the full harness suite pass.
+- **Scope:** no starters, references, alt_valid, existing wrong variants, README.md, docs/, site/ or results/final/ changed. Review F22's answer-adjacent starter helpers remain unchanged under this phase's no-starter-edits constraint.
+
 ## Patterns
+
+**Held-out catch rate.** The independent review-v2 baseline was **6/44 wrong rejected (13.64%)** and
+**6/8 correct accepted (75.00%)**, recorded before grader changes in F-401. After the F-402?F-411 hardening,
+`python -m harness.heldout` rejects **46/46 wrong (100.00%)** and accepts **6/6 correct (100.00%)**;
+receipt `results/20261022T192204381689Z/heldout.json` has matching task/overlay/catalog digests and no infrastructure
+errors. The denominator changes are explicit: the originally correct lifespan-only schema and overcapture-first
+solutions are now reject probes under the clarified 01/06 tickets (two logged false_fail findings); task 02's
+formerly permitted 28-digit arithmetic is disallowed by the clarified precision/tie rule. On the original labels,
+all 44 review-wrong probes are rejected and 6/8 review-correct probes accepted. The set was independent when
+written, then exposed during hardening; this final figure is a regression catch rate, not a new blind estimate.
+New 01/05/08 concurrency tests each pass 20/20 reference repetitions with **0 flips**. Existing final matrix:
+**60/60 ok, 0 infrastructure errors**. No requested held-out expectations remain unmet.
 
 Data: v2 matrix, `results/final/matrix.json`. Naive graders now have 3 to 4 tests each, including the ticket's own
 worked example. **20 of the 30 wrong variants still pass the naive graders** (v1: 29 of 30), **1 of 10 unmodified
 starters** passes (v1: 5 of 10), 10 wrong variants are caught by the naive grader, and 0 of 20 valid solutions are
 rejected. All 10 caught variants are caught by an assertion taken from the ticket's example, never by a test that
-the declared `must_fail` names. Predictions recorded before the naive runs matched 28 of 30 wrong variants (mismatches:
+the declared `must_fail` names. The v2 metadata predictions match 28 of 30 wrong variants; they are not independently preregistered,
+so this is a retrospective comparison (review F16; mismatches:
 F-218 and F-222, both caught when I predicted a false pass).
 
 1. **State over time is invisible to one-shot examples.** 01 `wrong_retry_race`, 01 `wrong_inmemory_cache`,
@@ -949,9 +1070,9 @@ F-218 and F-222, both caught when I predicted a false pass).
    dropped the naive count-mismatch test, so the starter passed 9/9 final tests (F-001), and graders for 05 and 08 first
    produced false fails on valid code (F-002, F-003). In v2, stating zone and month validation (07) and unknown-id handling (08)
    in the ticket showed that the v1 final graders had no hidden test for them; each needed a new hardened test (F-106,
-   F-107). F-104 (09 schedule validation) is weaker than first logged: the starter's `Schedule` constructor still
-   validates, so the added test passes without `compute_fee` checking anything (found by the independent review). A requirement enforced only by visible tests
-   is silently ungraded.
+   F-107). F-104 (09 schedule validation) was weaker than first logged: the starter's `Schedule` constructor
+   validated before compute_fee ran. F-410 now bypasses the constructor and mutates a valid schedule to test
+   per-call validation. A requirement enforced only by visible tests is silently ungraded.
 6. **The ticket's example calibrates the naive grader.** Adding the worked example and a validation case lowered the
    naive false-pass rate from 29/30 to 20/30; which variants survive depends on what the example happens to contain
    (a winter date, an exact cross leg, a sequence of two refunds). The remaining false passes are the ones whose
@@ -963,11 +1084,13 @@ F-218 and F-222, both caught when I predicted a false pass).
 
 ## Limitations
 
-- Every task, solution and grader was written by one author. The wrong variants
-  are the bugs that author predicted; real model failures may cluster differently (the M5 stretch goal was not run).
+- The original tasks, solutions and graders were written by one author.
+  The held-out set was independently written in review-v2 and then exposed during this hardening phase; its final
+  catch rate measures regression coverage of this finite set, not an unseen future distribution. Real model failures
+  may cluster differently (the M5 stretch goal was not run).
 - The same author wrote the ticket examples that now drive the naive graders, and knew the wrong variants when writing
-  them. Predictions were recorded before each naive run (28 of 30 matched), but 20/30 is a property of these examples, not an
-  estimate of what a hurried human author would let through.
+  them. The v2 predictions were adjusted during calibration, so their 28/30 match is retrospective (review F16);
+  20/30 is a property of these examples, not an estimate of what a hurried human author would let through.
 - The three regressive variants (F-108, F-109, F-218) rest on rationales a reviewer must accept. `ref_diff_lines` for task 03
   sits exactly on its floor (25).
 - The blind reviews (S5) are disciplined self-reviews, not independent reviews. An independent review is still owed.

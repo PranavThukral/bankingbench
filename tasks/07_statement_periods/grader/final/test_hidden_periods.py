@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, tzinfo
 from hypothesis import given, strategies as st
 import pytest
 from statements.period import period_bounds, select, Txn
@@ -39,6 +39,16 @@ def test_naive_and_instant_order():
     a = datetime.fromisoformat("2026-01-15T09:00:00+05:30")
     b = datetime.fromisoformat("2026-01-15T03:30:00+00:00")
     assert select([Txn("b", a), Txn("a", b)], "UTC", 2026, 1) == ["a", "b"]
+
+
+def test_non_none_tzinfo_with_no_offset_is_naive():
+    class NoOffset(tzinfo):
+        def utcoffset(self, dt):
+            return None
+
+    for year in (2020, 2026):
+        with pytest.raises(ValueError):
+            select([Txn("x", datetime(year, 1, 15, tzinfo=NoOffset()))], "UTC", 2026, 1)
 
 
 @given(zone=st.sampled_from(["UTC", "America/Toronto", "Asia/Kolkata", "Pacific/Auckland"]),

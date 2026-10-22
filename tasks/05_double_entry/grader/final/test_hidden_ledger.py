@@ -1,4 +1,6 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
+import threading
 from uuid import uuid4
 import pytest
 from hypothesis import Phase, settings, strategies as st
@@ -40,10 +42,14 @@ def test_unknown_account_is_atomic(database_url):
 def test_reverse_once(database_url):
     s, accounts = setup(database_url)
     a, b = accounts["CAD"][:2]
+    totals = s.trial_balance()
     txn = s.post([Line(a, "debit", 100), Line(b, "credit", 100)], "posted")
     reversal = s.reverse(txn, "reverse")
     assert type(reversal) is int and reversal != txn
     assert s.balance(a) == s.balance(b) == 0
+    assert s.trial_balance() == {c: (d + (200 if c == "CAD" else 0),
+                                     cr + (200 if c == "CAD" else 0))
+                                for c, (d, cr) in totals.items()}
     before = s.trial_balance()
     with pytest.raises(AlreadyReversed):
         s.reverse(txn, "again")
@@ -87,6 +93,72 @@ def test_rejections_leave_no_trace(database_url):
     with pytest.raises(LedgerError):
         s.reverse(-1, "absent")
     assert s.trial_balance() == before
+
+
+@pytest.mark.parametrize("code,currency", [("", "CAD"), ("new", "XYZ"), ("new", "")])
+def test_create_account_validation(database_url, code, currency):
+    s, _ = setup(database_url)
+    before = s.trial_balance()
+    with pytest.raises(LedgerError):
+        s.create_account(code, currency)
+    assert s.trial_balance() == before
+    with pytest.raises(UnknownAccount):
+        s.balance(code)
+
+
+def test_create_account_idempotence_and_currency_mismatch(database_url):
+    s, accounts = setup(database_url)
+    a, b = accounts["CAD"][:2]
+    s.post([Line(a, "debit", 100), Line(b, "credit", 100)], "sale")
+    before = s.trial_balance()
+    s.create_account(a, "CAD")
+    with pytest.raises(LedgerError):
+        s.create_account(a, "USD")
+    assert s.trial_balance() == before
+    assert s.balance(a) == 100
+    # Original currency must still balance against another CAD account.
+    s.post([Line(a, "debit", 10), Line(b, "credit", 10)], "still CAD")
+    assert s.balance(a) == 110
+
+
+@pytest.mark.parametrize("lines,error", [
+    ([Line("absent", "bad", 0)], UnbalancedTransaction),
+    ([Line("absent", "debit", 0), Line("also_absent", "credit", 1)], InvalidAmount),
+    ([Line("absent", "debit", True), Line("also_absent", "credit", 1)], InvalidAmount),
+    ([Line("absent", "debit", 1), Line("also_absent", "credit", 2)], UnknownAccount),
+])
+def test_post_validation_priority(database_url, lines, error):
+    s, _ = setup(database_url)
+    before = s.trial_balance()
+    with pytest.raises(error):
+        s.post(lines, "invalid on several grounds")
+    assert s.trial_balance() == before
+
+
+def test_concurrent_reversals_once(database_url):
+    s, accounts = setup(database_url)
+    a, b = accounts["CAD"][:2]
+    services = [LedgerService(database_url) for _ in range(8)]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for _ in range(10):
+            before = s.trial_balance()
+            txn = s.post([Line(a, "debit", 100), Line(b, "credit", 100)], "concurrent sale")
+            barrier = threading.Barrier(8, timeout=15)
+
+            def reverse(index):
+                barrier.wait()
+                try:
+                    return services[index].reverse(txn, "concurrent undo")
+                except AlreadyReversed:
+                    return None
+
+            results = list(pool.map(reverse, range(8)))
+            ids = [value for value in results if value is not None]
+            assert len(ids) == 1 and type(ids[0]) is int and ids[0] != txn
+            assert s.balance(a) == s.balance(b) == 0
+            assert s.trial_balance() == {c: (d + (200 if c == "CAD" else 0),
+                                             cr + (200 if c == "CAD" else 0))
+                                        for c, (d, cr) in before.items()}
 
 
 class JournalMachine(RuleBasedStateMachine):

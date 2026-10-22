@@ -57,6 +57,25 @@ def test_fee_properties(amount, extra, bps, fixed, floor, cap):
     ([Tier(None, 1, 0)], 20, 10),
 ])
 def test_invalid_schedule_raises_for_any_amount(tiers, floor, cap):
+    # Bypass construction so only compute_fee can raise; the public dataclass
+    # constructor already rejects these values and used to make this test vacuous.
+    schedule = object.__new__(Schedule)
+    for name, value in [("tiers", tiers), ("min_fee_minor", floor), ("max_fee_minor", cap)]:
+        object.__setattr__(schedule, name, value)
     for amount in (0, 1, 5000):
         with pytest.raises(ValueError):
-            compute_fee(amount, Schedule(tiers, floor, cap))
+            compute_fee(amount, schedule)
+
+
+def test_schedule_revalidated_after_tier_list_mutation():
+    schedule = Schedule([Tier(None, 1, 0)], 0, 100)
+    assert compute_fee(1, schedule) == 0
+    schedule.tiers.append(Tier(None, 2, 0))
+    with pytest.raises(ValueError):
+        compute_fee(1, schedule)
+
+
+@pytest.mark.parametrize("amount", [True, False, 1.5, "1", None])
+def test_invalid_amount_type(amount):
+    with pytest.raises(ValueError):
+        compute_fee(amount, Schedule([Tier(None, 1, 0)], 0, 100))

@@ -30,7 +30,9 @@ Currencies supported: CAD/USD/EUR/GBP (2 dp), JPY (0), KWD/BHD (3). No conversio
   No gateway exceptions or crash recovery are in scope. A charge returns normally with either status.
 
 Preserve the factory and gateway protocol. Store state in the supplied PostgreSQL database;
-the application may create its own schema. Tests inspect only the declared HTTP surface and
+the application may create its own schema. The schema must exist when `create_app()` returns;
+HTTP requests must work without running application lifespan/startup handlers.
+Tests inspect only the declared HTTP surface and
 gateway calls. Timestamps in stored receipts use aware UTC; no timestamp field is required in JSON.
 Run visible tests from starter: `python -m pytest tests -q` with `DATABASE_URL` set to a disposable
 database. No customer data or real payment network is involved.

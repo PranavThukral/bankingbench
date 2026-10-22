@@ -161,6 +161,10 @@ set -eu
 # ASSUMPTION: candidate work defaults to /app, matching environment.workdir.
 SOLUTION_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 APP_DIR=${BCP_APP_DIR:-/app}
+# Git Bash needs its POSIX spelling for native Windows paths passed via env.
+if command -v cygpath >/dev/null 2>&1; then
+    APP_DIR=$(cygpath -u "$APP_DIR")
+fi
 mkdir -p "$APP_DIR"
 cp -R "$SOLUTION_DIR/overlay/." "$APP_DIR/"
 '''

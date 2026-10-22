@@ -18,7 +18,9 @@ start raise ValueError. These are dates, not timestamps; any datetime instead of
   intermediate precision. At posting, round accrued, add to balance, reset accrued to zero;
   discard the unrounded residual.
 - Round only the posting to 0.01 using ROUND_HALF_EVEN. Intermediate arithmetic must use
-  precision at least 28 or exact arithmetic. Both money fields must be Decimal with exponent -2,
+  precision at least 34 or exact arithmetic. Mathematically exact half-cent ties must round
+  half-even, without intermediate rounding changing which side of the tie is selected.
+  Both money fields must be Decimal with exponent -2,
   even when zero. Return the resulting balance after each posting.
 
 Worked example: principal 1000.00, rate 0.0365 (so 0.0001 per day), start 2026-01-01, end 2026-03-01.

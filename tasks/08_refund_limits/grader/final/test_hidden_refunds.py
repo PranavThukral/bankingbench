@@ -1,6 +1,8 @@
 from pathlib import Path
 from contextlib import contextmanager
 import gc
+from concurrent.futures import ThreadPoolExecutor
+import threading
 from tempfile import TemporaryDirectory
 import pytest
 from hypothesis import given, strategies as st
@@ -85,6 +87,31 @@ def test_capture_once_and_within_authorization(tmp_path):
     assert s.refund(p, 60) > 0
     with pytest.raises(RefundExceedsCaptured):
         s.refund(p, 1)
+
+
+def test_concurrent_refunds_respect_budget(tmp_path):
+    path = tmp_path / "db"
+    services = [RefundService(path) for _ in range(8)]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for _ in range(20):
+            s, pid = payment(path)
+            barrier = threading.Barrier(8, timeout=15)
+
+            def refund(index):
+                barrier.wait()
+                try:
+                    return services[index].refund(pid, 100)
+                except RefundExceedsCaptured:
+                    return None
+
+            results = list(pool.map(refund, range(8)))
+            ids = [value for value in results if value is not None]
+            assert len(ids) == 1 and type(ids[0]) is int and ids[0] > 0
+            assert RefundService(path).refunded_total(pid) == 100
+            with pytest.raises(RefundExceedsCaptured):
+                s.refund(pid, 1)
+            assert s.refunded_total(pid) == 100
+    gc.collect()
 
 
 @given(capture=st.integers(1, 100000), extra=st.integers(0, 100000),

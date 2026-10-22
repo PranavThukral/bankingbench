@@ -1,0 +1,314 @@
+# Independent review-v2 overlays; original labels are preserved in the F-401 baseline receipt.
+# F-402/F-407 reclassify two formerly correct probes after explicit ticket clarifications.
+
+[[probe]]
+task = "01_idempotent_payments"
+name = "rawbody_fingerprint"
+expect = "reject"
+description = "Hashes raw JSON bytes, violating equality of the three validated fields regardless of JSON member ordering."
+
+[[probe]]
+task = "01_idempotent_payments"
+name = "key_limit_64"
+expect = "reject"
+description = "Rejects keys longer than 64 characters, violating the inclusive 1-255 key length rule."
+
+[[probe]]
+task = "01_idempotent_payments"
+name = "key_limit_254"
+expect = "reject"
+description = "Rejects a 255-character key, violating the inclusive 1-255 key length rule."
+
+[[probe]]
+task = "01_idempotent_payments"
+name = "process_local_lock"
+expect = "reject"
+description = "Serializes keys only within one app, violating single-charge concurrency across app instances."
+
+[[probe]]
+task = "01_idempotent_payments"
+name = "alt_poll_replay"
+expect = "accept"
+description = "Polls reserved rows until completion and replays the receipt instead of returning an in-progress response."
+
+[[probe]]
+task = "01_idempotent_payments"
+name = "alt_schema_in_lifespan"
+expect = "reject"
+description = "Creates its schema only in a lifespan handler, violating PROBLEM.md lines 34-35 requiring schema readiness when create_app returns (original review label: correct; F-402 false_fail clarification)."
+
+[[probe]]
+task = "02_interest_accrual"
+name = "no_validate"
+expect = "reject"
+description = "Omits input validation, violating the finite Decimal, whole-cent, date and method validation rules."
+
+[[probe]]
+task = "02_interest_accrual"
+name = "daily_rate_first_prec28"
+expect = "reject"
+description = "Divides the rate first at precision 28, violating the clarified PROBLEM.md lines 20-23 requiring at least 34 digits or exact arithmetic with exact half-even ties (original ticket permitted precision 28; F-403)."
+
+[[probe]]
+task = "02_interest_accrual"
+name = "carry_residual"
+expect = "reject"
+description = "Carries rounding residual into later segments, violating the rule to discard residual after each posting."
+
+[[probe]]
+task = "02_interest_accrual"
+name = "simple_noncompounding"
+expect = "reject"
+description = "Uses the original principal for every segment, violating compounding at posting boundaries."
+
+[[probe]]
+task = "02_interest_accrual"
+name = "naive_end_posting_only_month_end"
+expect = "reject"
+description = "Posts only on month ends, violating the additional end-minus-one-day posting rule."
+
+[[probe]]
+task = "03_fx_quotes"
+name = "weak_validation"
+expect = "reject"
+description = "Accepts bool amounts and fees over 10000 bps, violating the stated integer and fee range rules."
+
+[[probe]]
+task = "03_fx_quotes"
+name = "infers_inverse"
+expect = "reject"
+description = "Infers inverse rates, violating the direct-or-USD-only routing rule."
+
+[[probe]]
+task = "03_fx_quotes"
+name = "cross_rate_6dp"
+expect = "reject"
+description = "Rounds the cross product to six decimals, violating full precision with no intermediate rounding."
+
+[[probe]]
+task = "03_fx_quotes"
+name = "default_context_prec28"
+expect = "reject"
+description = "Truncates the cross rate at the default Decimal precision, violating the full product rate_used rule."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "r3_latest_booking"
+expect = "reject"
+description = "Selects the latest refund booking, violating the R3 earliest booking date tie-break."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "r1_no_booking_tiebreak"
+expect = "reject"
+description = "Breaks equal distance by id before date, violating the R1 earliest booking date tie-break."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "statements_by_id_only"
+expect = "reject"
+description = "Processes statements by id alone, violating the (value_date,id) order."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "r1_matches_refunds"
+expect = "reject"
+description = "Allows refunds as exact matches, violating the R1 payment-only rule."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "r2_ledger_order_by_id"
+expect = "reject"
+description = "Processes split payments by id alone, violating R2 (reference,booking_date,id) order."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "dup_ignores_date"
+expect = "reject"
+description = "Marks different-date statements duplicate, violating the R4 signature including value_date."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "r2_excludes_negative"
+expect = "reject"
+description = "Drops negative split lines, violating the R2 signed sum of all eligible lines rule."
+
+[[probe]]
+task = "04_ledger_reconciliation"
+name = "alt_cleanroom"
+expect = "accept"
+description = "Uses independent pools and complete passes derived from the ticket."
+
+[[probe]]
+task = "05_double_entry"
+name = "trial_excludes_reversals"
+expect = "reject"
+description = "Excludes reversal lines from turnover, violating trial_balance totals including reversals."
+
+[[probe]]
+task = "05_double_entry"
+name = "reverse_without_row_lock"
+expect = "reject"
+description = "Checks and reverses without serialization, violating at-most-once reversal under concurrency."
+
+[[probe]]
+task = "05_double_entry"
+name = "account_currency_overwrite"
+expect = "reject"
+description = "Overwrites an existing account currency, violating rejection of re-creation with a different currency."
+
+[[probe]]
+task = "05_double_entry"
+name = "account_unvalidated"
+expect = "reject"
+description = "Accepts empty codes and unsupported currencies, violating create_account validation."
+
+[[probe]]
+task = "05_double_entry"
+name = "accounts_before_amounts"
+expect = "reject"
+description = "Checks account existence before line validity, violating amount/side-before-accounts error priority."
+
+[[probe]]
+task = "05_double_entry"
+name = "trial_inner_join"
+expect = "reject"
+description = "Omits currencies without postings, violating the (0,0) entry for every created account currency."
+
+[[probe]]
+task = "05_double_entry"
+name = "alt_running_totals"
+expect = "accept"
+description = "Maintains denormalized account and currency totals and enforces one reversal through a unique index."
+
+[[probe]]
+task = "06_available_balance"
+name = "closed_before_amount_validation"
+expect = "reject"
+description = "Checks closed status before capture amount validity, violating the explicit amount-before-closed priority."
+
+[[probe]]
+task = "06_available_balance"
+name = "bool_amount_accepted"
+expect = "reject"
+description = "Treats bool as int, violating positive integer amounts never bool."
+
+[[probe]]
+task = "06_available_balance"
+name = "unknown_auth_is_409"
+expect = "reject"
+description = "Reports unknown authorizations as closed, violating the 404 not_found rule."
+
+[[probe]]
+task = "06_available_balance"
+name = "alt_iso_text"
+expect = "accept"
+description = "Stores ISO timestamp text and compares datetimes through the declared clock interface."
+
+[[probe]]
+task = "06_available_balance"
+name = "exceeds_before_closed"
+expect = "reject"
+description = "Checks overcapture before closed status, violating PROBLEM.md lines 21-24 requiring closed/expired status before overcapture (original review label: correct; F-407 false_fail clarification)."
+
+[[probe]]
+task = "07_statement_periods"
+name = "no_id_tiebreak"
+expect = "reject"
+description = "Sorts tied timestamps by input order, violating the lexicographic id tie-break."
+
+[[probe]]
+task = "07_statement_periods"
+name = "validates_only_selected"
+expect = "reject"
+description = "Validates only selected timestamps, violating validation even outside the selected month."
+
+[[probe]]
+task = "07_statement_periods"
+name = "tzinfo_only_aware_check"
+expect = "reject"
+description = "Checks only tzinfo presence, violating the requirement for a non-None utcoffset."
+
+[[probe]]
+task = "08_refund_limits"
+name = "refund_check_then_write"
+expect = "reject"
+description = "Checks refund budget and writes in separate transactions, violating atomic cumulative refund limits."
+
+[[probe]]
+task = "08_refund_limits"
+name = "alt_conditional_update"
+expect = "accept"
+description = "Atomically reserves refund budget with a conditional UPDATE instead of an explicit read lock."
+
+[[probe]]
+task = "09_tiered_fees"
+name = "schedule_unvalidated"
+expect = "reject"
+description = "Does not validate schedules inside compute_fee, violating validation on every call whatever the amount."
+
+[[probe]]
+task = "09_tiered_fees"
+name = "amount_type_unchecked"
+expect = "reject"
+description = "Accepts bool and float amounts, violating nonnegative integer amounts never bool."
+
+[[probe]]
+task = "10_batch_parser"
+name = "zero_amount_accepted"
+expect = "reject"
+description = "Accepts zero detail amounts, violating the positive minor-unit amount field."
+
+[[probe]]
+task = "10_batch_parser"
+name = "blank_reference_accepted"
+expect = "reject"
+description = "Accepts blank references, violating the nonblank detail reference field."
+
+[[probe]]
+task = "10_batch_parser"
+name = "header_currency_any_alpha"
+expect = "reject"
+description = "Accepts arbitrary alphabetic currencies, violating the enumerated header currency set."
+
+[[probe]]
+task = "10_batch_parser"
+name = "lowercase_batch_id"
+expect = "reject"
+description = "Accepts lowercase batch ids, violating uppercase ASCII letters/digits."
+
+[[probe]]
+task = "10_batch_parser"
+name = "bare_cr_is_terminator"
+expect = "reject"
+description = "Treats bare CR as a terminator, violating invalid_encoding for bare CR."
+
+[[probe]]
+task = "10_batch_parser"
+name = "blank_lines_skipped"
+expect = "reject"
+description = "Skips interior blank lines, violating their treatment as invalid records."
+
+[[probe]]
+task = "10_batch_parser"
+name = "missing_trailer_after_last"
+expect = "reject"
+description = "Reports a missing trailer beyond the last line, violating last-line error positioning."
+
+[[probe]]
+task = "10_batch_parser"
+name = "reference_strip_both"
+expect = "reject"
+description = "Strips leading reference spaces, violating right-padding-only removal."
+
+[[probe]]
+task = "10_batch_parser"
+name = "crlf_all_or_nothing"
+expect = "reject"
+description = "Rejects mixed LF/CRLF records, violating acceptance of mixed terminators."
+
+[[probe]]
+task = "10_batch_parser"
+name = "alt_cleanroom"
+expect = "accept"
+description = "Uses an independently written rule-table parser with separate record and structure validation."
