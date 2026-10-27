@@ -38,7 +38,7 @@ def test_harbor_verifier_rejects_forged_junit(tmp_path):
     assert (output / "tests/manifest.json").is_file()
     work = materialize(output / "environment/starter", TOY / "solutions/wrong_forge_junit", tmp_path / "work")
     logs = tmp_path / "logs"
-    env = {**os.environ, "BCP_APP_DIR": str(work), "BCP_LOG_DIR": str(logs)}
+    env = {**os.environ, "BB_APP_DIR": str(work), "BB_LOG_DIR": str(logs)}
     run = subprocess.run([sys.executable, str(output / "tests/verify.py")], cwd=work, env=env,
                          capture_output=True, text=True)
     assert (logs / "verifier/reward.txt").read_text().strip() == "0"

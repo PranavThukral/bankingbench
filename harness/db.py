@@ -11,11 +11,11 @@ README_HINT = "the README section 'Run it'"
 
 
 def admin_url():
-    return os.environ.get("PG_ADMIN_URL", "postgresql://postgres:bcp@postgres:5432/postgres")
+    return os.environ.get("PG_ADMIN_URL", "postgresql://postgres:bankingbench@postgres:5432/postgres")
 
 
 def db_name(run_id):
-    safe = "bcp_" + re.sub(r"[^a-z0-9_]", "_", run_id.lower())
+    safe = "bb_" + re.sub(r"[^a-z0-9_]", "_", run_id.lower())
     return safe[:46] + "_" + hashlib.sha256(run_id.encode()).hexdigest()[:12]
 
 

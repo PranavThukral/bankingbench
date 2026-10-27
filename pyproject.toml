@@ -1,5 +1,5 @@
 [project]
-name = "banking-challenge-pack"
+name = "bankingbench"
 version = "0.1.0"
 description = "Private draft: synthetic payment tasks and adversarial verifier audit"
 requires-python = ">=3.12"

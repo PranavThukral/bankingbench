@@ -58,11 +58,11 @@ import sys
 
 here = Path(__file__).resolve().parent
 sys.path.insert(0, str(here))
-import bcp_db  # noqa: E402
-import bcp_junit  # noqa: E402
+import bb_db  # noqa: E402
+import bb_junit  # noqa: E402
 
-work = Path(os.environ.get("BCP_APP_DIR", "/app"))
-logs = Path(os.environ.get("BCP_LOG_DIR", "/logs"))
+work = Path(os.environ.get("BB_APP_DIR", "/app"))
+logs = Path(os.environ.get("BB_LOG_DIR", "/logs"))
 output = logs / "verifier"
 output.mkdir(parents=True, exist_ok=True)
 manifest = json.loads((here / "manifest.json").read_text(encoding="utf-8"))
@@ -78,7 +78,7 @@ try:
     if manifest.get("requires_postgres"):
         if not admin:
             raise RuntimeError("PG_ADMIN_URL or DATABASE_URL must point at the PostgreSQL service")
-        name, role, url = bcp_db.create_run_db("verify_" + os.urandom(6).hex(), admin)
+        name, role, url = bb_db.create_run_db("verify_" + os.urandom(6).hex(), admin)
         handle = (name, role)
         env["DATABASE_URL"] = url  # the candidate never sees the admin URL
     command = [sys.executable, "-m", "pytest", str(here / "grader"), "-q", "-p", "no:cacheprovider",
@@ -90,13 +90,13 @@ try:
     sys.stdout.write(proc.stdout)
     sys.stderr.write(proc.stderr)
     code = proc.returncode
-    outcome, counts, _, reason = bcp_junit.parse_checked(output / "junit.xml", code, manifest, proc.stdout)
+    outcome, counts, _, reason = bb_junit.parse_checked(output / "junit.xml", code, manifest, proc.stdout)
 except Exception as exc:  # any infrastructure failure is a zero reward
     reason = f"{type(exc).__name__}: {exc}"
 finally:
     if handle:
         try:
-            bcp_db.drop_run_db(*handle, admin)
+            bb_db.drop_run_db(*handle, admin)
         except Exception as exc:
             print(f"cleanup failed: {exc}", file=sys.stderr)
 if reason:
@@ -137,8 +137,8 @@ def export_task(task, root):
     environment = target / "environment"
     copy_tree(task.path / "starter", environment / "starter")
     (environment / "Dockerfile").write_text(
-        '# ASSUMPTION: first build bcp-runner:local with the repository compose file.\n'
-        'FROM bcp-runner:local\nWORKDIR /app\nCOPY starter/ /app/\nCMD ["sleep", "infinity"]\n', encoding="utf-8")
+        '# ASSUMPTION: first build bankingbench-runner:local with the repository compose file.\n'
+        'FROM bankingbench-runner:local\nWORKDIR /app\nCOPY starter/ /app/\nCMD ["sleep", "infinity"]\n', encoding="utf-8")
     if "postgres" in task.requires:
         (environment / "docker-compose.yaml").write_text('''# ASSUMPTION: Harbor uses service main and environment/ as its compose build context.
 # Service naming and build conventions are not documented in the supplied schema notes.
@@ -148,7 +148,7 @@ services:
     build: .
     command: ["sleep", "infinity"]
     environment:
-      DATABASE_URL: postgresql://postgres:bcp@postgres:5432/bcp
+      DATABASE_URL: postgresql://postgres:bankingbench@postgres:5432/bankingbench
     depends_on:
       postgres:
         condition: service_healthy
@@ -156,13 +156,13 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_PASSWORD: bcp
-      POSTGRES_DB: bcp
+      POSTGRES_PASSWORD: bankingbench
+      POSTGRES_DB: bankingbench
     # Disposable synthetic data only.
     command: ["postgres", "-c", "fsync=off"]
     tmpfs: [/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d bcp"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bankingbench"]
       interval: 1s
       timeout: 5s
       retries: 30
@@ -176,18 +176,18 @@ networks:
     copy_tree(config.ROOT / "graderlib", tests / "graderlib")
     (tests / "verify.py").write_text(VERIFIER, encoding="utf-8")
     # Trusted helpers and the expected-test manifest ship with the tests, never with the candidate.
-    shutil.copyfile(config.ROOT / "harness/junit.py", tests / "bcp_junit.py")
-    shutil.copyfile(config.ROOT / "harness/db.py", tests / "bcp_db.py")
+    shutil.copyfile(config.ROOT / "harness/junit.py", tests / "bb_junit.py")
+    shutil.copyfile(config.ROOT / "harness/db.py", tests / "bb_db.py")
     built = manifests.build(task.path / "grader/final", task.path / "starter")
     built["requires_postgres"] = "postgres" in task.requires
     (tests / "manifest.json").write_text(json.dumps(built, indent=1) + chr(10), encoding="utf-8")
     (tests / "test.sh").write_text('''#!/bin/sh
 set -u
 # No tests mount path is assumed: locate this script's own directory.
-# ASSUMPTION: candidate work defaults to /app; BCP_APP_DIR redirects native validation.
-# /logs/verifier is documented; BCP_LOG_DIR redirects it only for native validation.
+# ASSUMPTION: candidate work defaults to /app; BB_APP_DIR redirects native validation.
+# /logs/verifier is documented; BB_LOG_DIR redirects it only for native validation.
 TESTS_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-exec "${BCP_PYTHON:-python}" "$TESTS_DIR/verify.py"
+exec "${BB_PYTHON:-python}" "$TESTS_DIR/verify.py"
 ''', encoding="utf-8")
     solution = target / "solution"
     copy_tree(task.path / "solutions/reference", solution / "overlay")
@@ -196,7 +196,7 @@ set -eu
 # No solution mount path is assumed: locate the adjacent overlay from this script.
 # ASSUMPTION: candidate work defaults to /app, matching environment.workdir.
 SOLUTION_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-APP_DIR=${BCP_APP_DIR:-/app}
+APP_DIR=${BB_APP_DIR:-/app}
 # Git Bash needs its POSIX spelling for native Windows paths passed via env.
 if command -v cygpath >/dev/null 2>&1; then
     APP_DIR=$(cygpath -u "$APP_DIR")
@@ -237,8 +237,8 @@ def validate_task(task, exported):
             work = materialize(exported / "environment/starter", None, root / "work")
             logs = root / "logs"
             env = {**os.environ, **config.DETERMINISM,
-                   "BCP_APP_DIR": work.as_posix(), "BCP_LOG_DIR": logs.as_posix(),
-                   "BCP_PYTHON": Path(sys.executable).as_posix()}
+                   "BB_APP_DIR": work.as_posix(), "BB_LOG_DIR": logs.as_posix(),
+                   "BB_PYTHON": Path(sys.executable).as_posix()}
             if "postgres" in task.requires:
                 # As in Harbor's compose file, the verifier sees the service URL and makes its own
                 # per-run role and database; the candidate-facing URL is created inside verify.py.

@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_PASSWORD: bcp
+      POSTGRES_PASSWORD: bankingbench
     # Test-only durability tradeoff: data is disposable and fsync is disabled.
     command: ["postgres", "-c", "fsync=off"]
     tmpfs:
@@ -12,9 +12,9 @@ services:
       interval: 1s
       timeout: 5s
       retries: 30
-    networks: [bcp]
+    networks: [bankingbench]
   runner:
-    image: bcp-runner:local
+    image: bankingbench-runner:local
     build:
       context: .
       dockerfile: docker/runner.Dockerfile
@@ -25,10 +25,10 @@ services:
       - ./:/pack
     working_dir: /pack
     environment:
-      PG_ADMIN_URL: postgresql://postgres:bcp@postgres:5432/postgres
-      BCP_TMP: /tmp/bcp
+      PG_ADMIN_URL: postgresql://postgres:bankingbench@postgres:5432/postgres
+      BB_TMP: /tmp/bankingbench
     command: ["sleep", "infinity"]
-    networks: [bcp]
+    networks: [bankingbench]
 networks:
-  bcp:
+  bankingbench:
     internal: true

@@ -1,8 +1,8 @@
-# Banking Challenge Pack
+# BankingBench
 
 Ten synthetic banking coding tasks, each graded twice: by a first-draft ("naive") grader written first, and by a hardened grader written after measuring what the first one missed. Every task ships with a reference solution, a structurally different correct solution and three plausible wrong ones, so you can see exactly which bugs each grader lets through.
 
-**[Website](https://banking-challenge-pack.vercel.app)** · **[Results report](https://banking-challenge-pack.vercel.app/results/final/report.html)** · **[Hardening log](analysis/findings.md)** · **[One-page summary](docs/SUMMARY.md)**
+**[Website](https://bankingbench.vercel.app)** · **[Results report](https://bankingbench.vercel.app/results/final/report.html)** · **[Hardening log](analysis/findings.md)** · **[One-page summary](docs/SUMMARY.md)**
 
 ## Results
 

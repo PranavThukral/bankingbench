@@ -1,4 +1,4 @@
-# Banking challenge pack — one-page summary
+# BankingBench — one-page summary
 
 ## Problem
 A coding task is only as good as its grader. A grader that accepts plausible-but-wrong code (a *false pass*) rewards

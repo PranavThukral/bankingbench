@@ -4,7 +4,7 @@
 # Task descriptions, solution notes, tickets and results come from the repository sources.
 
 [page]
-banking_challenge_pack = "Banking Challenge Pack"
+site_name = "BankingBench"
 description = "Synthetic finance coding tasks, each graded twice, showing which wrong solutions a naive grader lets through and how hardening catches them."
 
 [nav]
@@ -215,4 +215,4 @@ not_run = "{grader}: not run"
 navigation = "Task navigation"
 scroll_grid = "{grader}: scroll tests and solutions"
 skip = "Skip to task"
-title = "{title} · Banking Challenge Pack"
+title = "{title} · BankingBench"
