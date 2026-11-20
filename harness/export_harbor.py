@@ -129,7 +129,7 @@ def export_task(task, root):
             f'[verifier]\ntimeout_sec = {task.timeout_seconds}\nnetwork_mode = "no-network"\n'
             '# The agent timeout and the build/resource values below are chosen limits,\n'
             '# not values derived from measurements: timeout_sec 1800, build_timeout_sec 600, cpus 4,\n'
-            '# memory_mb 4096, storage_mb 4096. Revisit them after real agent runs (BLUEPRINT section 12).\n'
+            '# memory_mb 4096, storage_mb 4096. Revisit them after real agent runs.\n'
             '[agent]\ntimeout_sec = 1800\nnetwork_mode = "no-network"\n'
             '[environment]\nbuild_timeout_sec = 600\nnetwork_mode = "no-network"\nos = "linux"\n'
             'cpus = 4\nmemory_mb = 4096\nstorage_mb = 4096\nworkdir = "/app"\n')

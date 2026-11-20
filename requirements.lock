@@ -2,7 +2,7 @@
 #   pip install --no-deps -r requirements.lock
 # Versions are the ones verified on the authoring host. `python tools/check_lock.py` recomputes the
 # dependency closure of the allow-listed packages from installed metadata and fails on any missing
-# or unexplained package. Roots (BLUEPRINT 4.2): pytest, hypothesis, fastapi, uvicorn, httpx,
+# or unexplained package. Roots: pytest, hypothesis, fastapi, uvicorn, httpx,
 # psycopg[binary], ruff.
 annotated-doc==0.0.5            # fastapi
 annotated-types==0.8.0          # pydantic

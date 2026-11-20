@@ -1,6 +1,6 @@
 """Check that requirements.lock is a closed, explained set for the runner image.
 
-The roots are the allow-listed packages (BLUEPRINT section 4.2). The dependency closure is read from
+The roots are the allow-listed packages. The dependency closure is read from
 the installed distribution metadata and evaluated for Linux / Python 3.12 (the image) and for
 Windows (the authoring host). The Dockerfile installs the lock with `pip install --no-deps -r`, so:
   * every package in the Linux closure must be pinned, with no marker that excludes Linux;

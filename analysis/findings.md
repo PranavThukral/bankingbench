@@ -4,7 +4,7 @@ Only measured outcomes belong here. Naive graders are committed before final gra
 All candidate data, accounts, merchants, and formats are synthetic.
 
 **Numbering.** `F-0xx` entries are the v1 audit (the original build). `F-1xx` entries are the v2 task
-redesigns required by review R1 (`docs/REVIEW-2026-10-17.md`), each with its own
+redesigns required by review R1 (a review of the v1 build), each with its own
 `run_all --tasks NN --grader all` block. `F-2xx` entries are the per-variant findings of the v2
 variants. `F-3xx` entries record v3 follow-ups. Anchors: `#<task>-<variant>` identifies a variant entry; the v1
 entry of a redesigned variant has the suffix `-v1`. A v1 entry says which F-1xx entry supersedes it.
@@ -1125,10 +1125,10 @@ F-218 and F-222, both caught when I predicted a false pass).
 
 ## Limitations
 
-- The original tasks, solutions and graders were written by one author.
+- The original tasks, solutions and graders come from a single author, so they share that author's blind spots.
   The held-out set was independently written in review-v2 and then exposed during this hardening phase; its final
   catch rate measures regression coverage of this finite set, not an unseen future distribution. Real model failures
-  may cluster differently (the M5 stretch goal was not run).
+  may cluster differently (no model has been run on the tasks yet).
 - The same author wrote the ticket examples that now drive the naive graders, and knew the wrong variants when writing
   them. The v2 predictions were adjusted during calibration, so their 28/30 match is retrospective (review F16);
   20/30 is a property of these examples, not an estimate of what a hurried human author would let through.
