@@ -71,7 +71,7 @@ tasks/<id>/ ──discover──► one run per (solution × grader) ──► f
 - **Every task has a known-wrong answer key.** Three plausible wrong solutions per task make "how good is this grader" a number instead of an opinion.
 - **Naive grader first, committed before the hardened one.** The gap between the two is the measurement; every miss is logged in [analysis/findings.md](analysis/findings.md) with the commit that fixed it.
 - **A structurally different correct solution per task.** It keeps hardening honest: a test that only accepts the reference's exact approach shows up as a false fail.
-- **Exact arithmetic and searched inputs.** Money tasks use `Decimal`; Hypothesis profiles look for the rounding ties and boundaries where wrong code agrees with right code almost everywhere.
+- **Exact arithmetic and searched inputs.** Graders check money exactly (the interest and FX tasks, which need fractional rates, use `Decimal`), and Hypothesis profiles search for the rounding ties and boundaries where wrong code agrees with right code almost everywhere.
 - **Isolation per run, not per suite.** Concurrency bugs (retry races, double reversals) only show up with a real database, so each run gets its own.
 
 ## How it was built
