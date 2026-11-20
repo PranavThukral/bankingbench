@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_at": "2026-10-22T22:00:07.926757+00:00",
-  "git_sha": "0ab4d5a",
+  "git_sha": "c75508d",
   "dirty": false,
   "task_digests": {
     "01_idempotent_payments": "bc570e1115344c64cd6a1de0ce4616fa22e84ab4cf61bc0e48afa46c3ddc78c2",

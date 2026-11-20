@@ -27,7 +27,7 @@ No unresolved graded ambiguity after the ticket revision. This is not an indepen
 ## Flake measurement
 
 Native Windows / PostgreSQL 16.13, 10 simultaneous callers, 150 ms gateway delay, 25 fresh-key rounds per test.
-v2 re-measurement (starter changed, so the 20-repeat check was re-run; commit ce7d671, clean tree):
+v2 re-measurement (starter changed, so the 20-repeat check was re-run; commit 6655764, clean tree):
 60 final runs (20 per variant), 0 flips, all 60 verdicts ok. Wall time 149.441 s.
 Per-run duration_s in repeat order:
 
