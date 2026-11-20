@@ -17,11 +17,7 @@ from harness.model import RunSpec
 
 def git_info():
     def git(*args):
-        history = config.ROOT / ".audit-history"
-        command = ["git"]
-        if history.exists():
-            command += [f"--git-dir={history}", f"--work-tree={config.ROOT}"]
-        return subprocess.check_output([*command, *args], cwd=config.ROOT, text=True).strip()
+        return subprocess.check_output(["git", *args], cwd=config.ROOT, text=True).strip()
     try:
         return git("rev-parse", "--short", "HEAD"), bool(git("status", "--porcelain"))
     except (OSError, subprocess.CalledProcessError):
