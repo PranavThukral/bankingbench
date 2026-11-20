@@ -41,22 +41,50 @@ export PG_ADMIN_URL=postgresql://postgres:<password>@localhost:5432/postgres   #
 
 python -m harness.run_all --grader all     # every solution against both graders → results/<stamp>/matrix.json
 python -m harness.report --latest          # offline HTML report next to it
-python -m harness.check_done               # the completion criteria in BLUEPRINT.md §1.1
+python -m harness.check_done               # the project's completion checks (S1–S11)
 ```
 
 Or with Docker: `docker compose up -d && make matrix` (written to spec but not yet timed). Each run gets a fresh workspace, a fresh database with its own unprivileged role, and an allow-listed environment; verdicts are checked against the grader's expected test list ([docs/ISOLATION.md](docs/ISOLATION.md)).
 
 Other checks: `python -m harness.heldout` (the 52 independent solutions), `python -m harness.check_realism` (wrong solutions compile, lint clean and pass the visible tests), `python -m harness.lint_leaks` (no answer hints in starters), `python -m harness.export_harbor --validate` (Harbor export plus oracle check), `python site/build.py` (rebuild the website).
 
+## Architecture
+
+```
+tasks/<id>/ ──discover──► one run per (solution × grader) ──► fresh workspace + fresh database
+                                                                    │
+                               pytest on the hidden grader ◄────────┘
+                                          │
+              junit.xml, checked against the grader's expected test list
+                                          │
+                     verdict ──► results/<stamp>/matrix.json ──► report.html
+```
+
+- **Discovery** (`harness/discover.py`) reads each `task.toml` and lists its variants, each with an expected outcome (PASS for the reference and alternative, FAIL for wrong solutions and the starter) and, for wrong ones, the tests that must catch it.
+- **Workspaces** (`harness/workspace.py`) copy the starter and lay a solution's overlay on top. An overlay may not touch the visible tests or escape the workspace.
+- **Execution** (`harness/execute.py`, `harness/db.py`) runs the grader with an allow-listed environment. Tasks that need PostgreSQL get a new database owned by a new unprivileged role for every run.
+- **Verdicts** (`harness/verdict.py`) compare outcome with expectation: `ok`, `false_pass` (a wrong solution got through), `false_fail` (a correct one was rejected) or `ok_wrong_reason` (rejected, but not by the test meant to catch that bug). `harness/manifest.py` derives the expected test ids without running candidate code, so a run that drops tests or rewrites its own `junit.xml` with missing or inconsistent results is rejected.
+- **Evidence** (`harness/evidence.py`) fingerprints every task's sources, so committed results can be checked against the code they came from.
+
+## Key design decisions
+
+- **Every task has a known-wrong answer key.** Three plausible wrong solutions per task make "how good is this grader" a number instead of an opinion.
+- **Naive grader first, committed before the hardened one.** The gap between the two is the measurement; every miss is logged in [analysis/findings.md](analysis/findings.md) with the commit that fixed it.
+- **A structurally different correct solution per task.** It keeps hardening honest: a test that only accepts the reference's exact approach shows up as a false fail.
+- **Exact arithmetic and searched inputs.** Money tasks use `Decimal`; Hypothesis profiles look for the rounding ties and boundaries where wrong code agrees with right code almost everywhere.
+- **Isolation per run, not per suite.** Concurrency bugs (retry races, double reversals) only show up with a real database, so each run gets its own.
+
 ## How it was built
 
-[BLUEPRINT.md](BLUEPRINT.md) is the spec. For each task the naive grader was committed before the hardened one, and every miss is logged with its commit in [analysis/findings.md](analysis/findings.md). The pack went through three rounds: v1, then a [review](docs/REVIEW-2026-10-17.md) that rebuilt starters which were one line away from the answer, then v3, which replaced three wrong solutions that broke behaviour the starter already got right. [docs/TASK_FORMAT.md](docs/TASK_FORMAT.md) describes how to add a task.
+For each task the naive grader was committed before the hardened one, and every miss is logged with its commit in [analysis/findings.md](analysis/findings.md). The pack went through three rounds: v1, then a review that rebuilt starters which were one line away from the answer, then v3, which replaced three wrong solutions that broke behaviour the starter already got right. [docs/TASK_FORMAT.md](docs/TASK_FORMAT.md) describes how to add a task.
 
 ## Limitations
 
 - All tasks and solutions are author-written and synthetic. No real bank, customer or system is represented, and no model has been run on the tasks yet.
 - "0 of 30" and "46 of 46" are measured against solutions the graders were hardened on. The independent figure is the baseline: 6 of 44 before the held-out set was used.
 - Solver code runs as the same OS user as the grader. Forged or incomplete results that the harness can cross-check are rejected, but a complete forgery from inside the test process needs container isolation to stop ([docs/ISOLATION.md](docs/ISOLATION.md)).
-- Ticket blind reviews are self-reviews so far. Verified on Windows with PostgreSQL 16.13 under Python 3.14 and 3.12; the Docker path has not been timed.
+- Ticket blind reviews are self-reviews so far.
+- `check_done` reports S11 (held-out receipt) as FAIL on a fresh clone: the receipt hashed `heldout/catalog.toml` with Windows line endings, and `.gitattributes` checks it out with LF.
+- Verified on Windows with PostgreSQL 16.13 under Python 3.14 and 3.12; the Docker path has not been timed.
 
 MIT licensed.
