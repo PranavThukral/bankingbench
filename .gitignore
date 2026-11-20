@@ -7,7 +7,6 @@ results/*
 !results/final/
 dist/
 .venv/
-.audit-history/
 .test-tmp/
 .local/
 site/qa/
